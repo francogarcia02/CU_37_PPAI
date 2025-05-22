@@ -1,0 +1,18 @@
+package com.DSI.PPAI.Red.sismica.Boundary;
+
+import com.DSI.PPAI.Red.sismica.Control.GestorOrden;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/ordenes")
+public class PantallaOrden {
+
+    private final GestorOrden gestorOrden;
+
+    public PantallaOrden(GestorOrden gestorOrden) {
+        this.gestorOrden = gestorOrden;
+    }
+
+    
+}

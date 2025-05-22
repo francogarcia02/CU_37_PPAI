@@ -1,0 +1,25 @@
+{
+    "ordenes": [
+        {
+            "numeroDeOrden": "1",
+            "fechaFinalizacion": "2025-05-20",
+            "estado": "completamente realizada",
+            "estacionSismologica": "Estacion 1",
+            "idSismografo": "1234567890" 
+        },
+        {
+            "numeroDeOrden": "2",
+            "fechaFinalizacion": "2025-05-20",
+            "estado": "completamente realizada",
+            "estacionSismologica": "Estacion 2",
+            "idSismografo": "1234567890" 
+        },  
+        {
+            "numeroDeOrden": "3",
+            "fechaFinalizacion": "2025-05-20",
+            "estado": "completamente realizada",
+            "estacionSismologica": "Estacion 3",
+            "idSismografo": "1234567890" 
+        }
+    ]
+}

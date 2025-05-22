@@ -1,0 +1,74 @@
+{
+    "ordenes": [
+        {
+            "numeroDeOrden": "ORD-2023-001",
+            "fechaFinalizacion": "2025-05-20",
+            "estado": "pendiente de revisión",
+            "estacionSismologica": "Estación Central",
+            "idSismografo": "SIS-001-2023"
+        },
+        {
+            "numeroDeOrden": "ORD-2023-002",
+            "fechaFinalizacion": "2025-05-19",
+            "estado": "en proceso",
+            "estacionSismologica": "Estación Norte",
+            "idSismografo": "SIS-045-2023"
+        },
+        {
+            "numeroDeOrden": "ORD-2023-003",
+            "fechaFinalizacion": "2025-05-18",
+            "estado": "completamente realizada",
+            "estacionSismologica": "Estación Sur",
+            "idSismografo": "SIS-102-2023"
+        },
+        {
+            "numeroDeOrden": "ORD-2023-004",
+            "fechaFinalizacion": "2025-05-17",
+            "estado": "cancelada",
+            "estacionSismologica": "Estación Este",
+            "idSismografo": "SIS-078-2023"
+        },
+        {
+            "numeroDeOrden": "ORD-2023-005",
+            "fechaFinalizacion": "2025-05-16",
+            "estado": "completamente realizada",
+            "estacionSismologica": "Estación Oeste",
+            "idSismografo": "SIS-156-2023"
+        },
+        {
+            "numeroDeOrden": "ORD-2023-006",
+            "fechaFinalizacion": "2025-05-15",
+            "estado": "pendiente de materiales",
+            "estacionSismologica": "Estación Central",
+            "idSismografo": "SIS-001-2023"
+        },
+        {
+            "numeroDeOrden": "ORD-2023-007",
+            "fechaFinalizacion": "2025-05-14",
+            "estado": "en revisión",
+            "estacionSismologica": "Estación Norte",
+            "idSismografo": "SIS-045-2023"
+        },
+        {
+            "numeroDeOrden": "ORD-2023-008",
+            "fechaFinalizacion": "2025-05-13",
+            "estado": "completamente realizada",
+            "estacionSismologica": "Estación Sur",
+            "idSismografo": "SIS-102-2023"
+        },
+        {
+            "numeroDeOrden": "ORD-2023-009",
+            "fechaFinalizacion": "2025-05-12",
+            "estado": "en proceso",
+            "estacionSismologica": "Estación Este",
+            "idSismografo": "SIS-078-2023"
+        },
+        {
+            "numeroDeOrden": "ORD-2023-010",
+            "fechaFinalizacion": "2025-05-11",
+            "estado": "pendiente de aprobación",
+            "estacionSismologica": "Estación Oeste",
+            "idSismografo": "SIS-156-2023"
+        }
+    ]
+}
