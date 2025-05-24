@@ -15,13 +15,16 @@ public class Main {
     Sesion sesion = mockDataGenerator.generarSesion(empleadoRI.getUsuario());
     EstacionSismologica estacionSismologica = mockDataGenerator.generarEstacionSismologica();
     List<Empleado> empleados = List.of(empleadoRI, otroEmpleadoNoRIParaPruebas); // para pruebas>
-    List<Estado> estadosOI = mockDataGenerator.generarEstadosOI();
-    List<OrdenInspeccion> ordenesInspeccion = mockDataGenerator.generarOrdenesInspeccion(empleadoRI, estacionSismologica,estadosOI);
+    List<Estado> estados = mockDataGenerator.generarEstados();
+    List<OrdenInspeccion> ordenesInspeccion = mockDataGenerator.generarOrdenesInspeccion(empleadoRI, estacionSismologica,estados);
+    List<TipoMotivo> listaMotivos = mockDataGenerator.generarTipoMotivo();
 
     GestorOrden gestorOrden = new GestorOrden();
     gestorOrden.RecibirSesion(sesion);
     gestorOrden.RecibirOrdenesInspeccion(ordenesInspeccion);
     gestorOrden.RecibirEmpleados(empleados);
+    gestorOrden.RecibirTipoMotivos(listaMotivos);
+    gestorOrden.RecibirEstados(estados);
 
 
     PantallaOrden pantallaOrden = new PantallaOrden(gestorOrden);

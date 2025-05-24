@@ -4,6 +4,7 @@ import entity.*;
 
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -35,8 +36,17 @@ public class MOCKDATAGenerator {
         return new Sesion(usuario);
     }
 
-    public List<Estado> generarEstadosOI() {
+    public List<Estado> generarEstados() {
         return List.of(
+                new Estado("SISMOGRAFO", "pteCertificacion"),
+                new Estado("SISMOGRAFO", "Disponible"),
+                new Estado("SISMOGRAFO", "enInstalacion"),
+                new Estado("SISMOGRAFO", "enRevicion"),
+                new Estado("SISMOGRAFO", "Descartado"),
+                new Estado("SISMOGRAFO", "enReparacion"),
+                new Estado("SISMOGRAFO", "enLinea"),
+                new Estado("SISMOGRAFO", "Inhabilitado"),
+                new Estado("SISMOGRAFO", "fueraServicio"),
                 new Estado("ORDEN_INSPECCION", "pteRealizacion"),
                 new Estado("ORDEN_INSPECCION", "parcialmenteRealizada"),
                 new Estado("ORDEN_INSPECCION", "realizada"),
@@ -45,8 +55,10 @@ public class MOCKDATAGenerator {
     }
 
     public EstacionSismologica generarEstacionSismologica() {
-        return new EstacionSismologica("Estacion 1", new Sismografo(Long.valueOf(1), "ZETLAB", "Modelo 1"));
-    };
+        Sismografo sismografo = new Sismografo(1L, "ZETLAB", "Modelo 1", new Estado("Sismografo", null));
+        return new EstacionSismologica("Estación 1", sismografo);
+    }
+    
     public List<OrdenInspeccion> generarOrdenesInspeccion(Empleado empleado, EstacionSismologica estacionSismologica, List<Estado> estadosOI) {
         List<OrdenInspeccion> ordenesInspeccion = List.of(
 
@@ -70,7 +82,14 @@ public class MOCKDATAGenerator {
                 )));
         return ordenesInspeccion;
     }
-
+    public List<TipoMotivo> generarTipoMotivo(){
+        return List.of(
+                new TipoMotivo("Avería por vibración"),
+                new TipoMotivo("Desgaste de componente"),
+                new TipoMotivo("Fallo en el sistema de registro"),
+                new TipoMotivo("Vandalismo"),
+                new TipoMotivo("Fallo en fuente de alimentación"));
+    }
 
 
 }

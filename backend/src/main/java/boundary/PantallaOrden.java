@@ -32,6 +32,7 @@ public class PantallaOrden {
         return entrada;
 
     }
+
     private static void imprimirOndasSismicas() {
         // Simula ondas sísmicas con caracteres
         String[] ondas = {"~", "~", "^^", "~~~", "^^^^", "~~~~~", "^^^", "~~", "~"};
@@ -84,7 +85,7 @@ public class PantallaOrden {
         // Prompt de entrada moderno
         System.out.print(BLUE + BOLD + "┌─ " + RESET + YELLOW + "Seleccione una opción" + RESET + " " + BLUE + BOLD + "──────────────────────────────────────" + RESET);
         System.out.println();
-        System.out.print(BLUE + BOLD + "└─❯ " + RESET + WHITE + BOLD);
+        System.out.print(BLUE + BOLD + "└─> " + RESET + WHITE + BOLD);
 
         String selectedOption = leerEntradaUsuario();
 
@@ -105,12 +106,22 @@ public class PantallaOrden {
         // Prompt de entrada moderno
         System.out.print(BLUE + BOLD + "┌─ " + RESET + YELLOW + "Ingrese las observaciones" + RESET + " " + BLUE + BOLD + "──────────────────────────────────────" + RESET);
         System.out.println();
-        System.out.print(BLUE + BOLD + "└─❯ " + RESET + WHITE + BOLD);
+        System.out.print(BLUE + BOLD + "└─> " + RESET + WHITE + BOLD);
 
         String observaciones = leerEntradaUsuario();
         return observaciones;
     }
 
+    public String solicitarMotivoComentario(){
+        String comentario = "";
+        while(comentario.equals("")){
+            System.out.print(BLUE + BOLD + "┌─ " + RESET + YELLOW + "Ingrese un comentario sobre el motivo" + RESET + " " + BLUE + BOLD + "──────────────────────────────────────" + RESET);
+            System.out.println();
+            System.out.print(BLUE + BOLD + "└─> " + RESET + WHITE + BOLD);
+            comentario = leerEntradaUsuario();
+        }
+        return comentario;
+    }
 
     public void mainProcess() {
         System.out.println();
@@ -142,5 +153,50 @@ public class PantallaOrden {
 
         System.out.println(ordenInspeccionString);
         System.out.println();
+    }
+
+    public void mostrarTipoMotivosFueraServicio(String motivoTipoFueraServicio) {
+        System.out.println(motivoTipoFueraServicio);
+        System.out.println();
+    }
+
+    public String SolicitarMFS(){
+        System.out.println("Seleccione un motivo como mínimo: (000: Salir de la selección)");
+        String motSelected = leerEntradaUsuario();
+        return motSelected;
+    }
+
+    public String confirmarActualizacionSituacion(){
+        System.out.println();
+        System.out.println("Desea cambiar la situacion de uno o varios sismografos de la ES? (1: Si, 0: No)");
+        System.out.println();
+        String selectedDecicion = leerEntradaUsuario();
+        return selectedDecicion;
+    }
+
+    public void mostrarResultadoCierre(Boolean result){
+        if(result){
+            System.out.println("Orden de inspeccion cerrada con exito!");
+        } else {
+            System.out.println("Orden de inspeccion no se a cerrado correctamente");
+        }
+    }
+
+    public Boolean solicitarConfirmacionCierre(){
+        System.out.println();
+        System.out.println("Desea confirmar el cierre de la OI? (1:Si, 0:No)");
+        String response = leerEntradaUsuario();
+        System.out.println();
+        while(!response.equals("1") && !response.equals("0")){
+            System.out.println();
+            System.out.println("Desea confirmar el cierre de la OI? (1:Si, 0:No)");
+            response = leerEntradaUsuario();
+            System.out.println();
+        }
+        if(response.equals("1")){
+            return true;
+        } else {
+            return false;
+        }
     }
 }

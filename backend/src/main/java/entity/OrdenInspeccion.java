@@ -2,6 +2,8 @@ package entity;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -12,6 +14,27 @@ public class OrdenInspeccion {
     private List<TareaTecnicaRevision> tareasTecnicasRevisiones;
     private String observaciones;
     private List<CambioEstado> cambiosEstados;
+
+
+    public Boolean cerrar(String observacion, List<MotivoFueraServicio> motivosNuevos) {
+        for (CambioEstado cambio : cambiosEstados) {
+            if (cambio.getFechaHorafin() == null &&
+                "finalizada".equalsIgnoreCase(cambio.getEstadoNuevo().getNombre())) {
+
+                this.setObservaciones(observacion);
+
+                List<MotivoFueraServicio> lista = new ArrayList<>();
+                lista.addAll(cambio.getMotivosCambioEstados()); 
+                lista.addAll(motivosNuevos);
+
+                cambio.setMotivosCambioEstados(lista);
+                cambio.setFechaHorafin(LocalDateTime.now());
+
+                return true;
+            }
+        }
+        return false;
+    }
 
     public OrdenInspeccion(Long numeroOrden, EstacionSismologica estacionSismologica, List<TareaTecnicaRevision> tareasTecnicasRevisiones, Empleado responsableOrdenInspeccion, String observaciones, List<CambioEstado> cambiosEstados) {
         if (numeroOrden == null) {
@@ -47,6 +70,32 @@ public class OrdenInspeccion {
 
     public Boolean esTuRI(Empleado empleado) {
           return responsableOrdenInspeccion.equals(empleado);
+    }
+
+    public String getResponsableDeInspeccion(){
+        String nombre = this.responsableOrdenInspeccion.getNombreEmpleado();
+        System.out.println(nombre);
+        return nombre;
+    }
+
+    public String obtenerFechaFinalizacionMasReciente() {
+        LocalDateTime fechaMasReciente = null;
+
+        for (CambioEstado cambio : cambiosEstados) {
+            LocalDateTime fechaFin = cambio.getFechaHorafin();
+            if (fechaFin != null) {
+                if (fechaMasReciente == null || fechaFin.isAfter(fechaMasReciente)) {
+                    fechaMasReciente = fechaFin;
+                }
+            }
+        }
+
+        if (fechaMasReciente != null) {
+            System.out.println(fechaMasReciente.toString()); // o formatealo como desees
+        } else {
+            System.out.println("No finalizada");
+        }
+        return ("");
     }
 
     public String toStringForPantalla() {
