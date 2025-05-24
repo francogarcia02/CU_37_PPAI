@@ -33,7 +33,7 @@ public class PantallaOrden {
 
     }
 
-    private static void imprimirOndasSismicas() {
+    public static void imprimirOndasSismicas(String mensaje) {
         // Simula ondas sísmicas con caracteres
         String[] ondas = {"~", "~", "^^", "~~~", "^^^^", "~~~~~", "^^^", "~~", "~"};
         System.out.print(GREEN);
@@ -43,7 +43,7 @@ public class PantallaOrden {
             esperarAnimado(100);
         }
 
-        System.out.print(" UTN ");
+        System.out.print(mensaje);
 
         for (int i = ondas.length - 1; i >= 0; i--) {
             System.out.print(ondas[i]);

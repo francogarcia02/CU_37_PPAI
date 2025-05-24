@@ -67,6 +67,7 @@ public class GestorOrden {
     public void RecibirselectedOption(String selectedOption) {
         this.selectedOption = selectedOption;
         System.out.print("~GestorOrdenes~ He recibido la opción seleccionada correctamente");
+
         System.out.println();
         mainProcess();
     }
@@ -82,104 +83,111 @@ public class GestorOrden {
 
 
     private void mainProcess() {
-        if (selectedOption.equals("1")) {
-            System.out.println();
-            // busca el empleado asociado a la sesion
-            Empleado RI = mappearEmpleadoPorUsuario(sesion.getUsuario());
+        while (!selectedOption.equals("0")) {
+            if (selectedOption.equals("1")) {
+                System.out.println();
+                // busca el empleado asociado a la sesion
+                Empleado RI = mappearEmpleadoPorUsuario(sesion.getUsuario());
 
-            System.out.println("Listado de Ordenes Inspeccion para cerrar: ");
+                System.out.println("Listado de Ordenes Inspeccion para cerrar: ");
 
-            ordenesInspeccion.forEach(ordenInspeccion -> {
-                Boolean condition1 = ordenInspeccion.sosFinalizada();
-                Boolean condition2 = ordenInspeccion.esTuRI(RI);
-                if (condition1 && condition2) {
-                    String ordenInspeccionString = ordenInspeccion.toStringForPantalla();
-                    pantallaOrden.mostrarOrdenInspeccion(ordenInspeccionString);
-                }
-            });
-
-            System.out.println("ingrese el numero de la Orden de Inspeccion a cerrar ");
-            String selectedOrdenNumero = pantallaOrden.leerEntradaUsuario();
-            selectedOrdenNumero = selectedOrdenNumero.trim();
-            selectedOrden = null;
-
-            for (OrdenInspeccion ordenInspeccion : ordenesInspeccion) {
-                if (ordenInspeccion.getNumeroOrden().equals(Long.parseLong(selectedOrdenNumero))) {
-                    selectedOrden = ordenInspeccion;
-                    break; // Exit the loop once we find the order
-                }
-            }
-
-            String observaciones = null;
-            if (selectedOrden != null) {
-                // Proceed with the selected order
-                System.out.println("Se encontró una orden con el número: " + selectedOrdenNumero);
-                observaciones = pantallaOrden.solicitarObservaciones();
-                while (observaciones == "") {
-                    System.out.println("Es obligatorio ingresar observaciones para cerrar la orden de inspeccion");
-                    observaciones = pantallaOrden.solicitarObservaciones();
-                }
-                System.out.println("~GestorOrdenes~ He recibido las observaciones: " + observaciones);
-
-            } else {
-                System.out.println("No se encontró ninguna orden con el número ingresado.");
-            }
-
-            String selectedDecicion = pantallaOrden.confirmarActualizacionSituacion();
-            while (!selectedDecicion.equals("1") && !selectedDecicion.equals("0")) {
-                selectedDecicion = pantallaOrden.confirmarActualizacionSituacion();
-            }
-
-            sismografoSelected = selectedOrden.getEstacionSismologica().getSismografo();
-            List<MotivoFueraServicio> motivosFueraServicio =  new ArrayList<>();
-
-            if(selectedDecicion.equals("1")) {
-                String motSelected = "";
-                while (!motSelected.equals("000")) {
-                    System.out.println();
-                    System.out.println("Tipos de motivo: ");
-                    for (int i = 0; i < tiposMotivos.size(); i++) {
-                        TipoMotivo tipoMotivo = tiposMotivos.get(i);
-                        String descripcionConIndice = i + ": " + tipoMotivo.getDescripcion();
-                        pantallaOrden.mostrarTipoMotivosFueraServicio(descripcionConIndice);
-                    }
-
-                    motSelected = pantallaOrden.SolicitarMFS();
-
-                    if (motSelected.equals("000")) {
-                        break;
-                    }
-
-                    try {
-                        int index = Integer.parseInt(motSelected);
-                        if (index >= 0 && index < tiposMotivos.size()) {
-                            TipoMotivo motivoSeleccionado = tiposMotivos.get(index);
-                            System.out.println("Seleccionaste: " + motivoSeleccionado.getDescripcion());
-                            String comentario = pantallaOrden.solicitarMotivoComentario();
-                            motivosFueraServicio.add(new MotivoFueraServicio(comentario, motivoSeleccionado));
-                        } else {
-                            System.out.println("Número fuera de rango.");
-                        }
-                    } catch (NumberFormatException e) {
-                        System.out.println("Entrada inválida. Ingrese un número o '000' para salir.");
-                    }
-                }
-
-            }
-            
-            Boolean solicitudConfirmacion = pantallaOrden.solicitarConfirmacionCierre();
-            List<Estado> estadosFS = new ArrayList<>();
-            if(solicitudConfirmacion && observaciones != null && motivosFueraServicio.size()>0){
-                estados.forEach(estado -> {
-                    String ambito = estado.getAmbito();
-                    String nombre = estado.getNombre();
-                    if(ambito.equals("SISMOGRAFO") && nombre.equals("fueraServicio")){
-                        estadosFS.add(estado);
+                ordenesInspeccion.forEach(ordenInspeccion -> {
+                    Boolean condition1 = ordenInspeccion.sosFinalizada();
+                    Boolean condition2 = ordenInspeccion.esTuRI(RI);
+                    if (condition1 && condition2) {
+                        String ordenInspeccionString = ordenInspeccion.toStringForPantalla();
+                        pantallaOrden.mostrarOrdenInspeccion(ordenInspeccionString);
                     }
                 });
-                Boolean result = selectedOrden.cerrar(observaciones, motivosFueraServicio);
-                pantallaOrden.mostrarResultadoCierre(result);
+
+                System.out.println("ingrese el numero de la Orden de Inspeccion a cerrar ");
+                String selectedOrdenNumero = pantallaOrden.leerEntradaUsuario();
+                selectedOrdenNumero = selectedOrdenNumero.trim();
+                selectedOrden = null;
+
+                for (OrdenInspeccion ordenInspeccion : ordenesInspeccion) {
+                    if (ordenInspeccion.getNumeroOrden().equals(Long.parseLong(selectedOrdenNumero))) {
+                        selectedOrden = ordenInspeccion;
+                        break; // Exit the loop once we find the order
+                    }
+                }
+
+                String observaciones = null;
+                if (selectedOrden != null) {
+                    // Proceed with the selected order
+                    System.out.println("Se encontró una orden con el número: " + selectedOrdenNumero);
+                    observaciones = pantallaOrden.solicitarObservaciones();
+                    while (observaciones == "") {
+                        System.out.println("Es obligatorio ingresar observaciones para cerrar la orden de inspeccion");
+                        observaciones = pantallaOrden.solicitarObservaciones();
+                    }
+                    System.out.println("~GestorOrdenes~ He recibido las observaciones: " + observaciones);
+
+                } else {
+                    System.out.println("No se encontró ninguna orden con el número ingresado.");
+                }
+
+                String selectedDecicion = pantallaOrden.confirmarActualizacionSituacion();
+                while (!selectedDecicion.equals("1") && !selectedDecicion.equals("0")) {
+                    selectedDecicion = pantallaOrden.confirmarActualizacionSituacion();
+                }
+
+                sismografoSelected = selectedOrden.getEstacionSismologica().getSismografo();
+                List<MotivoFueraServicio> motivosFueraServicio = new ArrayList<>();
+
+                if (selectedDecicion.equals("1")) {
+                    String motSelected = "";
+                    while (!motSelected.equals("000")) {
+                        System.out.println();
+                        System.out.println("Tipos de motivo: ");
+                        for (int i = 0; i < tiposMotivos.size(); i++) {
+                            TipoMotivo tipoMotivo = tiposMotivos.get(i);
+                            String descripcionConIndice = i + ": " + tipoMotivo.getDescripcion();
+                            pantallaOrden.mostrarTipoMotivosFueraServicio(descripcionConIndice);
+                        }
+
+                        motSelected = pantallaOrden.SolicitarMFS();
+
+                        if (motSelected.equals("000")) {
+                            break;
+                        }
+
+                        try {
+                            int index = Integer.parseInt(motSelected);
+                            if (index >= 0 && index < tiposMotivos.size()) {
+                                TipoMotivo motivoSeleccionado = tiposMotivos.get(index);
+                                System.out.println("Seleccionaste: " + motivoSeleccionado.getDescripcion());
+                                String comentario = pantallaOrden.solicitarMotivoComentario();
+                                motivosFueraServicio.add(new MotivoFueraServicio(comentario, motivoSeleccionado));
+                            } else {
+                                System.out.println("Número fuera de rango.");
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("Entrada inválida. Ingrese un número o '000' para salir.");
+                        }
+                    }
+
+                }
+
+                Boolean solicitudConfirmacion = pantallaOrden.solicitarConfirmacionCierre();
+                List<Estado> estadosFS = new ArrayList<>();
+                if (solicitudConfirmacion && observaciones != null && motivosFueraServicio.size() > 0) {
+                    estados.forEach(estado -> {
+                        String ambito = estado.getAmbito();
+                        String nombre = estado.getNombre();
+                        if (ambito.equals("SISMOGRAFO") && nombre.equals("fueraServicio")) {
+                            estadosFS.add(estado);
+                        }
+                    });
+                    Boolean result = selectedOrden.cerrar(observaciones, motivosFueraServicio, estados.get(13), RI  );
+                    pantallaOrden.mostrarResultadoCierre(result);
+                } else if (solicitudConfirmacion && observaciones != null){
+                    Boolean result = selectedOrden.cerrar(observaciones, motivosFueraServicio, estados.get(13), RI  );
+                    pantallaOrden.mostrarResultadoCierre(result);
+                };
             }
+            pantallaOrden.imprimirOndasSismicas("usted está siendo redirigido al menú principal");
+            pantallaOrden.mostrarOpciones();
         }
     }
 

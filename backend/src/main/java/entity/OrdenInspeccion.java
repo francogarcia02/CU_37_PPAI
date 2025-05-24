@@ -16,20 +16,26 @@ public class OrdenInspeccion {
     private List<CambioEstado> cambiosEstados;
 
 
-    public Boolean cerrar(String observacion, List<MotivoFueraServicio> motivosNuevos) {
+    public Boolean cerrar(String observacion, List<MotivoFueraServicio> motivosNuevos, Estado estadoCerrada, Empleado responsableEjecucion) {
         for (CambioEstado cambio : cambiosEstados) {
             if (cambio.getFechaHorafin() == null &&
                 "finalizada".equalsIgnoreCase(cambio.getEstadoNuevo().getNombre())) {
-
                 this.setObservaciones(observacion);
-
                 List<MotivoFueraServicio> lista = new ArrayList<>();
                 lista.addAll(cambio.getMotivosCambioEstados()); 
                 lista.addAll(motivosNuevos);
-
                 cambio.setMotivosCambioEstados(lista);
                 cambio.setFechaHorafin(LocalDateTime.now());
-
+                cambiosEstados.add(
+                        new CambioEstado(
+                                cambio.getIdCambioEstado() + 1L,
+                                cambio.getEstadoNuevo(),
+                                estadoCerrada,
+                                LocalDateTime.now(),
+                                null,
+                                responsableEjecucion,
+                                null
+                ));
                 return true;
             }
         }
@@ -52,10 +58,10 @@ public class OrdenInspeccion {
         
         this.numeroOrden = numeroOrden;
         this.estacionSismologica = estacionSismologica;
-        this.tareasTecnicasRevisiones = tareasTecnicasRevisiones;
+        this.tareasTecnicasRevisiones = new ArrayList<>(tareasTecnicasRevisiones);
         this.responsableOrdenInspeccion = responsableOrdenInspeccion;
         this.observaciones = observaciones;
-        this.cambiosEstados = cambiosEstados;
+        this.cambiosEstados = new ArrayList<>(cambiosEstados);
     }
 
 
@@ -111,12 +117,12 @@ public class OrdenInspeccion {
                 : "No disponible";
 
         return String.format(
-                "____________________________________________________________________________%n" +
-                "Número de Orden: %d%n" +
-                        "Fecha de Finalización: %s%n" +
-                        "Estación Sismológica: %s%n" +
-                        "Sismógrafo: %s%n" +
-                "____________________________________________________________________________%n"
+                "\033[95m____________________________________________________________________________%n\033[0m" +
+                "\033[92mNúmero de Orden:\033[0m %d%n" +
+                        "\033[92mFecha de Finalización:\033[0m %s%n" +
+                        "\033[92mEstación Sismológica:\033[0m %s%n" +
+                        "\033[92mSismógrafo:\033[0m %s%n" +
+                "\033[95m____________________________________________________________________________%n\033[0m"
                 ,
                 numeroOrden,
                 fechaFin,
