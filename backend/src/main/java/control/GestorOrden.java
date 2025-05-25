@@ -83,7 +83,7 @@ public class GestorOrden {
 
 
     private void mainProcess() {
-        while (!selectedOption.equals("0")) {
+        while (!selectedOption.equals("2")) {
             if (selectedOption.equals("1")) {
                 System.out.println();
                 // busca el empleado asociado a la sesion
