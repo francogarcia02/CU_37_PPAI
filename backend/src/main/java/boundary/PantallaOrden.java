@@ -204,13 +204,15 @@ public class PantallaOrden {
         System.out.println();
     }
 
-    public int SolicitarMFS(){
-        return numericInput("Seleccione un motivo (000 para salir):", "Por favor ingrese un número válido o 000 para salir");
+    public int SolicitarMFS() {
+        return numericInput("Seleccione un motivo (0 para salir):",
+                "Por favor ingrese un número válido o 0 para salir");
     }
 
     public int confirmarActualizacionSituacion(){
-        return numericInput("¿Desea cambiar la situación de uno o varios sismógrafos de la ES? (1: Si, 0: No)", 
+        int input = numericInput("¿Desea cambiar la situación del sismógrafo de la estación? (1: Si, 0: No)",
                           "Por favor ingrese 1 para Sí o 0 para No");
+        return input;
     }
 
     public void mostrarResultadoCierre(Boolean result){

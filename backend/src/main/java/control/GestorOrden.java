@@ -98,24 +98,20 @@ public class GestorOrden {
                         ordenesInspeccionFiltradas.add(ordenInspeccion);
                         String ordenInspeccionString = ordenInspeccion.toStringForPantalla();
                         pantallaOrden.mostrarOrdenInspeccion(ordenInspeccionString);
-                        System.out.println("se añadió una orden a la lista filtrada");
                     }
                 });
 
 
                 // es necesario hacer un input que solo permita ingresar un número
                 Long selectedOrdenNumero = pantallaOrden.numericInputLong("ingrese el numero de la Orden de Inspeccion a cerrar ", "Solo puede ingresar números");
-                System.out.println("recibi este input " + selectedOrdenNumero);
                 selectedOrden = null;
 
                 for (OrdenInspeccion ordenInspeccion : ordenesInspeccion) {
                     // acá debería aplicarse patrón experto y preguntarle a la orden si selectedOrdenNumero es su numero
                     if (ordenInspeccion.getNumeroOrden().equals(selectedOrdenNumero)) {
                         selectedOrden = ordenInspeccion;
-                        System.out.println("coincidencia encontrada " + ordenInspeccion);
 
                         if (!ordenesInspeccionFiltradas.contains(selectedOrden)) {
-                            System.out.println(ordenesInspeccionFiltradas);
                             System.out.println("\033[91m~GestorOrdenes~ Ingresó una orden de inspeccion que no le pertenece o no se encuentra en estado finalizada");
                             System.out.println("será redirigido al menu principal");
                             pantallaOrden.mostrarOpciones();
@@ -150,23 +146,26 @@ public class GestorOrden {
 
                 if (selectedDecicion.equals("1")) {
                     String motSelected = "";
-                    while (!motSelected.equals("000")) {
+                    while (!motSelected.equals("0")) {
                         System.out.println();
                         System.out.println("Tipos de motivo: ");
                         for (int i = 0; i < tiposMotivos.size(); i++) {
                             TipoMotivo tipoMotivo = tiposMotivos.get(i);
-                            String descripcionConIndice = i + ": " + tipoMotivo.getDescripcion();
+                            String descripcionConIndice = (i+1) + ": " + tipoMotivo.getDescripcion();
                             pantallaOrden.mostrarTipoMotivosFueraServicio(descripcionConIndice);
                         }
 
                         motSelected = String.valueOf(pantallaOrden.SolicitarMFS());
 
-                        if (motSelected.equals("000")) {
+                        if (motSelected.equals("0")) {
                             break;
                         }
 
+                        // Ajustar el índice (restar 1 porque mostramos desde 1)
+                        int index = Integer.parseInt(motSelected) - 1;
+
                         try {
-                            int index = Integer.parseInt(motSelected);
+
                             if (index >= 0 && index < tiposMotivos.size()) {
                                 TipoMotivo motivoSeleccionado = tiposMotivos.get(index);
                                 System.out.println("Seleccionaste: " + motivoSeleccionado.getDescripcion());
@@ -176,7 +175,7 @@ public class GestorOrden {
                                 System.out.println("Número fuera de rango.");
                             }
                         } catch (NumberFormatException e) {
-                            System.out.println("~GestorOrdenes~ Entrada inválida. Ingrese un número o '000' para salir.");
+                            System.out.println("~GestorOrdenes~ Entrada inválida. Ingrese un número o '0' para salir.");
                         }
                     }
 
