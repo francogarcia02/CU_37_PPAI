@@ -114,13 +114,13 @@ public class PantallaOrden {
         // Opciones del menú con estilo moderno
         System.out.println("   " + GREEN + BOLD + "┌──────────────────────────────────────────────────┐" + RESET);
         System.out.println("   " + GREEN + BOLD + "│" + RESET + "                                                  " + GREEN + BOLD + "│" + RESET);
-        System.out.println("   " + GREEN + BOLD + "│" + RESET + "  " + WHITE + BOLD + "[1]" + RESET + " 📋 Cerrar orden de Inspección            " + GREEN + BOLD + "│" + RESET);
-        System.out.println("   " + GREEN + BOLD + "│" + RESET + "      " + DIM + "Finalizar proceso de inspección actual" + RESET + "    " + GREEN + BOLD + "│" + RESET);
+        System.out.println("   " + GREEN + BOLD + "│" + RESET + "  " + WHITE + BOLD + "[1]" + RESET + " 📋 Cerrar orden de Inspección            " + GREEN + BOLD + "   │" + RESET);
+        System.out.println("   " + GREEN + BOLD + "│" + RESET + "      " + DIM + "Finalizar proceso de inspección actual" + RESET + "    " + GREEN + BOLD + "  │" + RESET);
         System.out.println("   " + GREEN + BOLD + "│" + RESET + "                                                  " + GREEN + BOLD + "│" + RESET);
         System.out.println("   " + GREEN + BOLD + "├──────────────────────────────────────────────────┤" + RESET);
         System.out.println("   " + GREEN + BOLD + "│" + RESET + "                                                  " + GREEN + BOLD + "│" + RESET);
-        System.out.println("   " + GREEN + BOLD + "│" + RESET + "  " + WHITE + BOLD + "[2]" + RESET + " 🚪 Salir del Sistema                     " + GREEN + BOLD + "│" + RESET);
-        System.out.println("   " + GREEN + BOLD + "│" + RESET + "      " + DIM + "Cerrar aplicación de manera segura" + RESET + "      " + GREEN + BOLD + "│" + RESET);
+        System.out.println("   " + GREEN + BOLD + "│" + RESET + "  " + WHITE + BOLD + "[2]" + RESET + " 🚪 Salir del Sistema                     " + GREEN + BOLD + "   │" + RESET);
+        System.out.println("   " + GREEN + BOLD + "│" + RESET + "      " + DIM + "Cerrar aplicación de manera segura" + RESET + "      " + GREEN + BOLD + "    │" + RESET);
         System.out.println("   " + GREEN + BOLD + "│" + RESET + "                                                  " + GREEN + BOLD + "│" + RESET);
         System.out.println("   " + GREEN + BOLD + "└──────────────────────────────────────────────────┘" + RESET);
 
@@ -171,10 +171,10 @@ public class PantallaOrden {
         System.out.println();
         System.out.println(BLUE + BOLD + "╔════════════════════════════════════════════════════════════════════╗" + RESET);
         System.out.println(BLUE + BOLD + "║" + RESET + "                                                                    " + BLUE + BOLD + "║" + RESET);
-        System.out.println(BLUE + BOLD + "║" + RESET + "     " + RED + BOLD + "🌍 SISTEMA DE RED SÍSMICA - CCRS 🌍" + RESET + "                     " + BLUE + BOLD + "║" + RESET);
+        System.out.println(BLUE + BOLD + "║" + RESET + "     " + RED + BOLD + "   🌍 SISTEMA DE RED SÍSMICA - CCRS 🌍" + RESET + "                     " + BLUE + BOLD + "    ║" + RESET);
         System.out.println(BLUE + BOLD + "║" + RESET + "                                                                    " + BLUE + BOLD + "║" + RESET);
-        System.out.println(BLUE + BOLD + "║" + RESET + "          " + CYAN + BOLD + "Universidad Tecnológica Nacional" + RESET + "                 " + BLUE + BOLD + "║" + RESET);
-        System.out.println(BLUE + BOLD + "║" + RESET + "              " + CYAN + "Facultad Regional Córdoba" + RESET + "                      " + BLUE + BOLD + "║" + RESET);
+        System.out.println(BLUE + BOLD + "║" + RESET + "          " + CYAN + BOLD + "Universidad Tecnológica Nacional" + RESET + "                 " + BLUE + BOLD + "         ║" + RESET);
+        System.out.println(BLUE + BOLD + "║" + RESET + "              " + CYAN + "Facultad Regional Córdoba" + RESET + "                      " + BLUE + BOLD + "       ║" + RESET);
         System.out.println(BLUE + BOLD + "║" + RESET + "                                                                    " + BLUE + BOLD + "║" + RESET);
         System.out.println(BLUE + BOLD + "╚════════════════════════════════════════════════════════════════════╝" + RESET);
 
