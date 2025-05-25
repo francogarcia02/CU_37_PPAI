@@ -27,7 +27,7 @@ public class GestorOrden {
     private List<TipoMotivo> tiposMotivos;
     private Sismografo sismografoSelected;
     private List<Estado> estados;
-
+    private List<OrdenInspeccion> ordenesInspeccionFiltradas = new ArrayList<>();
     public void RecibirPantallaOrden(PantallaOrden pantallaOrden) {
         this.pantallaOrden = pantallaOrden;
         System.out.print("~GestorOrdenes~ He recibido la pantalla correctamente");
@@ -95,36 +95,44 @@ public class GestorOrden {
                     Boolean condition1 = ordenInspeccion.sosFinalizada();
                     Boolean condition2 = ordenInspeccion.esTuRI(RI);
                     if (condition1 && condition2) {
+                        ordenesInspeccionFiltradas.add(ordenInspeccion);
                         String ordenInspeccionString = ordenInspeccion.toStringForPantalla();
                         pantallaOrden.mostrarOrdenInspeccion(ordenInspeccionString);
                     }
                 });
 
                 System.out.println("ingrese el numero de la Orden de Inspeccion a cerrar ");
+                // es necesario hacer un input que solo permita ingresar un numero
                 String selectedOrdenNumero = pantallaOrden.leerEntradaUsuario();
                 selectedOrdenNumero = selectedOrdenNumero.trim();
                 selectedOrden = null;
 
                 for (OrdenInspeccion ordenInspeccion : ordenesInspeccion) {
+                    // acá debería aplicarse patrón experto y preguntarle a la orden si selectedOrdenNumero es su numero
                     if (ordenInspeccion.getNumeroOrden().equals(Long.parseLong(selectedOrdenNumero))) {
                         selectedOrden = ordenInspeccion;
-                        break; // Exit the loop once we find the order
+                    }
+                    if (!ordenesInspeccionFiltradas.contains(ordenInspeccion)) {
+                        System.out.println("\033[91m~GestorOrdenes~ Ingresó una orden de inspeccion que no le pertenece o no se encuentra en estado finalizada");
+                        System.out.println("será redirigido al menu principal");
+                        pantallaOrden.mostrarOpciones();
+
                     }
                 }
 
                 String observaciones = null;
                 if (selectedOrden != null) {
                     // Proceed with the selected order
-                    System.out.println("Se encontró una orden con el número: " + selectedOrdenNumero);
+                    System.out.println("~GestorOrdenes~ Se encontró una orden con el número: " + selectedOrdenNumero);
                     observaciones = pantallaOrden.solicitarObservaciones();
                     while (observaciones == "") {
-                        System.out.println("Es obligatorio ingresar observaciones para cerrar la orden de inspeccion");
+                        System.out.println("~GestorOrdenes~ Es obligatorio ingresar observaciones para cerrar la orden de inspeccion");
                         observaciones = pantallaOrden.solicitarObservaciones();
                     }
                     System.out.println("~GestorOrdenes~ He recibido las observaciones: " + observaciones);
 
                 } else {
-                    System.out.println("No se encontró ninguna orden con el número ingresado.");
+                    System.out.println(" ~GestorOrdenes~ No se encontró ninguna orden con el número ingresado.");
                 }
 
                 String selectedDecicion = pantallaOrden.confirmarActualizacionSituacion();
@@ -163,7 +171,7 @@ public class GestorOrden {
                                 System.out.println("Número fuera de rango.");
                             }
                         } catch (NumberFormatException e) {
-                            System.out.println("Entrada inválida. Ingrese un número o '000' para salir.");
+                            System.out.println("~GestorOrdenes~ Entrada inválida. Ingrese un número o '000' para salir.");
                         }
                     }
 
