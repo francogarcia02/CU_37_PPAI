@@ -26,11 +26,55 @@ public class PantallaOrden {
     }
 
     //metodo generico para escanear la entrada del usuario
+    private final Scanner scanner = new Scanner(System.in);
+    
     public String leerEntradaUsuario() {
-        Scanner scanner = new Scanner(System.in);
-        String entrada = scanner.nextLine();
-        return entrada;
-
+        return scanner.nextLine();
+    }
+    
+    //Solicita al usuario que ingrese un valor numérico entero (int primitivo)
+    public int numericInput(String mensaje, String mensajeError) {
+        while (true) {
+            try {
+                // Calcular el ancho restante para la línea
+                int anchoRestante = 70 - mensaje.length();
+                String linea = BLUE + BOLD + "┌─ " + RESET + YELLOW + mensaje + RESET + " " + 
+                             BLUE + BOLD + "─".repeat(Math.max(0, anchoRestante)) + RESET;
+                System.out.println(linea);
+                System.out.print(BLUE + BOLD + "└─> " + RESET + WHITE + BOLD);
+                
+                String entrada = scanner.nextLine().trim();
+                return Integer.parseInt(entrada);
+                
+            } catch (NumberFormatException e) {
+                System.out.println(RED + "✖ " + mensajeError + RESET);
+                System.out.println();
+            }
+        }
+    }
+    
+    //Solicita al usuario que ingrese un valor numérico largo (Long wrapper)
+    public Long numericInputLong(String mensaje, String mensajeError) {
+        while (true) {
+            try {
+                // Calcular el ancho restante para la línea
+                int anchoRestante = 70 - mensaje.length();
+                String linea = BLUE + BOLD + "┌─ " + RESET + YELLOW + mensaje + RESET + " " + 
+                             BLUE + BOLD + "─".repeat(Math.max(0, anchoRestante)) + RESET;
+                System.out.println(linea);
+                System.out.print(BLUE + BOLD + "└─> " + RESET + WHITE + BOLD);
+                
+                String entrada = scanner.nextLine().trim();
+                if (entrada.isEmpty()) {
+                    return null; // Opcional: devolver null si se ingresa una cadena vacía
+                }
+                return Long.valueOf(entrada);
+                
+            } catch (NumberFormatException e) {
+                System.out.println(RED + "✖ " + mensajeError + RESET);
+                System.out.println();
+            }
+        }
     }
 
     public static void imprimirOndasSismicas(String mensaje) {
@@ -160,18 +204,13 @@ public class PantallaOrden {
         System.out.println();
     }
 
-    public String SolicitarMFS(){
-        System.out.println("Seleccione un motivo como mínimo: (000: Salir de la selección)");
-        String motSelected = leerEntradaUsuario();
-        return motSelected;
+    public int SolicitarMFS(){
+        return numericInput("Seleccione un motivo (000 para salir):", "Por favor ingrese un número válido o 000 para salir");
     }
 
-    public String confirmarActualizacionSituacion(){
-        System.out.println();
-        System.out.println("Desea cambiar la situacion de uno o varios sismografos de la ES? (1: Si, 0: No)");
-        System.out.println();
-        String selectedDecicion = leerEntradaUsuario();
-        return selectedDecicion;
+    public int confirmarActualizacionSituacion(){
+        return numericInput("¿Desea cambiar la situación de uno o varios sismógrafos de la ES? (1: Si, 0: No)", 
+                          "Por favor ingrese 1 para Sí o 0 para No");
     }
 
     public void mostrarResultadoCierre(Boolean result){
@@ -183,20 +222,8 @@ public class PantallaOrden {
     }
 
     public Boolean solicitarConfirmacionCierre(){
-        System.out.println();
-        System.out.println("Desea confirmar el cierre de la OI? (1:Si, 0:No)");
-        String response = leerEntradaUsuario();
-        System.out.println();
-        while(!response.equals("1") && !response.equals("0")){
-            System.out.println();
-            System.out.println("Desea confirmar el cierre de la OI? (1:Si, 0:No)");
-            response = leerEntradaUsuario();
-            System.out.println();
-        }
-        if(response.equals("1")){
-            return true;
-        } else {
-            return false;
-        }
+        int respuesta = numericInput("¿Desea confirmar el cierre de la OI? (1:Si, 0:No)", 
+                                   "Por favor ingrese 1 para Sí o 0 para No");
+        return respuesta == 1;
     }
 }

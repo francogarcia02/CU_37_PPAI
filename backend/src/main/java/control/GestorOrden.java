@@ -98,26 +98,31 @@ public class GestorOrden {
                         ordenesInspeccionFiltradas.add(ordenInspeccion);
                         String ordenInspeccionString = ordenInspeccion.toStringForPantalla();
                         pantallaOrden.mostrarOrdenInspeccion(ordenInspeccionString);
+                        System.out.println("se añadió una orden a la lista filtrada");
                     }
                 });
 
-                System.out.println("ingrese el numero de la Orden de Inspeccion a cerrar ");
-                // es necesario hacer un input que solo permita ingresar un numero
-                String selectedOrdenNumero = pantallaOrden.leerEntradaUsuario();
-                selectedOrdenNumero = selectedOrdenNumero.trim();
+
+                // es necesario hacer un input que solo permita ingresar un número
+                Long selectedOrdenNumero = pantallaOrden.numericInputLong("ingrese el numero de la Orden de Inspeccion a cerrar ", "Solo puede ingresar números");
+                System.out.println("recibi este input " + selectedOrdenNumero);
                 selectedOrden = null;
 
                 for (OrdenInspeccion ordenInspeccion : ordenesInspeccion) {
                     // acá debería aplicarse patrón experto y preguntarle a la orden si selectedOrdenNumero es su numero
-                    if (ordenInspeccion.getNumeroOrden().equals(Long.parseLong(selectedOrdenNumero))) {
+                    if (ordenInspeccion.getNumeroOrden().equals(selectedOrdenNumero)) {
                         selectedOrden = ordenInspeccion;
-                    }
-                    if (!ordenesInspeccionFiltradas.contains(ordenInspeccion)) {
-                        System.out.println("\033[91m~GestorOrdenes~ Ingresó una orden de inspeccion que no le pertenece o no se encuentra en estado finalizada");
-                        System.out.println("será redirigido al menu principal");
-                        pantallaOrden.mostrarOpciones();
+                        System.out.println("coincidencia encontrada " + ordenInspeccion);
 
+                        if (!ordenesInspeccionFiltradas.contains(selectedOrden)) {
+                            System.out.println(ordenesInspeccionFiltradas);
+                            System.out.println("\033[91m~GestorOrdenes~ Ingresó una orden de inspeccion que no le pertenece o no se encuentra en estado finalizada");
+                            System.out.println("será redirigido al menu principal");
+                            pantallaOrden.mostrarOpciones();
+
+                        }
                     }
+
                 }
 
                 String observaciones = null;
@@ -135,9 +140,9 @@ public class GestorOrden {
                     System.out.println(" ~GestorOrdenes~ No se encontró ninguna orden con el número ingresado.");
                 }
 
-                String selectedDecicion = pantallaOrden.confirmarActualizacionSituacion();
+                String selectedDecicion = String.valueOf(pantallaOrden.confirmarActualizacionSituacion());
                 while (!selectedDecicion.equals("1") && !selectedDecicion.equals("0")) {
-                    selectedDecicion = pantallaOrden.confirmarActualizacionSituacion();
+                    selectedDecicion = String.valueOf(pantallaOrden.confirmarActualizacionSituacion());
                 }
 
                 sismografoSelected = selectedOrden.getEstacionSismologica().getSismografo();
@@ -154,7 +159,7 @@ public class GestorOrden {
                             pantallaOrden.mostrarTipoMotivosFueraServicio(descripcionConIndice);
                         }
 
-                        motSelected = pantallaOrden.SolicitarMFS();
+                        motSelected = String.valueOf(pantallaOrden.SolicitarMFS());
 
                         if (motSelected.equals("000")) {
                             break;
