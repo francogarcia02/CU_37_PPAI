@@ -23,15 +23,15 @@ public class Main {
     List<TipoMotivo> listaMotivos = mockDataGenerator.generarTipoMotivo();
 
     GestorOrden gestorOrden = new GestorOrden();
+    
+    PantallaOrden pantallaOrden = new PantallaOrden(gestorOrden);
+    gestorOrden.RecibirPantallaOrden(pantallaOrden);
+
     gestorOrden.RecibirSesion(sesion);
     gestorOrden.RecibirOrdenesInspeccion(ordenesInspeccion);
     gestorOrden.RecibirEmpleados(empleados);
     gestorOrden.RecibirTipoMotivos(listaMotivos);
     gestorOrden.RecibirEstados(estados);
-
-
-    PantallaOrden pantallaOrden = new PantallaOrden(gestorOrden);
-    gestorOrden.RecibirPantallaOrden(pantallaOrden);
 
     pantallaOrden.mainProcess();
 

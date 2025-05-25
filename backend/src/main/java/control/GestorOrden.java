@@ -28,53 +28,47 @@ public class GestorOrden {
     private Sismografo sismografoSelected;
     private List<Estado> estados;
     private List<OrdenInspeccion> ordenesInspeccionFiltradas = new ArrayList<>();
+
     public void RecibirPantallaOrden(PantallaOrden pantallaOrden) {
         this.pantallaOrden = pantallaOrden;
-        System.out.print("~GestorOrdenes~ He recibido la pantalla correctamente");
-        System.out.println();
+        pantallaOrden.comunicarFeedbackGestor("He recibido la pantalla correctamente");
     }
 
     public void RecibirOrdenesInspeccion(List<OrdenInspeccion> ordenesInspeccion) {
         this.ordenesInspeccion = ordenesInspeccion;
-        System.out.print("~GestorOrdenes~ He recibido las Ordenes de Inspeccion correctamente");
-        System.out.println();
+        pantallaOrden.comunicarFeedbackGestor("He recibido las Ordenes de Inspeccion correctamente");
     }
 
     public void RecibirEstados(List<Estado> estados) {
         this.estados = estados;
-        System.out.print("~GestorOrdenes~ He recibido los estados correctamente");
-        System.out.println();
+        pantallaOrden.comunicarFeedbackGestor("He recibido los estados correctamente");
     }
 
     public void RecibirTipoMotivos(List<TipoMotivo> tipoMotivos) {
         this.tiposMotivos = tipoMotivos;
-        System.out.print("~GestorOrdenes~ He recibido los tipos de motivo correctamente");
-        System.out.println();
+        pantallaOrden.comunicarFeedbackGestor("He recibido los tipos de motivo correctamente");
     }
 
     public void RecibirSesion(Sesion sesion) {
         this.sesion = sesion;
-        System.out.print("~GestorOrdenes~ He recibido la Sesion correctamente");
-        System.out.println();
+        pantallaOrden.comunicarFeedbackGestor("He recibido la Sesion correctamente");
     }
 
     public void RecibirEmpleados(List<Empleado> empleados) {
         this.empleados = empleados;
-        System.out.print("~GestorOrdenes~ He recibido los Empleados correctamente");
-        System.out.println();
+        pantallaOrden.comunicarFeedbackGestor("He recibido los Empleados correctamente");
     }
 
     public void RecibirselectedOption(String selectedOption) {
         this.selectedOption = selectedOption;
-        System.out.print("~GestorOrdenes~ He recibido la opción seleccionada correctamente");
-
-        System.out.println();
+        pantallaOrden.comunicarFeedbackGestor("He recibido la opción seleccionada correctamente");
         mainProcess();
     }
 
     private Empleado mappearEmpleadoPorUsuario(Usuario usuario) {
         for (Empleado empleado : empleados) {
-            if (empleado.getUsuario().equals(usuario)) {
+            Boolean comparedEmployee = empleado.compareEmployee(usuario);
+            if (comparedEmployee) {
                 return empleado;
             }
         }
@@ -85,12 +79,9 @@ public class GestorOrden {
     private void mainProcess() {
         while (!selectedOption.equals("2")) {
             if (selectedOption.equals("1")) {
-                System.out.println();
                 // busca el empleado asociado a la sesion
                 Empleado RI = mappearEmpleadoPorUsuario(sesion.getUsuario());
-
-                System.out.println("Listado de Ordenes Inspeccion para cerrar: ");
-
+                pantallaOrden.comunicarFeedbackGestorLeve("Listado de Ordenes Inspeccion para cerrar: ");
                 ordenesInspeccion.forEach(ordenInspeccion -> {
                     Boolean condition1 = ordenInspeccion.sosFinalizada();
                     Boolean condition2 = ordenInspeccion.esTuRI(RI);
@@ -108,14 +99,14 @@ public class GestorOrden {
 
                 for (OrdenInspeccion ordenInspeccion : ordenesInspeccion) {
                     // acá debería aplicarse patrón experto y preguntarle a la orden si selectedOrdenNumero es su numero
-                    if (ordenInspeccion.getNumeroOrden().equals(selectedOrdenNumero)) {
+                    Boolean comparedOI = ordenInspeccion.compareNroOrder(selectedOrdenNumero);
+                    if (comparedOI) {
                         selectedOrden = ordenInspeccion;
 
                         if (!ordenesInspeccionFiltradas.contains(selectedOrden)) {
-                            System.out.println("\033[91m~GestorOrdenes~ Ingresó una orden de inspeccion que no le pertenece o no se encuentra en estado finalizada");
-                            System.out.println("será redirigido al menu principal");
+                            pantallaOrden.comunicarFeedbackGestor("Ingresó una orden de inspeccion que no le pertenece o no se encuentra en estado finalizada");
+                            pantallaOrden.comunicarFeedbackGestor("será redirigido al menu principal");
                             pantallaOrden.mostrarOpciones();
-
                         }
                     }
 
@@ -124,16 +115,15 @@ public class GestorOrden {
                 String observaciones = null;
                 if (selectedOrden != null) {
                     // Proceed with the selected order
-                    System.out.println("~GestorOrdenes~ Se encontró una orden con el número: " + selectedOrdenNumero);
+                    pantallaOrden.comunicarFeedbackGestor("Se encontró una orden con el número: " + selectedOrdenNumero);
                     observaciones = pantallaOrden.solicitarObservaciones();
                     while (observaciones == "") {
-                        System.out.println("~GestorOrdenes~ Es obligatorio ingresar observaciones para cerrar la orden de inspeccion");
+                        pantallaOrden.comunicarFeedbackGestor("Es obligatorio ingresar observaciones para cerrar la orden de inspeccion");
                         observaciones = pantallaOrden.solicitarObservaciones();
                     }
-                    System.out.println("~GestorOrdenes~ He recibido las observaciones: " + observaciones);
-
+                    pantallaOrden.comunicarFeedbackGestor("He recibido las observaciones: " + observaciones);
                 } else {
-                    System.out.println(" ~GestorOrdenes~ No se encontró ninguna orden con el número ingresado.");
+                    pantallaOrden.comunicarFeedbackGestor("No se encontró ninguna orden con el número ingresado.");
                 }
 
                 String selectedDecicion = String.valueOf(pantallaOrden.confirmarActualizacionSituacion());
@@ -147,8 +137,7 @@ public class GestorOrden {
                 if (selectedDecicion.equals("1")) {
                     String motSelected = "";
                     while (!motSelected.equals("0")) {
-                        System.out.println();
-                        System.out.println("Tipos de motivo: ");
+                        pantallaOrden.comunicarFeedbackGestorLeve("Tipos de motivo: ");
                         for (int i = 0; i < tiposMotivos.size(); i++) {
                             TipoMotivo tipoMotivo = tiposMotivos.get(i);
                             String descripcionConIndice = (i+1) + ": " + tipoMotivo.getDescripcion();
@@ -168,14 +157,14 @@ public class GestorOrden {
 
                             if (index >= 0 && index < tiposMotivos.size()) {
                                 TipoMotivo motivoSeleccionado = tiposMotivos.get(index);
-                                System.out.println("Seleccionaste: " + motivoSeleccionado.getDescripcion());
+                                pantallaOrden.comunicarFeedbackGestorLeve("Seleccionaste: " + motivoSeleccionado.getDescripcion());
                                 String comentario = pantallaOrden.solicitarMotivoComentario();
                                 motivosFueraServicio.add(new MotivoFueraServicio(comentario, motivoSeleccionado));
                             } else {
-                                System.out.println("Número fuera de rango.");
+                                pantallaOrden.comunicarFeedbackGestor("Número fuera de rango.");
                             }
                         } catch (NumberFormatException e) {
-                            System.out.println("~GestorOrdenes~ Entrada inválida. Ingrese un número o '0' para salir.");
+                            pantallaOrden.comunicarFeedbackGestor("Entrada inválida. Ingrese un número o '0' para salir.");
                         }
                     }
 

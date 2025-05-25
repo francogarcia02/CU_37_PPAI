@@ -17,4 +17,14 @@ public class Empleado {
         this.rolEmpleado = rolEmpleado;
         this.usuario = usuario;
     }
+
+    public Boolean compareEmployee(Usuario user){
+        if(this.getUsuario().equals(user)){
+            return true;        
+        } else {
+            return false;
+        }
+
+    }
+    
 }

@@ -104,6 +104,15 @@ public class OrdenInspeccion {
         return ("");
     }
 
+    public Boolean compareNroOrder(Long number){
+        if(this.getNumeroOrden().equals(number)){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     public String toStringForPantalla() {
         // Obtener el cambio de estado actual (donde fechaHorafin es null)
         CambioEstado estadoActual = cambiosEstados.stream()

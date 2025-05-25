@@ -167,6 +167,18 @@ public class PantallaOrden {
         return comentario;
     }
 
+    public void comunicarFeedbackGestor (String mensaje) {
+        System.out.println();
+        System.out.println(YELLOW + BOLD + "~GestorOrdenes~ " + RESET + BLUE + mensaje + RESET);
+        System.out.println();
+    }
+
+    public void comunicarFeedbackGestorLeve (String mensaje) {
+        System.out.println();
+        System.out.println( RESET + BLUE + mensaje + RESET);
+        System.out.println();
+    }
+
     public void mainProcess() {
         System.out.println();
         System.out.println(BLUE + BOLD + "╔════════════════════════════════════════════════════════════════════╗" + RESET);
