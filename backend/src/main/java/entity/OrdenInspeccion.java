@@ -104,6 +104,13 @@ public class OrdenInspeccion {
         return ("");
     }
 
+    public CambioEstado obtenerCambioEstadoActual() {
+        return cambiosEstados.stream()
+            .filter(cambio -> cambio.getFechaHorafin() == null)
+            .findFirst()  // Get the first (debería ser el unico)
+            .orElse(null);
+    }
+
     public Boolean compareNroOrder(Long number){
         if(this.getNumeroOrden().equals(number)){
             return true;

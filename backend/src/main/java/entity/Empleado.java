@@ -26,5 +26,12 @@ public class Empleado {
         }
 
     }
-    
+
+    public boolean esResponsableReparaciones() {
+        return this.rolEmpleado.equals(Rol.RESPONSABLE_REPARACIONES);
+    }
+
+    public String  obtenerMail() {
+        return this.getUsuario().getEmail();
+    };
 }

@@ -32,7 +32,7 @@ public class MOCKDATAGenerator {
         }
 
         if (i == 2) {
-            return new Empleado(Long.valueOf(2), "Jane", "Doe", Rol.ADMIN, generarUsuario(2));
+            return new Empleado(Long.valueOf(2), "Jane", "Doe", Rol.RESPONSABLE_REPARACIONES, generarUsuario(2));
         }
         return null;
     }

@@ -1,5 +1,6 @@
 package control;
 
+import boundary.InterfazMail;
 import boundary.PantallaOrden;
 import entity.CambioEstado;
 import entity.Empleado;
@@ -14,6 +15,7 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 public class GestorOrden {
@@ -28,6 +30,7 @@ public class GestorOrden {
     private Sismografo sismografoSelected;
     private List<Estado> estados;
     private List<OrdenInspeccion> ordenesInspeccionFiltradas = new ArrayList<>();
+    private List<String> mailsResponsablesReparaciones = new ArrayList<>();
 
     // Todos estos metodos "Recibir" son para que el gestor conozca las clases necesarias
 
@@ -76,6 +79,66 @@ public class GestorOrden {
             }
         }
         return null;
+    }
+
+    public List<String> obtenerMailsResponsablesReparacion(){
+        List<Empleado> empleadosResponsablesReparaciones = new ArrayList<>();
+
+        // empleados.stream(): Crea un stream (flujo de datos) a partir de la lista de empleados.
+        // .filter(Empleado::esResponsableReparaciones): Filtra los empleados utilizando el predicado esResponsableReparaciones.
+        // .forEach(empleadosResponsablesReparaciones::add): Por cada empleado filtrado, lo agrega a la colección empleadosResponsablesReparaciones usando una referencia de método.
+        empleados.stream()
+                .filter(Empleado::esResponsableReparaciones)
+                .forEach(empleadosResponsablesReparaciones::add);
+
+        List<String> mailsResponsablesReparaciones = new ArrayList<>();
+
+        // empleadosResponsablesReparacion.stream(): Crea un stream (flujo de datos)  a partir de la lista de empleadosResponsablesReparacion.
+        // .map(empleado -> empleado.getUsuario().getEmail()): Transforma cada objeto Empleado en su dirección de correo electrónico
+        // .forEach(mailsResponsablesReparacion::add): Por cada email obtenido, lo agrega a la colección mailsResponsablesReparaciones usando una referencia de método.
+        empleadosResponsablesReparaciones.stream()
+                .map(empleado -> empleado.obtenerMail())
+                .forEach(mailsResponsablesReparaciones::add);
+
+        // finalmente, se devuelve la colección mailsResponsablesReparaciones
+        return mailsResponsablesReparaciones;
+    };
+
+    private String confeccionarMensajeMail(OrdenInspeccion selectedOrden) {
+        String mensaje = "";
+        mensaje = "Estimado(a) responsable de reparaciones" + ",\n\n"
+                + "La Orden de Inspeccion " + selectedOrden.getNumeroOrden() + " ha sido cerrada. \n\n"
+
+                + "Detalles:\n"
+                + "Estación Sismológica: " + selectedOrden.getEstacionSismologica().getNombreEstacion() + "\n"
+                + "Responsable de la Orden: " + selectedOrden.getResponsableOrdenInspeccion().getNombreEmpleado() + "\n"
+                + "ID sismografo: " + selectedOrden.getEstacionSismologica().getSismografo().getIdSismografo() + "\n\n"
+                + "Estado actual del sismografo: " + selectedOrden.getEstacionSismologica().getSismografo().getEstado().getNombre() + "\n"
+                + "fecha y hora nuevo estado: " + selectedOrden.obtenerCambioEstadoActual().getFechaHorafin() + "\n"
+                + "Motivos:\n" +
+
+    (selectedOrden.obtenerCambioEstadoActual().getMotivosCambioEstados() != null ?
+                            selectedOrden.obtenerCambioEstadoActual().getMotivosCambioEstados().stream()
+                                        .map(motivo ->
+                                    "  - Motivo: " + motivo.getTipoMotivo().getDescripcion() + "\n"
+                                            +
+                                            "    Observaciones: " + (motivo.getComentario() != null ? motivo.getComentario() : "Sin observaciones") + "\n"
+                                        )
+                        .collect(Collectors.joining("\n"))
+                    : "  No hay motivos registrados\n"
+                );
+
+        return mensaje;
+    }
+
+    public void enviarNotificacionMail(String mensaje) {
+        List<String> mailsResponsablesReparaciones = obtenerMailsResponsablesReparacion();
+
+        InterfazMail interfazMail = new InterfazMail();
+
+        mailsResponsablesReparaciones.stream().forEach(mail -> {
+            System.out.println(interfazMail.enviarMail(mail, mensaje));
+        });
     }
 
 
@@ -193,11 +256,20 @@ public class GestorOrden {
                     Boolean result = selectedOrden.cerrar(observaciones, motivosFueraServicio, estados.get(13), RI  );
                     pantallaOrden.mostrarResultadoCierre(result);
                 };
+
+                // notificar RRs via email Y publicar resultados en monitores CCRS
+                // : La notificación debe incluir la identificación del sismógrafo, el nombre del estado Fuera de Servicio, la fecha y
+                //hora de registro del nuevo estado, y los motivos y comentarios asociados al cambio.
+                String mensaje = confeccionarMensajeMail(selectedOrden);
+                enviarNotificacionMail(mensaje);
+
             }
             pantallaOrden.imprimirOndasSismicas("usted está siendo redirigido al menú principal");
             pantallaOrden.mostrarOpciones();
         }
     }
+
+
 
 }
 
