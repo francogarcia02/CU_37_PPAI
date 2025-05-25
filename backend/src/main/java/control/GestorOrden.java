@@ -29,6 +29,8 @@ public class GestorOrden {
     private List<Estado> estados;
     private List<OrdenInspeccion> ordenesInspeccionFiltradas = new ArrayList<>();
 
+    // Todos estos metodos "Recibir" son para que el gestor conozca las clases necesarias
+
     public void RecibirPantallaOrden(PantallaOrden pantallaOrden) {
         this.pantallaOrden = pantallaOrden;
         pantallaOrden.comunicarFeedbackGestor("He recibido la pantalla correctamente");
@@ -65,6 +67,7 @@ public class GestorOrden {
         mainProcess();
     }
 
+    // este metodo privado se encarga de mapear un usuario dado con un empleado
     private Empleado mappearEmpleadoPorUsuario(Usuario usuario) {
         for (Empleado empleado : empleados) {
             Boolean comparedEmployee = empleado.compareEmployee(usuario);
@@ -76,6 +79,9 @@ public class GestorOrden {
     }
 
 
+    // este metodo privado se encarga de llevar el proceso de cierre
+    // se llama mainProcess porque es el unico proceso que hay en el sistema,
+    // podría llamarse cierreOIProcess si fuera necesario
     private void mainProcess() {
         while (!selectedOption.equals("2")) {
             if (selectedOption.equals("1")) {
@@ -93,12 +99,13 @@ public class GestorOrden {
                 });
 
 
-                // es necesario hacer un input que solo permita ingresar un número
+                // numericInputLong es un metodo de la pantalla que permite solamente ingresar un número
+                // y este es retornado como un Long (wrapper class)
                 Long selectedOrdenNumero = pantallaOrden.numericInputLong("ingrese el numero de la Orden de Inspeccion a cerrar ", "Solo puede ingresar números");
                 selectedOrden = null;
 
                 for (OrdenInspeccion ordenInspeccion : ordenesInspeccion) {
-                    // acá debería aplicarse patrón experto y preguntarle a la orden si selectedOrdenNumero es su numero
+                    // se aplica patron experto para comparar el nro de la orden de inspeccion ingresado
                     Boolean comparedOI = ordenInspeccion.compareNroOrder(selectedOrdenNumero);
                     if (comparedOI) {
                         selectedOrden = ordenInspeccion;

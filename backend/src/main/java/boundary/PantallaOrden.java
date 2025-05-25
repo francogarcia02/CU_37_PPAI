@@ -179,6 +179,7 @@ public class PantallaOrden {
         System.out.println();
     }
 
+    // punto de entrada para el usuario al programa
     public void mainProcess() {
         System.out.println();
         System.out.println(BLUE + BOLD + "╔════════════════════════════════════════════════════════════════════╗" + RESET);
