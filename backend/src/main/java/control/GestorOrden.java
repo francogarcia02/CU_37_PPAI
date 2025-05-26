@@ -151,6 +151,14 @@ public class GestorOrden {
                 // busca el empleado asociado a la sesion
                 Empleado RI = mappearEmpleadoPorUsuario(sesion.getUsuario());
                 pantallaOrden.comunicarFeedbackGestorLeve("Listado de Ordenes Inspeccion para cerrar: ");
+
+                // limpia la lista de ordenesInspeccionFiltradas, este paso es importante porque sino
+                // el sistema cree que hay ordenes cuando no las hay
+                ordenesInspeccionFiltradas.clear();
+
+                // para cada ordenInspeccion en la lista de ordenesInspeccion, se verifica si es finalizada
+                // y si está asignada al RI, y si es asi, se agrega a la lista de
+                // ordenesInspeccionFiltradas y se muestra en la pantalla
                 ordenesInspeccion.forEach(ordenInspeccion -> {
                     Boolean condition1 = ordenInspeccion.sosFinalizada();
                     Boolean condition2 = ordenInspeccion.esTuRI(RI);
@@ -161,6 +169,10 @@ public class GestorOrden {
                     }
                 });
 
+                if (ordenesInspeccionFiltradas.isEmpty()) {
+                    pantallaOrden.comunicarFeedbackGestor("No hay Ordenes de Inspeccion para cerrar");
+                    pantallaOrden.mostrarOpciones();
+                };
 
                 // numericInputLong es un metodo de la pantalla que permite solamente ingresar un número
                 // y este es retornado como un Long (wrapper class)
