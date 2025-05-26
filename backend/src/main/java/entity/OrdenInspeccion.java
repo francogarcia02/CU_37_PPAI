@@ -21,10 +21,6 @@ public class OrdenInspeccion {
             if (cambio.getFechaHorafin() == null &&
                 "finalizada".equalsIgnoreCase(cambio.getEstadoNuevo().getNombre())) {
                 this.setObservaciones(observacion);
-                List<MotivoFueraServicio> lista = new ArrayList<>();
-                lista.addAll(cambio.getMotivosCambioEstados()); 
-                lista.addAll(motivosNuevos);
-                cambio.setMotivosCambioEstados(lista);
                 cambio.setFechaHorafin(LocalDateTime.now());
                 cambiosEstados.add(
                         new CambioEstado(
@@ -34,7 +30,7 @@ public class OrdenInspeccion {
                                 LocalDateTime.now(),
                                 null,
                                 responsableEjecucion,
-                                null
+                                motivosNuevos
                 ));
                 return true;
             }

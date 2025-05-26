@@ -114,19 +114,19 @@ public class GestorOrden {
                 + "Responsable de la Orden: " + selectedOrden.getResponsableOrdenInspeccion().getNombreEmpleado() + "\n"
                 + "ID sismografo: " + selectedOrden.getEstacionSismologica().getSismografo().getIdSismografo() + "\n\n"
                 + "Estado actual del sismografo: " + selectedOrden.getEstacionSismologica().getSismografo().getEstado().getNombre() + "\n"
-                + "fecha y hora nuevo estado: " + selectedOrden.obtenerCambioEstadoActual().getFechaHorafin() + "\n"
-                + "Motivos:\n" +
+                + "fecha y hora nuevo estado: " + selectedOrden.obtenerCambioEstadoActual().getFechaHorainicio() + "\n"
+                + "Motivos:\n" + (
 
-    (selectedOrden.obtenerCambioEstadoActual().getMotivosCambioEstados() != null ?
+                            (selectedOrden.obtenerCambioEstadoActual().getMotivosCambioEstados() != null) ?(
                             selectedOrden.obtenerCambioEstadoActual().getMotivosCambioEstados().stream()
                                         .map(motivo ->
                                     "  - Motivo: " + motivo.getTipoMotivo().getDescripcion() + "\n"
                                             +
                                             "    Observaciones: " + (motivo.getComentario() != null ? motivo.getComentario() : "Sin observaciones") + "\n"
                                         )
-                        .collect(Collectors.joining("\n"))
-                    : "  No hay motivos registrados\n"
-                );
+                        .collect(Collectors.joining("\n")))
+                    : ("  No hay motivos registrados\n"
+                ));
 
         return mensaje;
     }
@@ -215,9 +215,11 @@ public class GestorOrden {
                     selectedDecicion = String.valueOf(pantallaOrden.confirmarActualizacionSituacion());
                 }
 
+
                 sismografoSelected = selectedOrden.getEstacionSismologica().getSismografo();
                 List<MotivoFueraServicio> motivosFueraServicio = new ArrayList<>();
 
+                // selectedDecicion refiere a la decisión del usuario respecto a actualizar la situación del sismografo
                 if (selectedDecicion.equals("1")) {
                     String motSelected = "";
                     while (!motSelected.equals("0")) {
@@ -229,6 +231,7 @@ public class GestorOrden {
                         }
 
                         motSelected = String.valueOf(pantallaOrden.SolicitarMFS());
+                        System.out.println("usted selecciono como motSelected: " + motSelected);
 
                         if (motSelected.equals("0")) {
                             break;
@@ -236,34 +239,32 @@ public class GestorOrden {
 
                         // Ajustar el índice (restar 1 porque mostramos desde 1)
                         int index = Integer.parseInt(motSelected) - 1;
+                        System.out.println("el index es: " + index);
 
                         try {
-
                             if (index >= 0 && index < tiposMotivos.size()) {
                                 TipoMotivo motivoSeleccionado = tiposMotivos.get(index);
                                 pantallaOrden.comunicarFeedbackGestorLeve("Seleccionaste: " + motivoSeleccionado.getDescripcion());
                                 String comentario = pantallaOrden.solicitarMotivoComentario();
                                 motivosFueraServicio.add(new MotivoFueraServicio(comentario, motivoSeleccionado));
+                                System.out.println("entramos por true hasta el fondo, linea 250 gestor ");
+                                System.out.println(motivosFueraServicio);
                             } else {
                                 pantallaOrden.comunicarFeedbackGestor("Número fuera de rango.");
                             }
                         } catch (NumberFormatException e) {
                             pantallaOrden.comunicarFeedbackGestor("Entrada inválida. Ingrese un número o '0' para salir.");
                         }
+
+                        sismografoSelected.ponerEnFueraServicio(estados.get(8));
+
+
                     }
 
                 }
 
                 Boolean solicitudConfirmacion = pantallaOrden.solicitarConfirmacionCierre();
-                List<Estado> estadosFS = new ArrayList<>();
-                if (solicitudConfirmacion && observaciones != null && motivosFueraServicio.size() > 0) {
-                    estados.forEach(estado -> {
-                        String ambito = estado.getAmbito();
-                        String nombre = estado.getNombre();
-                        if (ambito.equals("SISMOGRAFO") && nombre.equals("fueraServicio")) {
-                            estadosFS.add(estado);
-                        }
-                    });
+                if (solicitudConfirmacion && observaciones != null && !motivosFueraServicio.isEmpty()) {
                     Boolean result = selectedOrden.cerrar(observaciones, motivosFueraServicio, estados.get(13), RI  );
                     pantallaOrden.mostrarResultadoCierre(result);
                 } else if (solicitudConfirmacion && observaciones != null){
