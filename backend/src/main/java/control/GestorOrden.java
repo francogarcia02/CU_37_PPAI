@@ -194,6 +194,8 @@ public class GestorOrden {
                     pantallaOrden.comunicarFeedbackGestor("He recibido las observaciones: " + observaciones);
                 } else {
                     pantallaOrden.comunicarFeedbackGestor("No se encontró ninguna orden con el número ingresado.");
+                    pantallaOrden.comunicarFeedbackGestor("será redirigido al menu principal");
+                    pantallaOrden.mostrarOpciones();
                 }
 
                 String selectedDecicion = String.valueOf(pantallaOrden.confirmarActualizacionSituacion());
