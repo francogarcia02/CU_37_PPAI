@@ -9,7 +9,6 @@ public class Sismografo {
     private String modelo;
     private Estado estado;
 
-
     public Sismografo(Long idSismografo, String fabricante, String modelo, Estado estado) {
         this.idSismografo = idSismografo;
         this.fabricante = fabricante;

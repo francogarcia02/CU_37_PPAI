@@ -247,7 +247,6 @@ public class GestorOrden {
                                 pantallaOrden.comunicarFeedbackGestorLeve("Seleccionaste: " + motivoSeleccionado.getDescripcion());
                                 String comentario = pantallaOrden.solicitarMotivoComentario();
                                 motivosFueraServicio.add(new MotivoFueraServicio(comentario, motivoSeleccionado));
-                                System.out.println("entramos por true hasta el fondo, linea 250 gestor ");
                                 System.out.println(motivosFueraServicio);
                             } else {
                                 pantallaOrden.comunicarFeedbackGestor("Número fuera de rango.");
@@ -264,22 +263,36 @@ public class GestorOrden {
                 }
 
                 Boolean solicitudConfirmacion = pantallaOrden.solicitarConfirmacionCierre();
+
+
                 if (solicitudConfirmacion && observaciones != null && !motivosFueraServicio.isEmpty()) {
                     Boolean result = selectedOrden.cerrar(observaciones, motivosFueraServicio, estados.get(13), RI  );
                     pantallaOrden.mostrarResultadoCierre(result);
+
+                    // notificar RRs via email Y publicar resultados en monitores CCRS
+                    // : La notificación debe incluir la identificación del sismógrafo, el nombre del estado Fuera de Servicio, la fecha y
+                    //hora de registro del nuevo estado, y los motivos y comentarios asociados al cambio.
+                    String mensaje = confeccionarMensajeMail(selectedOrden);
+                    enviarNotificacionMail(mensaje);
+
                 } else if (solicitudConfirmacion && observaciones != null){
                     Boolean result = selectedOrden.cerrar(observaciones, motivosFueraServicio, estados.get(13), RI  );
                     pantallaOrden.mostrarResultadoCierre(result);
+
+                    // notificar RRs via email Y publicar resultados en monitores CCRS
+                    // : La notificación debe incluir la identificación del sismógrafo, el nombre del estado Fuera de Servicio, la fecha y
+                    //hora de registro del nuevo estado, y los motivos y comentarios asociados al cambio.
+                    String mensaje = confeccionarMensajeMail(selectedOrden);
+                    enviarNotificacionMail(mensaje);
                 };
 
-                // notificar RRs via email Y publicar resultados en monitores CCRS
-                // : La notificación debe incluir la identificación del sismógrafo, el nombre del estado Fuera de Servicio, la fecha y
-                //hora de registro del nuevo estado, y los motivos y comentarios asociados al cambio.
-                String mensaje = confeccionarMensajeMail(selectedOrden);
-                enviarNotificacionMail(mensaje);
+
 
             }
             pantallaOrden.imprimirOndasSismicas("usted está siendo redirigido al menú principal");
+
+            // al finalizar el proceso limpiamos la seleccion
+            selectedOption = "";
             pantallaOrden.mostrarOpciones();
         }
     }

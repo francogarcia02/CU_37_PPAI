@@ -217,6 +217,7 @@ public class PantallaOrden {
         System.out.println();
     }
 
+
     public int SolicitarMFS() {
         return numericInput("Seleccione un motivo (0 para salir):",
                 "Por favor ingrese un número válido o 0 para salir");
