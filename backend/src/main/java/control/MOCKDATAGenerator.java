@@ -28,22 +28,22 @@ public class MOCKDATAGenerator {
 
     public Empleado generarEmpleado(int i) {
         if (i == 1) {
-            return new Empleado(Long.valueOf(1), "John", "Doe", Rol.RESPONSABLE_INSPECCIONES, generarUsuario(1));
+            return new Empleado(Long.valueOf(1), "John", "Doe", Rol.RESPONSABLE_INSPECCIONES, "johnDoe@gmail.com", "3512345671");
         }
 
         if (i == 2) {
-            return new Empleado(Long.valueOf(2), "Jane", "Doe", Rol.RESPONSABLE_REPARACIONES, generarUsuario(2));
+            return new Empleado(Long.valueOf(2), "Jane", "Doe", Rol.RESPONSABLE_REPARACIONES, "janeDoe@gmail.com", "3517654321");
         }
         return null;
     }
 
     public Usuario generarUsuario(int i) {
        if (i == 1) {
-           return new Usuario("JohnDoe", "123456", "j0o2k@example.com");
+           return new Usuario("JohnDoe", "123456", "j0o2k@example.com", generarEmpleado(1));
        }
 
        if (i == 2) {
-           return new Usuario("JaneDoe", "123456", "j0o2k@example.com");
+           return new Usuario("JaneDoe", "123456", "j0o2k@example.com", generarEmpleado(2));
        }
        return null;
     }

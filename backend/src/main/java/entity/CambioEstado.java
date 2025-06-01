@@ -24,4 +24,9 @@ public class CambioEstado {
         this.responsableCambioEstado = responsableCambioEstado;
         this.motivosCambioEstados = motivosCambioEstados;
     }
+
+    public Boolean esFinalizado() {
+        Boolean result = "finalizada".equals(this.getEstadoNuevo().getNombre());
+        return result;
+    }
 }

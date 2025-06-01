@@ -27,8 +27,8 @@ public class GestorOrden {
     private List<Empleado> empleados;
     private OrdenInspeccion selectedOrden;
     private List<TipoMotivo> tiposMotivos;
-    private Sismografo sismografoSelected;
     private List<Estado> estados;
+    private Usuario usuarioLogueado;
     private List<OrdenInspeccion> ordenesInspeccionFiltradas = new ArrayList<>();
     private List<String> mailsResponsablesReparaciones = new ArrayList<>();
 
@@ -73,7 +73,7 @@ public class GestorOrden {
     // este metodo privado se encarga de mapear un usuario dado con un empleado
     private Empleado mappearEmpleadoPorUsuario(Usuario usuario) {
         for (Empleado empleado : empleados) {
-            Boolean comparedEmployee = empleado.compareEmployee(usuario);
+            Boolean comparedEmployee = usuario.compareEmployee(empleado);
             if (comparedEmployee) {
                 return empleado;
             }
@@ -142,6 +142,8 @@ public class GestorOrden {
     }
 
 
+
+
     // este metodo privado se encarga de llevar el proceso de cierre
     // se llama mainProcess porque es el unico proceso que hay en el sistema,
     // podría llamarse cierreOIProcess si fuera necesario
@@ -149,7 +151,8 @@ public class GestorOrden {
         while (!selectedOption.equals("2")) {
             if (selectedOption.equals("1")) {
                 // busca el empleado asociado a la sesion
-                Empleado RI = mappearEmpleadoPorUsuario(sesion.getUsuario());
+                usuarioLogueado = sesion.getUsuario();
+                Empleado RI = mappearEmpleadoPorUsuario(usuarioLogueado);
                 pantallaOrden.comunicarFeedbackGestorLeve("Listado de Ordenes Inspeccion para cerrar: ");
 
                 // limpia la lista de ordenesInspeccionFiltradas, este paso es importante porque sino
@@ -160,7 +163,7 @@ public class GestorOrden {
                 // y si está asignada al RI, y si es asi, se agrega a la lista de
                 // ordenesInspeccionFiltradas y se muestra en la pantalla
                 ordenesInspeccion.forEach(ordenInspeccion -> {
-                    Boolean condition1 = ordenInspeccion.sosFinalizada();
+                    Boolean condition1 = ordenInspeccion.estaRealizada();
                     Boolean condition2 = ordenInspeccion.esTuRI(RI);
                     if (condition1 && condition2) {
                         ordenesInspeccionFiltradas.add(ordenInspeccion);
@@ -216,7 +219,6 @@ public class GestorOrden {
                 }
 
 
-                sismografoSelected = selectedOrden.getEstacionSismologica().getSismografo();
                 List<MotivoFueraServicio> motivosFueraServicio = new ArrayList<>();
 
                 // selectedDecicion refiere a la decisión del usuario respecto a actualizar la situación del sismografo
@@ -255,8 +257,7 @@ public class GestorOrden {
                             pantallaOrden.comunicarFeedbackGestor("Entrada inválida. Ingrese un número o '0' para salir.");
                         }
 
-                        sismografoSelected.ponerEnFueraServicio(estados.get(8));
-
+                        selectedOrden.enviarSismografoAReparar(estados.get(8));
 
                     }
 
@@ -296,8 +297,5 @@ public class GestorOrden {
             pantallaOrden.mostrarOpciones();
         }
     }
-
-
-
 }
 

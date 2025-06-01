@@ -14,11 +14,12 @@ public class Main {
     MOCKDATAGenerator mockDataGenerator = new MOCKDATAGenerator();
 
     Empleado empleadoRI = mockDataGenerator.generarEmpleado(1);
+    Usuario usuarioRI = mockDataGenerator.generarUsuario(1);
     Empleado otroEmpleadoNoRI = mockDataGenerator.generarEmpleado(2);
     List<Empleado> empleados = List.of(empleadoRI, otroEmpleadoNoRI);
 
     // generamos una sesion con el empleado que tiene rol RI, este paso es muy importante
-    Sesion sesion = mockDataGenerator.generarSesion(empleadoRI.getUsuario());
+    Sesion sesion = mockDataGenerator.generarSesion(usuarioRI);
 
     EstacionSismologica estacionSismologica1 = mockDataGenerator.generarEstacionSismologica(1);
     EstacionSismologica estacionSismologica2 = mockDataGenerator.generarEstacionSismologica(2);

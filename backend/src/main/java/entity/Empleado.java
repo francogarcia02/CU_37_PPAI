@@ -8,23 +8,23 @@ public class Empleado {
     private String nombreEmpleado;
     private String apellidoEmpleado;
     private Rol rolEmpleado;
-    private Usuario usuario;
+    private String mail;
+    private String telefono;
 
-    public Empleado(Long idEmpleado, String nombreEmpleado, String apellidoEmpleado, Rol rolEmpleado, Usuario usuario) {
+    public Empleado(
+            Long idEmpleado, 
+            String nombreEmpleado, 
+            String apellidoEmpleado, 
+            Rol rolEmpleado, 
+            String mail,
+            String telefono
+        ) {
         this.idEmpleado = idEmpleado;
         this.nombreEmpleado = nombreEmpleado;
         this.apellidoEmpleado = apellidoEmpleado;
         this.rolEmpleado = rolEmpleado;
-        this.usuario = usuario;
-    }
-
-    public Boolean compareEmployee(Usuario user){
-        if(this.getUsuario().equals(user)){
-            return true;        
-        } else {
-            return false;
-        }
-
+        this.mail = mail;
+        this.telefono = telefono;
     }
 
     public boolean esResponsableReparaciones() {
@@ -32,6 +32,6 @@ public class Empleado {
     }
 
     public String  obtenerMail() {
-        return this.getUsuario().getEmail();
+        return this.getMail();
     };
 }

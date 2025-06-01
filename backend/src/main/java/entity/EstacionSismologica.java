@@ -14,4 +14,9 @@ public class EstacionSismologica {
         this.sismografo = sismografo;
 
     }
+
+    public void enviarSismografoAReparar(Estado estadoFs){
+        Sismografo sismografoSelected = this.getSismografo();
+        sismografoSelected.enviarSismografoAReparar(estadoFs);
+    }
 }

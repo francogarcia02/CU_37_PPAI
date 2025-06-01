@@ -16,7 +16,7 @@ public class Sismografo {
         this.estado = estado;
     }
 
-    public void ponerEnFueraServicio(Estado estadoFS) {
+    public void enviarSismografoAReparar(Estado estadoFS) {
         this.estado = estadoFS;
     }
 }

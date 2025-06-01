@@ -62,11 +62,11 @@ public class OrdenInspeccion {
 
 
 
-    public Boolean sosFinalizada() {
+    public Boolean estaRealizada() {
         return cambiosEstados.stream()
             .filter(cambio -> cambio.getFechaHorafin() == null)  // Find current state (no end date)
             .findFirst()  // Get the first (debería ser el unico)
-            .map(cambioActual -> "finalizada".equals(cambioActual.getEstadoNuevo().getNombre()))
+            .map(cambioActual -> cambioActual.esFinalizado())
             .orElse(false);  // Return false if no current state is found
     }
 
@@ -78,6 +78,11 @@ public class OrdenInspeccion {
         String nombre = this.responsableOrdenInspeccion.getNombreEmpleado();
         System.out.println(nombre);
         return nombre;
+    }
+
+    public void enviarSismografoAReparar(Estado estadoFs) {
+        EstacionSismologica estacionSelected = this.getEstacionSismologica();
+        estacionSelected.enviarSismografoAReparar(estadoFs);
     }
 
     public String obtenerFechaFinalizacionMasReciente() {
