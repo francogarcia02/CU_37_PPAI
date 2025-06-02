@@ -42,6 +42,6 @@ public class Main {
     gestorOrden.RecibirTipoMotivos(listaMotivos);
     gestorOrden.RecibirEstados(estados);
 
-    pantallaOrden.mainProcess();
+    pantallaOrden.habilitarVentana();
     }
 }

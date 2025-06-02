@@ -39,11 +39,11 @@ public class MOCKDATAGenerator {
 
     public Usuario generarUsuario(int i) {
        if (i == 1) {
-           return new Usuario("JohnDoe", "123456", "j0o2k@example.com", generarEmpleado(1));
+           return new Usuario("JohnDoe", "123456", generarEmpleado(1));
        }
 
        if (i == 2) {
-           return new Usuario("JaneDoe", "123456", "j0o2k@example.com", generarEmpleado(2));
+           return new Usuario("JaneDoe", "123456", generarEmpleado(2));
        }
        return null;
     }

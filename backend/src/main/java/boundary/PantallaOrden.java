@@ -242,4 +242,8 @@ public class PantallaOrden {
                                    "Por favor ingrese 1 para Sí o 0 para No");
         return respuesta == 1;
     }
+
+    public void habilitarVentana() {
+        mainProcess();
+    }
 }
