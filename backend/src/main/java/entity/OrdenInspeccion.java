@@ -1,5 +1,6 @@
 package entity;
 
+import interfaces.OrdenInspeccionInterface;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -7,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class OrdenInspeccion{
+public class OrdenInspeccion implements OrdenInspeccionInterface {
     public Long numeroOrden;
     public EstacionSismologica estacionSismologica;
     public Empleado responsableOrdenInspeccion;
@@ -15,28 +16,6 @@ public class OrdenInspeccion{
     public String observaciones;
     public List<CambioEstado> cambiosEstados;
 
-
-    public Boolean cerrar(String observacion, List<MotivoFueraServicio> motivosNuevos, Estado estadoCerrada, Empleado responsableEjecucion) {
-        for (CambioEstado cambio : cambiosEstados) {
-            if (cambio.getFechaHorafin() == null &&
-                "finalizada".equalsIgnoreCase(cambio.getEstadoNuevo().getNombre())) {
-                this.setObservaciones(observacion);
-                cambio.setFechaHorafin(LocalDateTime.now());
-                cambiosEstados.add(
-                        new CambioEstado(
-                                cambio.getIdCambioEstado() + 1L,
-                                cambio.getEstadoNuevo(),
-                                estadoCerrada,
-                                LocalDateTime.now(),
-                                null,
-                                responsableEjecucion,
-                                motivosNuevos
-                ));
-                return true;
-            }
-        }
-        return false;
-    }
 
     public OrdenInspeccion(Long numeroOrden, EstacionSismologica estacionSismologica, List<TareaTecnicaRevision> tareasTecnicasRevisiones, Empleado responsableOrdenInspeccion, String observaciones, List<CambioEstado> cambiosEstados) {
         if (numeroOrden == null) {
@@ -61,6 +40,10 @@ public class OrdenInspeccion{
     }
 
 
+    @Override
+    public Boolean esTuRI(Empleado empleado) {
+        return responsableOrdenInspeccion.equals(empleado);
+    }
 
     public Boolean estaRealizada() {
         return cambiosEstados.stream()
@@ -70,15 +53,46 @@ public class OrdenInspeccion{
             .orElse(false);  // Return false if no current state is found
     }
 
-    public Boolean esTuRI(Empleado empleado) {
-          return responsableOrdenInspeccion.equals(empleado);
+    @Override
+    public Boolean cerrar(String observacion, List<MotivoFueraServicio> motivosNuevos, Estado estadoCerrada, Empleado responsableEjecucion) {
+        for (CambioEstado cambio : cambiosEstados) {
+            if (cambio.getFechaHorafin() == null &&
+                    "finalizada".equalsIgnoreCase(cambio.getEstadoNuevo().getNombre())) {
+                this.setObservaciones(observacion);
+                cambio.setFechaHorafin(LocalDateTime.now());
+                cambiosEstados.add(
+                        new CambioEstado(
+                                cambio.getIdCambioEstado() + 1L,
+                                cambio.getEstadoNuevo(),
+                                estadoCerrada,
+                                LocalDateTime.now(),
+                                null,
+                                responsableEjecucion,
+                                motivosNuevos
+                        ));
+                return true;
+            }
+        }
+        return false;
     }
 
-    public String getResponsableDeInspeccion(){
-        String nombre = this.responsableOrdenInspeccion.getNombreEmpleado();
-        System.out.println(nombre);
-        return nombre;
+
+    @Override
+    public void realizar() {
+
     }
+
+    @Override
+    public void confirmarPte() {
+
+    }
+
+    @Override
+    public void finalizar() {
+
+    }
+
+
 
     public void enviarSismografoAReparar(Estado estadoFs) {
         EstacionSismologica estacionSelected = this.getEstacionSismologica();
