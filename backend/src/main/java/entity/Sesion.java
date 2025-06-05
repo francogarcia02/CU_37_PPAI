@@ -5,10 +5,10 @@ import java.time.LocalDateTime;
 
 @Data
 public class Sesion {
-    private Usuario usuario;
-    private LocalDateTime fechaHoraInicio;
-    private LocalDateTime fechaHoraFin;
-    private Boolean isActiva;
+    public Usuario usuario;
+    public LocalDateTime fechaHoraInicio;
+    public LocalDateTime fechaHoraFin;
+    public Boolean isActiva;
 
     public Sesion(Usuario usuario) {
         this.usuario = usuario;

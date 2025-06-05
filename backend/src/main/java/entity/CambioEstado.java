@@ -7,13 +7,13 @@ import java.util.List;
 
 @Data
 public class CambioEstado {
-    private Long idCambioEstado;
-    private Estado estadoAnterior;
-    private Estado estadoNuevo;
-    private LocalDateTime fechaHorainicio;
-    private LocalDateTime fechaHorafin;
-    private Empleado responsableCambioEstado;
-    private List<MotivoFueraServicio> motivosCambioEstados;
+    public Long idCambioEstado;
+    public Estado estadoAnterior;
+    public Estado estadoNuevo;
+    public LocalDateTime fechaHorainicio;
+    public LocalDateTime fechaHorafin;
+    public Empleado responsableCambioEstado;
+    public List<MotivoFueraServicio> motivosCambioEstados;
 
     public CambioEstado(Long idCambioEstado, Estado estadoAnterior, Estado estadoNuevo, LocalDateTime fechaHorainicio, LocalDateTime fechaHorafin, Empleado responsableCambioEstado, List<MotivoFueraServicio> motivosCambioEstados) {
         this.idCambioEstado = idCambioEstado;

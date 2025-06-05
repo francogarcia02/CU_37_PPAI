@@ -1,12 +1,12 @@
 package boundary;
 import control.GestorOrden;
-import entity.OrdenInspeccion;
+import interfaces.PantallaOrdenInterface;
 
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 
-public class PantallaOrden {
+public class PantallaOrden implements PantallaOrdenInterface {
     // Códigos ANSI para colores y efectos
     private static final String RESET = "\033[0m";
     private static final String BOLD = "\033[1m";
@@ -206,10 +206,22 @@ public class PantallaOrden {
 
     }
 
-    public void mostrarOrdenInspeccion(String ordenInspeccionString) {
+    public void mostrarOI(String ordenInspeccionString) {
 
         System.out.println(ordenInspeccionString);
         System.out.println();
+    }
+
+    @Override
+    public Long tomarNumeroOI() {
+        Long selectedOrdenNumero = this.numericInputLong("ingrese el numero de la Orden de Inspeccion a cerrar ", "Solo puede ingresar números");
+
+        return selectedOrdenNumero;
+    }
+
+    @Override
+    public String solicitarObservacion() {
+        return "";
     }
 
     public void mostrarTipoMotivosFueraServicio(String motivoTipoFueraServicio) {
@@ -241,6 +253,11 @@ public class PantallaOrden {
         int respuesta = numericInput("¿Desea confirmar el cierre de la OI? (1:Si, 0:No)", 
                                    "Por favor ingrese 1 para Sí o 0 para No");
         return respuesta == 1;
+    }
+
+    @Override
+    public void OpCerrarOrden() {
+
     }
 
     public void habilitarVentana() {

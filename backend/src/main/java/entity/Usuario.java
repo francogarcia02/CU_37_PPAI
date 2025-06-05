@@ -4,10 +4,10 @@ import lombok.Data;
 
 @Data
 public class Usuario {
-    private int idUsuario;
-    private String nombreUsuario;
-    private String contrasenia;
-    private Empleado empleado;
+    public int idUsuario;
+    public String nombreUsuario;
+    public String contrasenia;
+    public Empleado empleado;
 
     public Usuario(String nombreUsuario, String contrasenia, Empleado empleado) {
         this.nombreUsuario = nombreUsuario;

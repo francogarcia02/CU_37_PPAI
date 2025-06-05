@@ -11,26 +11,32 @@ import entity.TipoMotivo;
 import entity.Estado;
 import entity.Sismografo;
 import entity.MotivoFueraServicio;
+import interfaces.GestorOrdenInterface;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-public class GestorOrden {
+public class GestorOrden implements GestorOrdenInterface {
+
+    private Usuario usuarioLogueado;
+    private Empleado RI;
+    private List<OrdenInspeccion> ordenesInspeccion;
+    private OrdenInspeccion selectedOrden;
 
     private String selectedOption;
-    private PantallaOrden pantallaOrden;
-    private List<OrdenInspeccion> ordenesInspeccion;
-    private Sesion sesion;
+
     private List<Empleado> empleados;
-    private OrdenInspeccion selectedOrden;
     private List<TipoMotivo> tiposMotivos;
     private List<Estado> estados;
-    private Usuario usuarioLogueado;
+
     private List<OrdenInspeccion> ordenesInspeccionFiltradas = new ArrayList<>();
     private List<String> mailsResponsablesReparaciones = new ArrayList<>();
+    private PantallaOrden pantallaOrden;
+    private Sesion sesion;
 
     // Todos estos metodos "Recibir" son para que el gestor conozca las clases necesarias
 
@@ -70,17 +76,145 @@ public class GestorOrden {
         mainProcess();
     }
 
-    // este metodo privado se encarga de mapear un usuario dado con un empleado
-    private Empleado mappearEmpleadoPorUsuario(Usuario usuario) {
-        for (Empleado empleado : empleados) {
-            Boolean comparedEmployee = usuario.compareEmployee(empleado);
-            if (comparedEmployee) {
-                return empleado;
+
+    @Override
+    public void registrarCierre() {
+    selectedOption = "1";
+    }
+
+    @Override
+    public Empleado buscarEmpleado() {
+        usuarioLogueado = obtenerUsuarioLogueado();
+        RI = usuarioLogueado.getEmpleado();
+        return RI;
+    }
+
+    @Override
+    public List<OrdenInspeccion> buscarOrdenesInspeccion() {
+        // limpia la lista de ordenesInspeccionFiltradas, este paso es importante porque sino
+        // el sistema cree que hay ordenes cuando no las hay
+        ordenesInspeccionFiltradas.clear();
+
+        // para cada ordenInspeccion en la lista de ordenesInspeccion, se verifica si es finalizada
+        // y si está asignada al RI, y si es asi, se agrega a la lista de
+        // ordenesInspeccionFiltradas y se muestra en la pantalla
+        ordenesInspeccion.forEach(ordenInspeccion -> {
+            Boolean condition1 = ordenInspeccion.estaRealizada();
+            Boolean condition2 = ordenInspeccion.esTuRI(RI);
+            if (condition1 && condition2) {
+                ordenesInspeccionFiltradas.add(ordenInspeccion);
             }
+        });
+
+        if (ordenesInspeccionFiltradas.isEmpty()) {
+            pantallaOrden.comunicarFeedbackGestor("No hay Ordenes de Inspeccion para cerrar");
+            return ordenarOI(ordenesInspeccionFiltradas);
+        } else {
+            return ordenarOI(ordenesInspeccionFiltradas);
         }
+
+    };
+
+    @Override
+    public List<OrdenInspeccion> ordenarOI(List<OrdenInspeccion> ordenesInspeccionToOrder) {
+        return ordenesInspeccionToOrder.stream()
+                .sorted((o1, o2) -> {
+                    LocalDateTime fecha1 = o1.obtenerFechaFinalizacion();
+                    LocalDateTime fecha2 = o2.obtenerFechaFinalizacion();
+
+                    // Handle null cases
+                    if (fecha1 == null && fecha2 == null) {
+                        return 0;
+                    }
+                    if (fecha1 == null) {
+                        return 1; // Put nulls at the end
+                    }
+                    if (fecha2 == null) {
+                        return -1; // Put nulls at the end
+                    }
+                    return fecha1.compareTo(fecha2); // Ascending order
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String stringificarOI(OrdenInspeccion ordenesInspeccionToStringify) {
+        return ordenesInspeccionToStringify.toStringForPantalla();
+    }
+
+    @Override
+    public void pasarToPantallaOIs() {
+        ordenesInspeccionFiltradas.forEach(ordenInspeccion -> {
+            pantallaOrden.mostrarOI(
+                    this.stringificarOI(ordenInspeccion)
+            );
+        });
+
+    }
+
+    @Override
+    public void tomarNumeroOI(Long selectedOrdenNumero) {
+        selectedOrden = null;
+
+        for (OrdenInspeccion ordenInspeccion : ordenesInspeccion) {
+            // se aplica patron experto para comparar el nro de la orden de inspeccion ingresado
+            Boolean comparedOI = ordenInspeccion.compareNroOrder(selectedOrdenNumero);
+            if (comparedOI) {
+                selectedOrden = ordenInspeccion;
+
+                if (!ordenesInspeccionFiltradas.contains(selectedOrden)) {
+                    pantallaOrden.comunicarFeedbackGestor("Ingresó una orden de inspeccion que no le pertenece o no se encuentra en estado finalizada");
+                    pantallaOrden.comunicarFeedbackGestor("será redirigido al menu principal");
+                    pantallaOrden.mostrarOpciones();
+                }
+            }
+
+        }
+
+    }
+
+    @Override
+    public void tomarDatosObservacion(String observacion) {
+
+    }
+
+    @Override
+    public List<MotivoFueraServicio> buscarMFS() {
+        return List.of();
+    }
+
+    @Override
+    public void tomarMFS() {
+
+    }
+
+    @Override
+    public void tomarComentario() {
+
+    }
+
+    @Override
+    public void buscarEstadosFS() {
+
+    }
+
+    @Override
+    public Boolean validarMotivo() {
         return null;
     }
 
+    @Override
+    public Estado buscarEstadoOrdenInspección(OrdenInspeccion ordenInspeccion) {
+        return null;
+    }
+
+    @Override
+    public LocalDateTime getFechaHoraActual() {
+        return null;
+    }
+
+
+    @Override
     public List<String> obtenerMailsResponsablesReparacion(){
         List<Empleado> empleadosResponsablesReparaciones = new ArrayList<>();
 
@@ -102,9 +236,27 @@ public class GestorOrden {
 
         // finalmente, se devuelve la colección mailsResponsablesReparaciones
         return mailsResponsablesReparaciones;
-    };
+    }
 
-    private String confeccionarMensajeMail(OrdenInspeccion selectedOrden) {
+    @Override
+    public void enviarNotificacionMail(String mensaje) {
+        List<String> mailsResponsablesReparaciones = obtenerMailsResponsablesReparacion();
+
+        InterfazMail interfazMail = new InterfazMail();
+
+        mailsResponsablesReparaciones.stream().forEach(mail -> {
+            System.out.println(interfazMail.enviarMail(mail, mensaje));
+        });
+
+    }
+
+    @Override
+    public void publicarMonitores() {
+
+    }
+
+    @Override
+    public String confeccionarMensaje(OrdenInspeccion selectedOrden) {
         String mensaje = "";
         mensaje = "Estimado(a) responsable de reparaciones" + ",\n\n"
                 + "La Orden de Inspeccion " + selectedOrden.getNumeroOrden() + " ha sido cerrada. \n\n"
@@ -117,31 +269,30 @@ public class GestorOrden {
                 + "fecha y hora nuevo estado: " + selectedOrden.obtenerCambioEstadoActual().getFechaHorainicio() + "\n"
                 + "Motivos:\n" + (
 
-                            (selectedOrden.obtenerCambioEstadoActual().getMotivosCambioEstados() != null) ?(
-                            selectedOrden.obtenerCambioEstadoActual().getMotivosCambioEstados().stream()
-                                        .map(motivo ->
-                                    "  - Motivo: " + motivo.getTipoMotivo().getDescripcion() + "\n"
-                                            +
-                                            "    Observaciones: " + (motivo.getComentario() != null ? motivo.getComentario() : "Sin observaciones") + "\n"
-                                        )
-                        .collect(Collectors.joining("\n")))
-                    : ("  No hay motivos registrados\n"
+                (selectedOrden.obtenerCambioEstadoActual().getMotivosCambioEstados() != null) ?(
+                        selectedOrden.obtenerCambioEstadoActual().getMotivosCambioEstados().stream()
+                                .map(motivo ->
+                                        "  - Motivo: " + motivo.getTipoMotivo().getDescripcion() + "\n"
+                                                +
+                                                "    Observaciones: " + (motivo.getComentario() != null ? motivo.getComentario() : "Sin observaciones") + "\n"
+                                )
+                                .collect(Collectors.joining("\n")))
+                        : ("  No hay motivos registrados\n"
                 ));
 
         return mensaje;
     }
 
-    public void enviarNotificacionMail(String mensaje) {
-        List<String> mailsResponsablesReparaciones = obtenerMailsResponsablesReparacion();
+    @Override
+    public void FinCU() {
 
-        InterfazMail interfazMail = new InterfazMail();
-
-        mailsResponsablesReparaciones.stream().forEach(mail -> {
-            System.out.println(interfazMail.enviarMail(mail, mensaje));
-        });
     }
 
-
+    @Override
+    public Usuario obtenerUsuarioLogueado() {
+        usuarioLogueado = sesion.getUsuario();
+        return usuarioLogueado;
+    }
 
 
     // este metodo privado se encarga de llevar el proceso de cierre
@@ -151,56 +302,22 @@ public class GestorOrden {
         while (!selectedOption.equals("2")) {
             if (selectedOption.equals("1")) {
                 // busca el empleado asociado a la sesion
-                usuarioLogueado = sesion.getUsuario();
-                Empleado RI = mappearEmpleadoPorUsuario(usuarioLogueado);
+
+                this.buscarEmpleado();
                 pantallaOrden.comunicarFeedbackGestorLeve("Listado de Ordenes Inspeccion para cerrar: ");
 
-                // limpia la lista de ordenesInspeccionFiltradas, este paso es importante porque sino
-                // el sistema cree que hay ordenes cuando no las hay
-                ordenesInspeccionFiltradas.clear();
+                this.buscarOrdenesInspeccion();
 
-                // para cada ordenInspeccion en la lista de ordenesInspeccion, se verifica si es finalizada
-                // y si está asignada al RI, y si es asi, se agrega a la lista de
-                // ordenesInspeccionFiltradas y se muestra en la pantalla
-                ordenesInspeccion.forEach(ordenInspeccion -> {
-                    Boolean condition1 = ordenInspeccion.estaRealizada();
-                    Boolean condition2 = ordenInspeccion.esTuRI(RI);
-                    if (condition1 && condition2) {
-                        ordenesInspeccionFiltradas.add(ordenInspeccion);
-                        String ordenInspeccionString = ordenInspeccion.toStringForPantalla();
-                        pantallaOrden.mostrarOrdenInspeccion(ordenInspeccionString);
-                    }
-                });
+                this.pasarToPantallaOIs();
 
-                if (ordenesInspeccionFiltradas.isEmpty()) {
-                    pantallaOrden.comunicarFeedbackGestor("No hay Ordenes de Inspeccion para cerrar");
-                    pantallaOrden.mostrarOpciones();
-                };
-
-                // numericInputLong es un metodo de la pantalla que permite solamente ingresar un número
-                // y este es retornado como un Long (wrapper class)
-                Long selectedOrdenNumero = pantallaOrden.numericInputLong("ingrese el numero de la Orden de Inspeccion a cerrar ", "Solo puede ingresar números");
-                selectedOrden = null;
-
-                for (OrdenInspeccion ordenInspeccion : ordenesInspeccion) {
-                    // se aplica patron experto para comparar el nro de la orden de inspeccion ingresado
-                    Boolean comparedOI = ordenInspeccion.compareNroOrder(selectedOrdenNumero);
-                    if (comparedOI) {
-                        selectedOrden = ordenInspeccion;
-
-                        if (!ordenesInspeccionFiltradas.contains(selectedOrden)) {
-                            pantallaOrden.comunicarFeedbackGestor("Ingresó una orden de inspeccion que no le pertenece o no se encuentra en estado finalizada");
-                            pantallaOrden.comunicarFeedbackGestor("será redirigido al menu principal");
-                            pantallaOrden.mostrarOpciones();
-                        }
-                    }
-
-                }
+                this.tomarNumeroOI(
+                        pantallaOrden.tomarNumeroOI()
+                );
 
                 String observaciones = null;
-                if (selectedOrden != null) {
+                if (this.selectedOrden != null) {
                     // Proceed with the selected order
-                    pantallaOrden.comunicarFeedbackGestor("Se encontró una orden con el número: " + selectedOrdenNumero);
+                    pantallaOrden.comunicarFeedbackGestor("Se encontró una orden con el número: " + this.selectedOrden.numeroOrden);
                     observaciones = pantallaOrden.solicitarObservaciones();
                     while (observaciones == "") {
                         pantallaOrden.comunicarFeedbackGestor("Es obligatorio ingresar observaciones para cerrar la orden de inspeccion");
@@ -273,7 +390,7 @@ public class GestorOrden {
                     // notificar RRs via email Y publicar resultados en monitores CCRS
                     // : La notificación debe incluir la identificación del sismógrafo, el nombre del estado Fuera de Servicio, la fecha y
                     //hora de registro del nuevo estado, y los motivos y comentarios asociados al cambio.
-                    String mensaje = confeccionarMensajeMail(selectedOrden);
+                    String mensaje = confeccionarMensaje(selectedOrden);
                     enviarNotificacionMail(mensaje);
 
                 } else if (solicitudConfirmacion && observaciones != null){
@@ -283,7 +400,7 @@ public class GestorOrden {
                     // notificar RRs via email Y publicar resultados en monitores CCRS
                     // : La notificación debe incluir la identificación del sismógrafo, el nombre del estado Fuera de Servicio, la fecha y
                     //hora de registro del nuevo estado, y los motivos y comentarios asociados al cambio.
-                    String mensaje = confeccionarMensajeMail(selectedOrden);
+                    String mensaje = confeccionarMensaje(selectedOrden);
                     enviarNotificacionMail(mensaje);
                 };
 

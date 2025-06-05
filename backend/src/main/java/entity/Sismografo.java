@@ -4,10 +4,10 @@ import lombok.Data;
 
 @Data
 public class Sismografo {
-    private Long idSismografo;
-    private String fabricante;
-    private String modelo;
-    private Estado estado;
+    public Long idSismografo;
+    public String fabricante;
+    public String modelo;
+    public Estado estado;
 
     public Sismografo(Long idSismografo, String fabricante, String modelo, Estado estado) {
         this.idSismografo = idSismografo;

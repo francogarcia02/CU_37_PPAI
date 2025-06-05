@@ -4,13 +4,13 @@ import lombok.Data;
 
 @Data
 public class TareaTecnicaRevision {
-    private Long codigo;
-    private String nombre;
-    private String descripcionTrabajo;
-    private String duracionEstimada;
-    private String comentrario;
-    private Apreciacion apreciacion;
-    private String resultadoInspeccion;
-    private boolean registroRealizacion;
+    public Long codigo;
+    public String nombre;
+    public String descripcionTrabajo;
+    public String duracionEstimada;
+    public String comentrario;
+    public Apreciacion apreciacion;
+    public String resultadoInspeccion;
+    public boolean registroRealizacion;
 
 }

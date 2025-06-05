@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class OrdenInspeccion {
-    private Long numeroOrden;
-    private EstacionSismologica estacionSismologica;
-    private Empleado responsableOrdenInspeccion;
-    private List<TareaTecnicaRevision> tareasTecnicasRevisiones;
-    private String observaciones;
-    private List<CambioEstado> cambiosEstados;
+public class OrdenInspeccion{
+    public Long numeroOrden;
+    public EstacionSismologica estacionSismologica;
+    public Empleado responsableOrdenInspeccion;
+    public List<TareaTecnicaRevision> tareasTecnicasRevisiones;
+    public String observaciones;
+    public List<CambioEstado> cambiosEstados;
 
 
     public Boolean cerrar(String observacion, List<MotivoFueraServicio> motivosNuevos, Estado estadoCerrada, Empleado responsableEjecucion) {
@@ -85,25 +85,17 @@ public class OrdenInspeccion {
         estacionSelected.enviarSismografoAReparar(estadoFs);
     }
 
-    public String obtenerFechaFinalizacionMasReciente() {
-        LocalDateTime fechaMasReciente = null;
+    public LocalDateTime obtenerFechaFinalizacion() {
+        LocalDateTime fechaFinalizacion = null;
 
         for (CambioEstado cambio : cambiosEstados) {
-            LocalDateTime fechaFin = cambio.getFechaHorafin();
-            if (fechaFin != null) {
-                if (fechaMasReciente == null || fechaFin.isAfter(fechaMasReciente)) {
-                    fechaMasReciente = fechaFin;
-                }
+            if (cambio.esFinalizado()) {
+                fechaFinalizacion = cambio.getFechaHorafin();
+                break;
             }
         }
-
-        if (fechaMasReciente != null) {
-            System.out.println(fechaMasReciente.toString()); // o formatealo como desees
-        } else {
-            System.out.println("No finalizada");
-        }
-        return ("");
-    }
+        return fechaFinalizacion;
+    };
 
     public CambioEstado obtenerCambioEstadoActual() {
         return cambiosEstados.stream()

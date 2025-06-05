@@ -6,8 +6,8 @@ import java.util.List;
 
 @Data
 public class EstacionSismologica {
-    private String nombreEstacion;
-    private Sismografo sismografo;
+    public String nombreEstacion;
+    public Sismografo sismografo;
 
     public EstacionSismologica(String nombreEstacion, Sismografo sismografo) {
         this.nombreEstacion = nombreEstacion;

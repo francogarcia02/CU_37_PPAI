@@ -6,7 +6,7 @@ import java.util.List;
 
 @Data
 public class TipoMotivo {
-    private String descripcion;
+    public String descripcion;
 
     public TipoMotivo(String descripcion) {
         this.descripcion = descripcion;

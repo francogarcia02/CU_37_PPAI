@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class Estado {
-    private String ambito;
-    private String nombre;
+    public String ambito;
+    public String nombre;
 
     public Estado(String ambito, String nombre) {
         this.ambito = ambito;
