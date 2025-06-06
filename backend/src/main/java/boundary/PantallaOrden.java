@@ -77,7 +77,7 @@ public class PantallaOrden implements PantallaOrdenInterface {
         }
     }
 
-    public static void imprimirOndasSismicas(String mensaje) {
+    public void imprimirOndasSismicas(String mensaje) {
         // Simula ondas sísmicas con caracteres
         String[] ondas = {"~", "~", "^^", "~~~", "^^^^", "~~~~~", "^^^", "~~", "~"};
         System.out.print(GREEN);
@@ -97,7 +97,7 @@ public class PantallaOrden implements PantallaOrdenInterface {
         System.out.println(RESET);
     }
 
-    private static void esperarAnimado(int milisegundos) {
+    public void esperarAnimado(int milisegundos) {
         try {
             TimeUnit.MILLISECONDS.sleep(milisegundos);
         } catch (InterruptedException e) {
@@ -216,12 +216,29 @@ public class PantallaOrden implements PantallaOrdenInterface {
     public Long tomarNumeroOI() {
         Long selectedOrdenNumero = this.numericInputLong("ingrese el numero de la Orden de Inspeccion a cerrar ", "Solo puede ingresar números");
 
+        gestorOrden.tomarNumeroOI(selectedOrdenNumero);
+
         return selectedOrdenNumero;
     }
 
     @Override
     public String solicitarObservacion() {
-        return "";
+        this.comunicarFeedbackGestorLeve("Por favor ingrese las observaciones de la orden de inspeccion");
+        String observaciones = null;
+
+        observaciones = this.tomarObservación();
+        while (observaciones == "") {
+            this.comunicarFeedbackGestor("Es obligatorio ingresar observaciones para cerrar la orden de inspeccion");
+            observaciones = this.tomarObservación();
+        }
+        this.comunicarFeedbackGestor("He recibido las observaciones: " + observaciones);
+
+        return observaciones;
+    }
+
+    @Override
+    public String tomarObservación() {
+        return this.leerEntradaUsuario();
     }
 
     public void mostrarTipoMotivosFueraServicio(String motivoTipoFueraServicio) {
@@ -235,9 +252,44 @@ public class PantallaOrden implements PantallaOrdenInterface {
                 "Por favor ingrese un número válido o 0 para salir");
     }
 
-    public int confirmarActualizacionSituacion(){
-        int input = numericInput("¿Desea cambiar la situación del sismógrafo de la estación? (1: Si, 0: No)",
-                          "Por favor ingrese 1 para Sí o 0 para No");
+    @Override
+    public void tomarMFS() {
+
+    }
+
+    @Override
+    public void solicitarComentario() {
+
+    }
+
+    @Override
+    public void pedirComentario() {
+
+    }
+
+    @Override
+    public Boolean solicitarConfirmacionCierreOI() {
+        return null;
+    }
+
+    @Override
+    public void tomarConfirmación() {
+
+    }
+
+    @Override
+    public String tomarConfirmaciónActuSitSismog() {
+        return String.valueOf(numericInput("¿Desea cambiar la situación del sismógrafo de la estación? (1: Si, 0: No)",
+                "Por favor ingrese 1 para Sí o 0 para No"));
+    }
+
+    public String confirmarActualizacionSituacionSismografo(){
+        String input = tomarConfirmaciónActuSitSismog();
+
+        while (!input.equals("1") && !input.equals("0")) {
+            input = tomarConfirmaciónActuSitSismog();
+        }
+
         return input;
     }
 
@@ -260,7 +312,7 @@ public class PantallaOrden implements PantallaOrdenInterface {
 
     }
 
-    public void habilitarVentana() {
+    public void habilitarVentanaCierre() {
         mainProcess();
     }
 }

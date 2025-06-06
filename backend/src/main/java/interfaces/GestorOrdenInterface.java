@@ -21,6 +21,7 @@ public interface GestorOrdenInterface {
     public void tomarNumeroOI(Long selectedOrdenNumero);
     public void tomarDatosObservacion(String observacion);
 
+    public void  tomarSeleccionDecicionSismografo(String selectedDecicionSismografo);
     public List<MotivoFueraServicio> buscarMFS();
 
     public void tomarMFS();

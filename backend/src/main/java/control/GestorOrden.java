@@ -28,7 +28,8 @@ public class GestorOrden implements GestorOrdenInterface {
     private OrdenInspeccion selectedOrden;
 
     private String selectedOption;
-
+    private String selectedDecicionSismografo;
+    private String observaciones;
     private List<Empleado> empleados;
     private List<TipoMotivo> tiposMotivos;
     private List<Estado> estados;
@@ -175,7 +176,12 @@ public class GestorOrden implements GestorOrdenInterface {
 
     @Override
     public void tomarDatosObservacion(String observacion) {
+        setObservaciones(observacion);
+    }
 
+    @Override
+    public void tomarSeleccionDecicionSismografo(String selectedDecicionSismografo) {
+        setSelectedDecicionSismografo(selectedDecicionSismografo);
     }
 
     @Override
@@ -314,32 +320,27 @@ public class GestorOrden implements GestorOrdenInterface {
                         pantallaOrden.tomarNumeroOI()
                 );
 
-                String observaciones = null;
+
                 if (this.selectedOrden != null) {
-                    // Proceed with the selected order
-                    pantallaOrden.comunicarFeedbackGestor("Se encontró una orden con el número: " + this.selectedOrden.numeroOrden);
-                    observaciones = pantallaOrden.solicitarObservaciones();
-                    while (observaciones == "") {
-                        pantallaOrden.comunicarFeedbackGestor("Es obligatorio ingresar observaciones para cerrar la orden de inspeccion");
-                        observaciones = pantallaOrden.solicitarObservaciones();
-                    }
-                    pantallaOrden.comunicarFeedbackGestor("He recibido las observaciones: " + observaciones);
+                    this.tomarDatosObservacion(
+                    pantallaOrden.solicitarObservacion()
+                    );
                 } else {
                     pantallaOrden.comunicarFeedbackGestor("No se encontró ninguna orden con el número ingresado.");
                     pantallaOrden.comunicarFeedbackGestor("será redirigido al menu principal");
                     pantallaOrden.mostrarOpciones();
                 }
 
-                String selectedDecicion = String.valueOf(pantallaOrden.confirmarActualizacionSituacion());
-                while (!selectedDecicion.equals("1") && !selectedDecicion.equals("0")) {
-                    selectedDecicion = String.valueOf(pantallaOrden.confirmarActualizacionSituacion());
-                }
+                this.tomarSeleccionDecicionSismografo(
+                        pantallaOrden.confirmarActualizacionSituacionSismografo()
+                        );
+
 
 
                 List<MotivoFueraServicio> motivosFueraServicio = new ArrayList<>();
 
                 // selectedDecicion refiere a la decisión del usuario respecto a actualizar la situación del sismografo
-                if (selectedDecicion.equals("1")) {
+                if (selectedDecicionSismografo.equals("1")) {
                     String motSelected = "";
                     while (!motSelected.equals("0")) {
                         pantallaOrden.comunicarFeedbackGestorLeve("Tipos de motivo: ");
