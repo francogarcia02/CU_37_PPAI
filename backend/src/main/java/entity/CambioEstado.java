@@ -26,7 +26,7 @@ public class CambioEstado {
     }
 
     public Boolean esFinalizado() {
-        Boolean result = "finalizada".equals(this.getEstadoNuevo().getNombre());
+        Boolean result = estadoNuevo.esFinalizado();
         return result;
     }
 }

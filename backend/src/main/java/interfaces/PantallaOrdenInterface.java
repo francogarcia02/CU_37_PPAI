@@ -1,15 +1,17 @@
 package interfaces;
 
-public interface PantallaOrdenInterface {
-    public void OpCerrarOrden();
-    public void habilitarVentanaCierre();
-    public void mostrarOpciones();
+import control.GestorOrden;
+import entity.TipoMotivo;
 
+import java.util.List;
+
+public interface PantallaOrdenInterface {
+    public void mostrarOpciones();
+    public void informarGestorSelectedOption();
     public String leerEntradaUsuario();
     public int numericInput(String mensaje, String mensajeError);
     public Long numericInputLong(String mensaje, String mensajeError);
-    public void imprimirOndasSismicas(String mensaje);
-    public void esperarAnimado(int milisegundos);
+
 
     public void mostrarOI(String ordenInspeccionString);
     public Long tomarNumeroOI();
@@ -17,12 +19,14 @@ public interface PantallaOrdenInterface {
     public String tomarObservación();
     public String confirmarActualizacionSituacionSismografo();
     public String tomarConfirmaciónActuSitSismog();
-    public int SolicitarMFS();
+    public void mostrarMFS(List<String> tipoMotivos);
+    public String  SolicitarMFS();
     public void tomarMFS();
     public void solicitarComentario();
-    public void pedirComentario();
+    public void tomarComentario();
     public Boolean solicitarConfirmacionCierreOI();
     public void tomarConfirmación();
 
-
+    public void imprimirOndasSismicas(String mensaje);
+    public void esperarAnimado(int milisegundos);
 }

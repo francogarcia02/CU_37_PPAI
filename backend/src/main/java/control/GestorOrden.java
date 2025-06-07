@@ -32,12 +32,21 @@ public class GestorOrden implements GestorOrdenInterface {
     private String observaciones;
     private List<Empleado> empleados;
     private List<TipoMotivo> tiposMotivos;
+    private List<MotivoFueraServicio> motivosFueraServicioSelection = new ArrayList<>();
     private List<Estado> estados;
-
+    private Boolean confirmacionCierre;
     private List<OrdenInspeccion> ordenesInspeccionFiltradas = new ArrayList<>();
     private List<String> mailsResponsablesReparaciones = new ArrayList<>();
     private PantallaOrden pantallaOrden;
     private Sesion sesion;
+
+    public GestorOrden(List<OrdenInspeccion> ordenesInspeccion, List<Empleado> empleados, List<TipoMotivo> tiposMotivos, List<Estado> estados, Sesion sesion) {
+        this.ordenesInspeccion = ordenesInspeccion;
+        this.empleados = empleados;
+        this.tiposMotivos = tiposMotivos;
+        this.estados = estados;
+        this.sesion = sesion;
+    }
 
     // Todos estos metodos "Recibir" son para que el gestor conozca las clases necesarias
 
@@ -56,10 +65,6 @@ public class GestorOrden implements GestorOrdenInterface {
         pantallaOrden.comunicarFeedbackGestor("He recibido los estados correctamente");
     }
 
-    public void RecibirTipoMotivos(List<TipoMotivo> tipoMotivos) {
-        this.tiposMotivos = tipoMotivos;
-        pantallaOrden.comunicarFeedbackGestor("He recibido los tipos de motivo correctamente");
-    }
 
     public void RecibirSesion(Sesion sesion) {
         this.sesion = sesion;
@@ -71,16 +76,9 @@ public class GestorOrden implements GestorOrdenInterface {
         pantallaOrden.comunicarFeedbackGestor("He recibido los Empleados correctamente");
     }
 
-    public void RecibirselectedOption(String selectedOption) {
+    public void RecibirSelectedOption(String selectedOption) {
         this.selectedOption = selectedOption;
         pantallaOrden.comunicarFeedbackGestor("He recibido la opción seleccionada correctamente");
-        mainProcess();
-    }
-
-
-    @Override
-    public void registrarCierre() {
-    selectedOption = "1";
     }
 
     @Override
@@ -100,8 +98,9 @@ public class GestorOrden implements GestorOrdenInterface {
         // y si está asignada al RI, y si es asi, se agrega a la lista de
         // ordenesInspeccionFiltradas y se muestra en la pantalla
         ordenesInspeccion.forEach(ordenInspeccion -> {
-            Boolean condition1 = ordenInspeccion.estaRealizada();
+            Boolean condition1 = ordenInspeccion.estaFinalizada();
             Boolean condition2 = ordenInspeccion.esTuRI(RI);
+
             if (condition1 && condition2) {
                 ordenesInspeccionFiltradas.add(ordenInspeccion);
             }
@@ -185,8 +184,52 @@ public class GestorOrden implements GestorOrdenInterface {
     }
 
     @Override
-    public List<MotivoFueraServicio> buscarMFS() {
-        return List.of();
+    public void manageSismografoFS() {
+        String motSelected = "";
+        while (!motSelected.equals("0")) {
+            pantallaOrden.comunicarFeedbackGestorLeve("Tipos de motivo: ");
+            pantallaOrden.mostrarMFS(
+                    this.stringificarMFS()
+            );
+            motSelected = pantallaOrden.SolicitarMFS();
+            if (motSelected.equals("0")) {
+                break;
+            }
+            // Ajustar el índice (restar 1 porque mostramos desde 1)
+            int index = Integer.parseInt(motSelected) - 1;
+
+            try {
+                if (index >= 0 && index < this.getTiposMotivos().size()) {
+                    TipoMotivo motivoSeleccionado = this.getTiposMotivos().get(index);
+                    pantallaOrden.comunicarFeedbackGestorLeve("Seleccionaste: " + motivoSeleccionado.getDescripcion());
+                    String comentario = pantallaOrden.solicitarMotivoComentario();
+                    this.getMotivosFueraServicioSelection().add(new MotivoFueraServicio(comentario, motivoSeleccionado));
+                } else {
+                    pantallaOrden.comunicarFeedbackGestor("Número fuera de rango.");
+                }
+            } catch (NumberFormatException e) {
+                pantallaOrden.comunicarFeedbackGestor("Entrada inválida. Ingrese un número o '0' para salir.");
+            }
+
+            this.getSelectedOrden()
+                    .enviarSismografoAReparar(
+                            this.getEstados().get(8)
+                    );
+
+        }
+    }
+
+
+    @Override
+    public List<String> stringificarMFS() {
+        List<String> stringifiedMFS = new ArrayList<>();
+
+        for (int i = 0; i < this.getTiposMotivos().size(); i++) {
+            TipoMotivo tipoMotivo = this.getTiposMotivos().get(i);
+            String descripcionConIndice = (i+1) + ": " + tipoMotivo.getDescripcion();
+            stringifiedMFS.add(descripcionConIndice);
+        }
+        return stringifiedMFS;
     }
 
     @Override
@@ -300,120 +343,9 @@ public class GestorOrden implements GestorOrdenInterface {
         return usuarioLogueado;
     }
 
-
-    // este metodo privado se encarga de llevar el proceso de cierre
-    // se llama mainProcess porque es el unico proceso que hay en el sistema,
-    // podría llamarse cierreOIProcess si fuera necesario
-    private void mainProcess() {
-        while (!selectedOption.equals("2")) {
-            if (selectedOption.equals("1")) {
-                // busca el empleado asociado a la sesion
-
-                this.buscarEmpleado();
-                pantallaOrden.comunicarFeedbackGestorLeve("Listado de Ordenes Inspeccion para cerrar: ");
-
-                this.buscarOrdenesInspeccion();
-
-                this.pasarToPantallaOIs();
-
-                this.tomarNumeroOI(
-                        pantallaOrden.tomarNumeroOI()
-                );
-
-
-                if (this.selectedOrden != null) {
-                    this.tomarDatosObservacion(
-                    pantallaOrden.solicitarObservacion()
-                    );
-                } else {
-                    pantallaOrden.comunicarFeedbackGestor("No se encontró ninguna orden con el número ingresado.");
-                    pantallaOrden.comunicarFeedbackGestor("será redirigido al menu principal");
-                    pantallaOrden.mostrarOpciones();
-                }
-
-                this.tomarSeleccionDecicionSismografo(
-                        pantallaOrden.confirmarActualizacionSituacionSismografo()
-                        );
-
-
-
-                List<MotivoFueraServicio> motivosFueraServicio = new ArrayList<>();
-
-                // selectedDecicion refiere a la decisión del usuario respecto a actualizar la situación del sismografo
-                if (selectedDecicionSismografo.equals("1")) {
-                    String motSelected = "";
-                    while (!motSelected.equals("0")) {
-                        pantallaOrden.comunicarFeedbackGestorLeve("Tipos de motivo: ");
-                        for (int i = 0; i < tiposMotivos.size(); i++) {
-                            TipoMotivo tipoMotivo = tiposMotivos.get(i);
-                            String descripcionConIndice = (i+1) + ": " + tipoMotivo.getDescripcion();
-                            pantallaOrden.mostrarTipoMotivosFueraServicio(descripcionConIndice);
-                        }
-
-                        motSelected = String.valueOf(pantallaOrden.SolicitarMFS());
-                        System.out.println("usted selecciono como motSelected: " + motSelected);
-
-                        if (motSelected.equals("0")) {
-                            break;
-                        }
-
-                        // Ajustar el índice (restar 1 porque mostramos desde 1)
-                        int index = Integer.parseInt(motSelected) - 1;
-                        System.out.println("el index es: " + index);
-
-                        try {
-                            if (index >= 0 && index < tiposMotivos.size()) {
-                                TipoMotivo motivoSeleccionado = tiposMotivos.get(index);
-                                pantallaOrden.comunicarFeedbackGestorLeve("Seleccionaste: " + motivoSeleccionado.getDescripcion());
-                                String comentario = pantallaOrden.solicitarMotivoComentario();
-                                motivosFueraServicio.add(new MotivoFueraServicio(comentario, motivoSeleccionado));
-                                System.out.println(motivosFueraServicio);
-                            } else {
-                                pantallaOrden.comunicarFeedbackGestor("Número fuera de rango.");
-                            }
-                        } catch (NumberFormatException e) {
-                            pantallaOrden.comunicarFeedbackGestor("Entrada inválida. Ingrese un número o '0' para salir.");
-                        }
-
-                        selectedOrden.enviarSismografoAReparar(estados.get(8));
-
-                    }
-
-                }
-
-                Boolean solicitudConfirmacion = pantallaOrden.solicitarConfirmacionCierre();
-
-
-                if (solicitudConfirmacion && observaciones != null && !motivosFueraServicio.isEmpty()) {
-                    Boolean result = selectedOrden.cerrar(observaciones, motivosFueraServicio, estados.get(13), RI  );
-                    pantallaOrden.mostrarResultadoCierre(result);
-
-                    // notificar RRs via email Y publicar resultados en monitores CCRS
-                    // : La notificación debe incluir la identificación del sismógrafo, el nombre del estado Fuera de Servicio, la fecha y
-                    //hora de registro del nuevo estado, y los motivos y comentarios asociados al cambio.
-                    String mensaje = confeccionarMensaje(selectedOrden);
-                    enviarNotificacionMail(mensaje);
-
-                } else if (solicitudConfirmacion && observaciones != null){
-                    Boolean result = selectedOrden.cerrar(observaciones, motivosFueraServicio, estados.get(13), RI  );
-                    pantallaOrden.mostrarResultadoCierre(result);
-
-                    // notificar RRs via email Y publicar resultados en monitores CCRS
-                    // : La notificación debe incluir la identificación del sismógrafo, el nombre del estado Fuera de Servicio, la fecha y
-                    //hora de registro del nuevo estado, y los motivos y comentarios asociados al cambio.
-                    String mensaje = confeccionarMensaje(selectedOrden);
-                    enviarNotificacionMail(mensaje);
-                };
-
-
-
-            }
-            pantallaOrden.imprimirOndasSismicas("usted está siendo redirigido al menú principal");
-
-            // al finalizar el proceso limpiamos la seleccion
-            selectedOption = "";
-            pantallaOrden.mostrarOpciones();
-        }
+    @Override
+    public void RecibirTipoMotivos(List<TipoMotivo> listaMotivos) {
+        setTiposMotivos(listaMotivos);
     }
 }
 

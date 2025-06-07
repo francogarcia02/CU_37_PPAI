@@ -1,11 +1,13 @@
 package boundary;
 import control.GestorOrden;
 import interfaces.PantallaOrdenInterface;
+import lombok.Data;
 
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
-
+@Data
 public class PantallaOrden implements PantallaOrdenInterface {
     // Códigos ANSI para colores y efectos
     private static final String RESET = "\033[0m";
@@ -19,7 +21,8 @@ public class PantallaOrden implements PantallaOrdenInterface {
     private static final String RED = "\033[91m";
     private static final String WHITE = "\033[97m";
 
-    private final GestorOrden gestorOrden;
+    public String selectedOption;
+    private GestorOrden gestorOrden;
 
     public PantallaOrden(GestorOrden gestorOrden) {
         this.gestorOrden = gestorOrden;
@@ -107,6 +110,28 @@ public class PantallaOrden implements PantallaOrdenInterface {
 
     //metodo para mostrar las opciones
     public void mostrarOpciones() {
+        System.out.println();
+        System.out.println(BLUE + BOLD + "╔════════════════════════════════════════════════════════════════════╗" + RESET);
+        System.out.println(BLUE + BOLD + "║" + RESET + "                                                                    " + BLUE + BOLD + "║" + RESET);
+        System.out.println(BLUE + BOLD + "║" + RESET + "     " + RED + BOLD + "   🌍 SISTEMA DE RED SÍSMICA - CCRS 🌍" + RESET + "                     " + BLUE + BOLD + "    ║" + RESET);
+        System.out.println(BLUE + BOLD + "║" + RESET + "                                                                    " + BLUE + BOLD + "║" + RESET);
+        System.out.println(BLUE + BOLD + "║" + RESET + "          " + CYAN + BOLD + "Universidad Tecnológica Nacional" + RESET + "                 " + BLUE + BOLD + "         ║" + RESET);
+        System.out.println(BLUE + BOLD + "║" + RESET + "              " + CYAN + "Facultad Regional Córdoba" + RESET + "                      " + BLUE + BOLD + "       ║" + RESET);
+        System.out.println(BLUE + BOLD + "║" + RESET + "                                                                    " + BLUE + BOLD + "║" + RESET);
+        System.out.println(BLUE + BOLD + "╚════════════════════════════════════════════════════════════════════╝" + RESET);
+
+        // Banner principal de bienvenida
+        System.out.println();
+        System.out.println(RED + BOLD + "═════════════════════════════════════════════════════════════════════" + RESET);
+        System.out.println();
+        System.out.println(WHITE + BOLD + "    🚨 BIENVENIDO AL SISTEMA DE RED SÍSMICA DE LA CCRS" + RESET);
+        System.out.println();
+        System.out.println(CYAN + "       Software desarrollado en la UTN Facultad Regional Córdoba" + RESET);
+        System.out.println(DIM + "         Sistema de monitoreo sísmico en tiempo real" + RESET);
+        System.out.println(DIM + "           Detección y análisis de actividad sísmica" + RESET);
+        System.out.println();
+        System.out.println(RED + BOLD + "═════════════════════════════════════════════════════════════════════" + RESET);
+
         // Título de opciones
         System.out.println(YELLOW + BOLD + "⚡ OPCIONES DISPONIBLES:" + RESET);
         System.out.println();
@@ -131,19 +156,24 @@ public class PantallaOrden implements PantallaOrdenInterface {
         System.out.println();
         System.out.print(BLUE + BOLD + "└─> " + RESET + WHITE + BOLD);
 
-        String selectedOption = leerEntradaUsuario();
+        String tempSelectedOption = leerEntradaUsuario();
 
-        if (selectedOption.equals("1") || selectedOption.equals("2")) {
-            informarGestorSelectedOption(selectedOption);
+        if (tempSelectedOption.equals("1") || tempSelectedOption.equals("2")) {
+            setSelectedOption(tempSelectedOption);
         } else {
             System.out.println("Opcion no valida, intente de nuevo.");
-            mostrarOpciones();
+            while (!tempSelectedOption.equals("1") && !tempSelectedOption.equals("2")) {
+                tempSelectedOption = leerEntradaUsuario();
+            }
+            setSelectedOption(tempSelectedOption);
         }
+
+        this.informarGestorSelectedOption();
     }
 
     //metodo para informar al gestor la opcion seleccionada
-    public void informarGestorSelectedOption(String selectedOption) {
-        gestorOrden.RecibirselectedOption(selectedOption);
+    public void informarGestorSelectedOption() {
+        gestorOrden.RecibirSelectedOption(selectedOption);
     }
 
     public String solicitarObservaciones() {
@@ -179,32 +209,6 @@ public class PantallaOrden implements PantallaOrdenInterface {
         System.out.println();
     }
 
-    // punto de entrada para el usuario al programa
-    public void mainProcess() {
-        System.out.println();
-        System.out.println(BLUE + BOLD + "╔════════════════════════════════════════════════════════════════════╗" + RESET);
-        System.out.println(BLUE + BOLD + "║" + RESET + "                                                                    " + BLUE + BOLD + "║" + RESET);
-        System.out.println(BLUE + BOLD + "║" + RESET + "     " + RED + BOLD + "   🌍 SISTEMA DE RED SÍSMICA - CCRS 🌍" + RESET + "                     " + BLUE + BOLD + "    ║" + RESET);
-        System.out.println(BLUE + BOLD + "║" + RESET + "                                                                    " + BLUE + BOLD + "║" + RESET);
-        System.out.println(BLUE + BOLD + "║" + RESET + "          " + CYAN + BOLD + "Universidad Tecnológica Nacional" + RESET + "                 " + BLUE + BOLD + "         ║" + RESET);
-        System.out.println(BLUE + BOLD + "║" + RESET + "              " + CYAN + "Facultad Regional Córdoba" + RESET + "                      " + BLUE + BOLD + "       ║" + RESET);
-        System.out.println(BLUE + BOLD + "║" + RESET + "                                                                    " + BLUE + BOLD + "║" + RESET);
-        System.out.println(BLUE + BOLD + "╚════════════════════════════════════════════════════════════════════╝" + RESET);
-
-        // Banner principal de bienvenida
-        System.out.println();
-        System.out.println(RED + BOLD + "═════════════════════════════════════════════════════════════════════" + RESET);
-        System.out.println();
-        System.out.println(WHITE + BOLD + "    🚨 BIENVENIDO AL SISTEMA DE RED SÍSMICA DE LA CCRS" + RESET);
-        System.out.println();
-        System.out.println(CYAN + "       Software desarrollado en la UTN Facultad Regional Córdoba" + RESET);
-        System.out.println(DIM + "         Sistema de monitoreo sísmico en tiempo real" + RESET);
-        System.out.println(DIM + "           Detección y análisis de actividad sísmica" + RESET);
-        System.out.println();
-        System.out.println(RED + BOLD + "═════════════════════════════════════════════════════════════════════" + RESET);
-        mostrarOpciones();
-
-    }
 
     public void mostrarOI(String ordenInspeccionString) {
 
@@ -247,9 +251,9 @@ public class PantallaOrden implements PantallaOrdenInterface {
     }
 
 
-    public int SolicitarMFS() {
-        return numericInput("Seleccione un motivo (0 para salir):",
-                "Por favor ingrese un número válido o 0 para salir");
+    public String SolicitarMFS() {
+        return String.valueOf(numericInput("Seleccione un motivo (0 para salir):",
+                "Por favor ingrese un número válido o 0 para salir"));
     }
 
     @Override
@@ -263,7 +267,7 @@ public class PantallaOrden implements PantallaOrdenInterface {
     }
 
     @Override
-    public void pedirComentario() {
+    public void tomarComentario() {
 
     }
 
@@ -281,6 +285,11 @@ public class PantallaOrden implements PantallaOrdenInterface {
     public String tomarConfirmaciónActuSitSismog() {
         return String.valueOf(numericInput("¿Desea cambiar la situación del sismógrafo de la estación? (1: Si, 0: No)",
                 "Por favor ingrese 1 para Sí o 0 para No"));
+    }
+
+    @Override
+    public void mostrarMFS(List<String> tipoMotivos) {
+        tipoMotivos.stream().forEach(System.out::println);
     }
 
     public String confirmarActualizacionSituacionSismografo(){
@@ -307,12 +316,5 @@ public class PantallaOrden implements PantallaOrdenInterface {
         return respuesta == 1;
     }
 
-    @Override
-    public void OpCerrarOrden() {
 
-    }
-
-    public void habilitarVentanaCierre() {
-        mainProcess();
-    }
 }

@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface GestorOrdenInterface {
-    public void registrarCierre();
+    public void RecibirSelectedOption(String selectedOption);
 
     public Empleado buscarEmpleado();
 
@@ -22,8 +22,8 @@ public interface GestorOrdenInterface {
     public void tomarDatosObservacion(String observacion);
 
     public void  tomarSeleccionDecicionSismografo(String selectedDecicionSismografo);
-    public List<MotivoFueraServicio> buscarMFS();
-
+    public void manageSismografoFS();
+    public List<String> stringificarMFS();
     public void tomarMFS();
 
     public void tomarComentario();
@@ -52,4 +52,6 @@ public interface GestorOrdenInterface {
     // nuevos metodos, cargarlos en el diagrama de clases
 
     public Usuario obtenerUsuarioLogueado();
+
+    public void RecibirTipoMotivos(List<TipoMotivo> listaMotivos);
 }

@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface OrdenInspeccionInterface {
     public Boolean esTuRI(Empleado empleado);
-    public Boolean estaRealizada();
+    public Boolean estaFinalizada();
     public Boolean cerrar(String observacion, List<MotivoFueraServicio> motivosNuevos, Estado estadoCerrada, Empleado responsableEjecucion);
     public void realizar();
     public void confirmarPte();

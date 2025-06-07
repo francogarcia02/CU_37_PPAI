@@ -45,13 +45,10 @@ public class OrdenInspeccion implements OrdenInspeccionInterface {
         return responsableOrdenInspeccion.equals(empleado);
     }
 
-    public Boolean estaRealizada() {
-        return cambiosEstados.stream()
-            .filter(cambio -> cambio.getFechaHorafin() == null)  // Find current state (no end date)
-            .findFirst()  // Get the first (debería ser el unico)
-            .map(cambioActual -> cambioActual.esFinalizado())
-            .orElse(false);  // Return false if no current state is found
-    }
+public Boolean estaFinalizada() {
+    CambioEstado estadoActual = this.obtenerCambioEstadoActual();
+    return estadoActual != null && estadoActual.getEstadoNuevo().getNombre().equals("finalizada");
+}
 
     @Override
     public Boolean cerrar(String observacion, List<MotivoFueraServicio> motivosNuevos, Estado estadoCerrada, Empleado responsableEjecucion) {
@@ -142,12 +139,14 @@ public class OrdenInspeccion implements OrdenInspeccionInterface {
         return String.format(
                 "\033[95m____________________________________________________________________________%n\033[0m" +
                 "\033[92mNúmero de Orden:\033[0m %d%n" +
+                        "\033[92mEstado:\033[0m %s%n" +
                         "\033[92mFecha de Finalización:\033[0m %s%n" +
                         "\033[92mEstación Sismológica:\033[0m %s%n" +
                         "\033[92mSismógrafo:\033[0m %s%n" +
                 "\033[95m____________________________________________________________________________%n\033[0m"
                 ,
                 numeroOrden,
+                this.obtenerCambioEstadoActual().estadoNuevo.getNombre(),
                 fechaFin,
                 estacionSismologica.getNombreEstacion(),
                 estacionSismologica.getSismografo().getIdSismografo()

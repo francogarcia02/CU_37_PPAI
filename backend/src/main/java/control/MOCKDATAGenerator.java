@@ -54,20 +54,20 @@ public class MOCKDATAGenerator {
 
     public List<Estado> generarEstados() {
         return List.of(
-                new Estado("SISMOGRAFO", "pteCertificacion"),
-                new Estado("SISMOGRAFO", "Disponible"),
-                new Estado("SISMOGRAFO", "enInstalacion"),
-                new Estado("SISMOGRAFO", "enRevicion"),
-                new Estado("SISMOGRAFO", "Descartado"),
-                new Estado("SISMOGRAFO", "enReparacion"),
-                new Estado("SISMOGRAFO", "enLinea"),
-                new Estado("SISMOGRAFO", "Inhabilitado"),
-                new Estado("SISMOGRAFO", "fueraServicio"),
-                new Estado("ORDEN_INSPECCION", "pteRealizacion"),
-                new Estado("ORDEN_INSPECCION", "parcialmenteRealizada"),
-                new Estado("ORDEN_INSPECCION", "realizada"),
-                new Estado("ORDEN_INSPECCION", "finalizada"),
-                new Estado("ORDEN_INSPECCION", "cierreDefinitivo"));
+                new Estado("SISMOGRAFO", "pteCertificacion"), // 0
+                new Estado("SISMOGRAFO", "Disponible"), // 1
+                new Estado("SISMOGRAFO", "enInstalacion"), // 2
+                new Estado("SISMOGRAFO", "enRevicion"), // 3
+                new Estado("SISMOGRAFO", "Descartado"), // 4
+                new Estado("SISMOGRAFO", "enReparacion"), // 5
+                new Estado("SISMOGRAFO", "enLinea"), // 6
+                new Estado("SISMOGRAFO", "Inhabilitado"), // 7
+                new Estado("SISMOGRAFO", "fueraServicio"), // 8
+                new Estado("ORDEN_INSPECCION", "pteRealizacion"), // 9
+                new Estado("ORDEN_INSPECCION", "parcialmenteRealizada"), // 10
+                new Estado("ORDEN_INSPECCION", "realizada"), // 11
+                new Estado("ORDEN_INSPECCION", "finalizada"), // 12
+                new Estado("ORDEN_INSPECCION", "cierreDefinitivo")); //13
     }
 
     public EstacionSismologica generarEstacionSismologica(int i) {
