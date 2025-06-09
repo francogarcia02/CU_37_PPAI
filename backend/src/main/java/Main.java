@@ -76,18 +76,28 @@ public class Main {
                 gestorOrden.manageSismografoFS();
             }
 
-            gestorOrden.setConfirmacionCierre(
-                    pantallaOrden.solicitarConfirmacionCierre()
+            gestorOrden.tomarConfirmacioncierreOI(
+                    pantallaOrden.solicitarConfirmacionCierreOI()
             );
 
 
 
             if (gestorOrden.getConfirmacionCierre() && gestorOrden.getObservaciones() != null){
+                gestorOrden.buscarEstadoFS();
+                gestorOrden.buscarEstadoCerradoOI();
+
                 Boolean result = gestorOrden.getSelectedOrden().cerrar(
                         gestorOrden.getObservaciones(),
                         gestorOrden.getMotivosFueraServicioSelection(),
                         gestorOrden.getEstados().get(13),
                         gestorOrden.getRI());
+
+                if (!gestorOrden.getMotivosFueraServicioSelection().isEmpty()){
+                    gestorOrden.getSelectedOrden()
+                            .enviarSismografoAReparar(
+                                    gestorOrden.getEstadoFS()
+                            );
+                }
 
                 pantallaOrden.mostrarResultadoCierre(result);
 

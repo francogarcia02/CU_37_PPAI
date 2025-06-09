@@ -1,8 +1,5 @@
 package interfaces;
 
-import control.GestorOrden;
-import entity.TipoMotivo;
-
 import java.util.List;
 
 public interface PantallaOrdenInterface {
@@ -21,12 +18,11 @@ public interface PantallaOrdenInterface {
     public String tomarConfirmaciónActuSitSismog();
     public void mostrarMFS(List<String> tipoMotivos);
     public String  SolicitarMFS();
-    public void tomarMFS();
-    public void solicitarComentario();
-    public void tomarComentario();
+    public void tomarMFS(String SelectedMFS);
+    public String solicitarMotivoComentario();
+    public void tomarComentario(String inputComentrarioFS);
     public Boolean solicitarConfirmacionCierreOI();
-    public void tomarConfirmación();
-
+    public int tomarConfirmaciónCierreOI();
     public void imprimirOndasSismicas(String mensaje);
     public void esperarAnimado(int milisegundos);
 }

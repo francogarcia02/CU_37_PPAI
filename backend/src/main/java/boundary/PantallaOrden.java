@@ -22,6 +22,8 @@ public class PantallaOrden implements PantallaOrdenInterface {
     private static final String WHITE = "\033[97m";
 
     public String selectedOption;
+    public String selectedMFS = "";
+    public String inputComentrarioFS;
     private GestorOrden gestorOrden;
 
     public PantallaOrden(GestorOrden gestorOrden) {
@@ -257,28 +259,26 @@ public class PantallaOrden implements PantallaOrdenInterface {
     }
 
     @Override
-    public void tomarMFS() {
+    public void tomarMFS(String SelectedMFS) {
+       setSelectedMFS(SelectedMFS);
+    }
 
+
+    @Override
+    public void tomarComentario(String inputComentrarioFS) {
+        setInputComentrarioFS(inputComentrarioFS);
     }
 
     @Override
-    public void solicitarComentario() {
-
+    public Boolean solicitarConfirmacionCierreOI(){
+        int respuesta = tomarConfirmaciónCierreOI();
+        return respuesta == 1;
     }
 
     @Override
-    public void tomarComentario() {
-
-    }
-
-    @Override
-    public Boolean solicitarConfirmacionCierreOI() {
-        return null;
-    }
-
-    @Override
-    public void tomarConfirmación() {
-
+    public int tomarConfirmaciónCierreOI() {
+        return numericInput("¿Desea confirmar el cierre de la OI? (1:Si, 0:No)",
+                "Por favor ingrese 1 para Sí o 0 para No");
     }
 
     @Override
@@ -310,11 +310,7 @@ public class PantallaOrden implements PantallaOrdenInterface {
         }
     }
 
-    public Boolean solicitarConfirmacionCierre(){
-        int respuesta = numericInput("¿Desea confirmar el cierre de la OI? (1:Si, 0:No)", 
-                                   "Por favor ingrese 1 para Sí o 0 para No");
-        return respuesta == 1;
-    }
+
 
 
 }

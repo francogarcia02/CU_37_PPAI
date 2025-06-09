@@ -33,7 +33,11 @@ public class GestorOrden implements GestorOrdenInterface {
     private List<Empleado> empleados;
     private List<TipoMotivo> tiposMotivos;
     private List<MotivoFueraServicio> motivosFueraServicioSelection = new ArrayList<>();
+    public int selectedTempMFSIndex;
+    public String inputTempComentrarioFS;
     private List<Estado> estados;
+    private Estado EstadoFS;
+    private Estado EstadoCerrada;
     private Boolean confirmacionCierre;
     private List<OrdenInspeccion> ordenesInspeccionFiltradas = new ArrayList<>();
     private List<String> mailsResponsablesReparaciones = new ArrayList<>();
@@ -185,36 +189,40 @@ public class GestorOrden implements GestorOrdenInterface {
 
     @Override
     public void manageSismografoFS() {
-        String motSelected = "";
-        while (!motSelected.equals("0")) {
+
+        while (!pantallaOrden.getSelectedMFS().equals("0")) {
             pantallaOrden.comunicarFeedbackGestorLeve("Tipos de motivo: ");
+
             pantallaOrden.mostrarMFS(
                     this.stringificarMFS()
             );
-            motSelected = pantallaOrden.SolicitarMFS();
-            if (motSelected.equals("0")) {
+
+            pantallaOrden.tomarMFS(
+                    pantallaOrden.SolicitarMFS()
+            );
+
+            if (pantallaOrden.getSelectedMFS().equals("0")) {
                 break;
             }
-            // Ajustar el índice (restar 1 porque mostramos desde 1)
-            int index = Integer.parseInt(motSelected) - 1;
 
-            try {
-                if (index >= 0 && index < this.getTiposMotivos().size()) {
-                    TipoMotivo motivoSeleccionado = this.getTiposMotivos().get(index);
-                    pantallaOrden.comunicarFeedbackGestorLeve("Seleccionaste: " + motivoSeleccionado.getDescripcion());
-                    String comentario = pantallaOrden.solicitarMotivoComentario();
-                    this.getMotivosFueraServicioSelection().add(new MotivoFueraServicio(comentario, motivoSeleccionado));
-                } else {
-                    pantallaOrden.comunicarFeedbackGestor("Número fuera de rango.");
-                }
-            } catch (NumberFormatException e) {
-                pantallaOrden.comunicarFeedbackGestor("Entrada inválida. Ingrese un número o '0' para salir.");
+            // Ajustar el índice (restar 1 porque mostramos desde 1)
+            this.setSelectedTempMFSIndex(
+                    Integer.parseInt(pantallaOrden.getSelectedMFS()) - 1
+            );
+
+            if (validarMotivo()) {
+                TipoMotivo motivoSeleccionado = this.getTiposMotivos().get(selectedTempMFSIndex);
+                pantallaOrden.comunicarFeedbackGestorLeve("Seleccionaste: " + motivoSeleccionado.getDescripcion());
+                pantallaOrden.tomarComentario(
+                        pantallaOrden.solicitarMotivoComentario()
+                );
+                this.tomarMFSyComentario(motivoSeleccionado,pantallaOrden.getInputComentrarioFS());
+            } else {
+                pantallaOrden.comunicarFeedbackGestor("Número fuera de rango.");
             }
 
-            this.getSelectedOrden()
-                    .enviarSismografoAReparar(
-                            this.getEstados().get(8)
-                    );
+
+
 
         }
     }
@@ -233,29 +241,47 @@ public class GestorOrden implements GestorOrdenInterface {
     }
 
     @Override
-    public void tomarMFS() {
+    public void tomarMFSyComentario(TipoMotivo motivoSeleccionado, String comentario) {
+        this.getMotivosFueraServicioSelection().add(new MotivoFueraServicio(comentario, motivoSeleccionado));
 
     }
 
     @Override
-    public void tomarComentario() {
+    public void tomarConfirmacioncierreOI(Boolean input) {
+        setConfirmacionCierre(input);
+    }
+
+
+    @Override
+    public void buscarEstadoFS() {
+        estados.stream().forEach(estado -> {
+            if (estado.esAmbitoSismografo() && estado.esFueraDeServicio()) {
+                this.setEstadoFS(estado);
+            }
+        });
 
     }
 
     @Override
-    public void buscarEstadosFS() {
+    public void  buscarEstadoCerradoOI() {
+        estados.stream().forEach(estado -> {
+            if (estado.esAmbitoOrdendeInspeccion() && estado.esCerrada()) {
+                this.setEstadoCerrada(estado);
+            }
+        });
 
     }
 
     @Override
     public Boolean validarMotivo() {
-        return null;
+        if (selectedTempMFSIndex >= 0 && selectedTempMFSIndex < this.getTiposMotivos().size()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    @Override
-    public Estado buscarEstadoOrdenInspección(OrdenInspeccion ordenInspeccion) {
-        return null;
-    }
+
 
     @Override
     public LocalDateTime getFechaHoraActual() {
@@ -309,7 +335,6 @@ public class GestorOrden implements GestorOrdenInterface {
         String mensaje = "";
         mensaje = "Estimado(a) responsable de reparaciones" + ",\n\n"
                 + "La Orden de Inspeccion " + selectedOrden.getNumeroOrden() + " ha sido cerrada. \n\n"
-
                 + "Detalles:\n"
                 + "Estación Sismológica: " + selectedOrden.getEstacionSismologica().getNombreEstacion() + "\n"
                 + "Responsable de la Orden: " + selectedOrden.getResponsableOrdenInspeccion().getNombreEmpleado() + "\n"
