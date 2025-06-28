@@ -43,6 +43,8 @@ public class GestorOrden implements GestorOrdenInterface {
     private List<String> mailsResponsablesReparaciones = new ArrayList<>();
     private PantallaOrden pantallaOrden;
     private Sesion sesion;
+    private Empleado empleadoLogueado;
+    private List<TipoMotivo> motivosFueraServicio;
 
     public GestorOrden(List<OrdenInspeccion> ordenesInspeccion, List<Empleado> empleados, List<TipoMotivo> tiposMotivos, List<Estado> estados, Sesion sesion) {
         this.ordenesInspeccion = ordenesInspeccion;
@@ -72,6 +74,7 @@ public class GestorOrden implements GestorOrdenInterface {
 
     public void RecibirSesion(Sesion sesion) {
         this.sesion = sesion;
+        this.empleadoLogueado = sesion.getUsuario().getEmpleado();
         pantallaOrden.comunicarFeedbackGestor("He recibido la Sesion correctamente");
     }
 
@@ -212,6 +215,7 @@ public class GestorOrden implements GestorOrdenInterface {
 
             if (validarMotivo()) {
                 TipoMotivo motivoSeleccionado = this.getTiposMotivos().get(selectedTempMFSIndex);
+                motivosFueraServicio.add(motivoSeleccionado);
                 pantallaOrden.comunicarFeedbackGestorLeve("Seleccionaste: " + motivoSeleccionado.getDescripcion());
                 pantallaOrden.tomarComentario(
                         pantallaOrden.solicitarMotivoComentario()
@@ -220,10 +224,6 @@ public class GestorOrden implements GestorOrdenInterface {
             } else {
                 pantallaOrden.comunicarFeedbackGestor("Número fuera de rango.");
             }
-
-
-
-
         }
     }
 
@@ -339,7 +339,7 @@ public class GestorOrden implements GestorOrdenInterface {
                 + "Estación Sismológica: " + selectedOrden.getEstacionSismologica().getNombreEstacion() + "\n"
                 + "Responsable de la Orden: " + selectedOrden.getResponsableOrdenInspeccion().getNombreEmpleado() + "\n"
                 + "ID sismografo: " + selectedOrden.getEstacionSismologica().getSismografo().getIdSismografo() + "\n\n"
-                + "Estado actual del sismografo: " + selectedOrden.getEstacionSismologica().getSismografo().getEstado().getNombre() + "\n"
+                + "Estado actual del sismografo: " + selectedOrden.getEstacionSismologica().getSismografo().getEstadoActual().getNombre() + "\n"
                 + "fecha y hora nuevo estado: " + selectedOrden.obtenerCambioEstadoActual().getFechaHorainicio() + "\n"
                 + "Motivos:\n" + (
 

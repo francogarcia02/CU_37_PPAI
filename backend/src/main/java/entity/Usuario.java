@@ -21,6 +21,5 @@ public class Usuario {
         } else {
             return false;
         }
-
     }
 }

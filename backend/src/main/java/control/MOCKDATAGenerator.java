@@ -73,12 +73,12 @@ public class MOCKDATAGenerator {
     public EstacionSismologica generarEstacionSismologica(int i) {
 
         // la estacion sismologica de ejemplo 1
-        if  (i == 1) {Sismografo sismografo = new Sismografo(contadorSismografo, "ZETLAB", "Modelo 1", new Estado("Sismografo", "enLinea"));
-            return new EstacionSismologica("Estación Córdoba", sismografo);}
+        if  (i == 1) {Sismografo sismografo = new Sismografo(contadorSismografo, "12-12-2024", 12,"ZETLAB", "Modelo 1", new Estado("Sismografo", "enLinea"));
+            return new EstacionSismologica(1 ,"Estación Córdoba",10, 20, 5, "20-12-2024", "Documentacion", sismografo);}
 
         // la estacion sismologica de ejemplo 1
-        if  (i == 2) {Sismografo sismografo = new Sismografo(registrarCreacionSismografo(), "ZETLAB", "Modelo 1", new Estado("Sismografo", "enLinea"));
-            return new EstacionSismologica("Estación Buenos Aires", sismografo);}
+        if  (i == 2) {Sismografo sismografo = new Sismografo(registrarCreacionSismografo(), "12-12-2024", 11,"ZETLAB", "Modelo 1", new Estado("Sismografo", "enLinea"));
+            return new EstacionSismologica(2, "Estación Buenos Aires", 11, 23, 20, "13-03-2023", "Documentacion", sismografo);}
         return null;
     }
     
