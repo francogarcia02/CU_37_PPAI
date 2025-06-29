@@ -44,7 +44,7 @@ public class GestorOrden implements GestorOrdenInterface {
     private PantallaOrden pantallaOrden;
     private Sesion sesion;
     private Empleado empleadoLogueado;
-    private List<TipoMotivo> motivosFueraServicio;
+    private List<TipoMotivo> motivosFueraServicio = new ArrayList<>();
 
     public GestorOrden(List<OrdenInspeccion> ordenesInspeccion, List<Empleado> empleados, List<TipoMotivo> tiposMotivos, List<Estado> estados, Sesion sesion) {
         this.ordenesInspeccion = ordenesInspeccion;
@@ -248,7 +248,11 @@ public class GestorOrden implements GestorOrdenInterface {
 
     @Override
     public void tomarConfirmacioncierreOI(Boolean input) {
-        setConfirmacionCierre(input);
+        if(selectedOrden != null){
+            setConfirmacionCierre(input);
+        } else {
+            pantallaOrden.notificarIOSinSeleccionar();
+        }
     }
 
 

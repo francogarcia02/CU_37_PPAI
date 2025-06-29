@@ -281,6 +281,11 @@ public class PantallaOrden implements PantallaOrdenInterface {
                 "Por favor ingrese 1 para Sí o 0 para No");
     }
 
+    public void notificarIOSinSeleccionar() {
+        System.out.println(YELLOW + "No hay ninguna Orden de inspeccion seleccionada");
+        System.out.println();
+    }
+
     @Override
     public String tomarConfirmaciónActuSitSismog() {
         return String.valueOf(numericInput("¿Desea cambiar la situación del sismógrafo de la estación? (1: Si, 0: No)",
