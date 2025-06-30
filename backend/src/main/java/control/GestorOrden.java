@@ -62,27 +62,6 @@ public class GestorOrden implements GestorOrdenInterface {
         pantallaOrden.comunicarFeedbackGestor("He recibido la pantalla correctamente");
     }
 
-    public void RecibirOrdenesInspeccion(List<OrdenInspeccion> ordenesInspeccion) {
-        this.ordenesInspeccion = ordenesInspeccion;
-        pantallaOrden.comunicarFeedbackGestor("He recibido las Ordenes de Inspeccion correctamente");
-    }
-
-    public void RecibirEstados(List<Estado> estados) {
-        this.estados = estados;
-        pantallaOrden.comunicarFeedbackGestor("He recibido los estados correctamente");
-    }
-
-
-    public void RecibirSesion(Sesion sesion) {
-        this.sesion = sesion;
-        this.empleadoLogueado = sesion.getUsuario().getEmpleado();
-        pantallaOrden.comunicarFeedbackGestor("He recibido la Sesion correctamente");
-    }
-
-    public void RecibirEmpleados(List<Empleado> empleados) {
-        this.empleados = empleados;
-        pantallaOrden.comunicarFeedbackGestor("He recibido los Empleados correctamente");
-    }
 
     public void RecibirSelectedOption(String selectedOption) {
         this.selectedOption = selectedOption;
