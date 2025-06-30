@@ -1,5 +1,6 @@
 package control;
 
+import boundary.InterfazCCRS;
 import boundary.InterfazMail;
 import boundary.PantallaOrden;
 import entity.CambioEstado;
@@ -312,6 +313,8 @@ public class GestorOrden implements GestorOrdenInterface {
 
     @Override
     public void publicarMonitores() {
+        InterfazCCRS interfazCCRS = new InterfazCCRS();
+        interfazCCRS.imprimirMonitores();
         pantallaOrden.comunicarFeedbackGestor("publicación de monitores CCRS completada");
     }
 
