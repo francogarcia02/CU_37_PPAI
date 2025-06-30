@@ -99,6 +99,8 @@ public class Main {
                                 gestorOrden.getSelectedOrden()
                         )
                 );
+
+                gestorOrden.publicarMonitores();
             }
             } else {
                 pantallaOrden.comunicarFeedbackGestor("No se encontró ninguna orden con el número ingresado.");

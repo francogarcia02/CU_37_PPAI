@@ -312,7 +312,7 @@ public class GestorOrden implements GestorOrdenInterface {
 
     @Override
     public void publicarMonitores() {
-
+        pantallaOrden.comunicarFeedbackGestor("publicación de monitores CCRS completada");
     }
 
     @Override
