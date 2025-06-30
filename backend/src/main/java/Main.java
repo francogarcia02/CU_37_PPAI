@@ -102,10 +102,7 @@ public class Main {
 
                 gestorOrden.publicarMonitores();
             }
-            } else {
-                pantallaOrden.comunicarFeedbackGestor("No se encontró ninguna orden con el número ingresado.");
-
-            };
+            }
             pantallaOrden.imprimirOndasSismicas("usted está siendo redirigido al menú principal");
         }
 

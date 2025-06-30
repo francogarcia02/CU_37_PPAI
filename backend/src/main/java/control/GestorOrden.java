@@ -142,6 +142,10 @@ public class GestorOrden implements GestorOrdenInterface {
 
     @Override
     public void tomarNumeroOI(Long selectedOrdenNumero) {
+        selectedOrden = null;
+
+        // ingresó orden ajena o no se encuentra en estado finalizada
+        Boolean error1 = false;
 
         for (OrdenInspeccion ordenInspeccion : ordenesInspeccion) {
             // se aplica patron experto para comparar el nro de la orden de inspeccion ingresado
@@ -152,13 +156,15 @@ public class GestorOrden implements GestorOrdenInterface {
                     selectedOrden = ordenInspeccion;
                 } else {
                     pantallaOrden.comunicarFeedbackGestor("Ingresó una orden de inspeccion que no le pertenece o no se encuentra en estado finalizada");
+                    error1 = true;
                     pantallaOrden.comunicarFeedbackGestor("será redirigido al menu principal");
                 }
-
-
             }
-
         }
+
+        if (selectedOrden == null && !error1) {
+            pantallaOrden.comunicarFeedbackGestor("No se encontró ninguna orden con el número ingresado.");
+        };
 
     }
 
