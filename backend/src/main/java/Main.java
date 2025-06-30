@@ -43,11 +43,11 @@ public class Main {
     gestorOrden.RecibirPantallaOrden(pantallaOrden);
 
     // a partir de acá empieza el programa para el usuario
-    pantallaOrden.mostrarOpciones();
+
     while (!gestorOrden.getSelectedOption().equals("2")) {
+        pantallaOrden.mostrarOpciones();
         if (gestorOrden.getSelectedOption().equals("1")) {
             // busca el empleado asociado a la sesion
-
             gestorOrden.buscarEmpleado();
             pantallaOrden.comunicarFeedbackGestorLeve("Listado de Ordenes Inspeccion para cerrar: ");
             gestorOrden.buscarOrdenesInspeccion();
@@ -56,16 +56,11 @@ public class Main {
                     pantallaOrden.tomarNumeroOI()
             );
 
-
             if (gestorOrden.getSelectedOrden() != null) {
                 gestorOrden.tomarDatosObservacion(
                         pantallaOrden.solicitarObservacion()
                 );
-            } else {
-                pantallaOrden.comunicarFeedbackGestor("No se encontró ninguna orden con el número ingresado.");
-                pantallaOrden.comunicarFeedbackGestor("será redirigido al menu principal");
-                pantallaOrden.mostrarOpciones();
-            }
+
 
             gestorOrden.tomarSeleccionDecicionSismografo(
                     pantallaOrden.confirmarActualizacionSituacionSismografo()
@@ -79,8 +74,6 @@ public class Main {
             gestorOrden.tomarConfirmacioncierreOI(
                     pantallaOrden.solicitarConfirmacionCierreOI()
             );
-
-
 
             if (gestorOrden.getConfirmacionCierre() && gestorOrden.getObservaciones() != null){
                 gestorOrden.buscarEstadoFS();
@@ -106,13 +99,14 @@ public class Main {
                                 gestorOrden.getSelectedOrden()
                         )
                 );
-            };
-        }
-        pantallaOrden.imprimirOndasSismicas("usted está siendo redirigido al menú principal");
+            }
+            } else {
+                pantallaOrden.comunicarFeedbackGestor("No se encontró ninguna orden con el número ingresado.");
 
-        // al finalizar el proceso limpiamos la seleccion
-        gestorOrden.setSelectedOption("");
-        pantallaOrden.mostrarOpciones();
+            };
+            pantallaOrden.imprimirOndasSismicas("usted está siendo redirigido al menú principal");
+        }
+
     }
 }
 }

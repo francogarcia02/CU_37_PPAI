@@ -221,9 +221,6 @@ public class PantallaOrden implements PantallaOrdenInterface {
     @Override
     public Long tomarNumeroOI() {
         Long selectedOrdenNumero = this.numericInputLong("ingrese el numero de la Orden de Inspeccion a cerrar ", "Solo puede ingresar números");
-
-        gestorOrden.tomarNumeroOI(selectedOrdenNumero);
-
         return selectedOrdenNumero;
     }
 

@@ -52,6 +52,7 @@ public class GestorOrden implements GestorOrdenInterface {
         this.tiposMotivos = tiposMotivos;
         this.estados = estados;
         this.sesion = sesion;
+        this.selectedOption = "";
     }
 
     // Todos estos metodos "Recibir" son para que el gestor conozca las clases necesarias
@@ -161,19 +162,20 @@ public class GestorOrden implements GestorOrdenInterface {
 
     @Override
     public void tomarNumeroOI(Long selectedOrdenNumero) {
-        selectedOrden = null;
 
         for (OrdenInspeccion ordenInspeccion : ordenesInspeccion) {
             // se aplica patron experto para comparar el nro de la orden de inspeccion ingresado
             Boolean comparedOI = ordenInspeccion.compareNroOrder(selectedOrdenNumero);
             if (comparedOI) {
-                selectedOrden = ordenInspeccion;
-
-                if (!ordenesInspeccionFiltradas.contains(selectedOrden)) {
+                OrdenInspeccion tempSelectedOrden = ordenInspeccion;
+                if (ordenesInspeccionFiltradas.contains(tempSelectedOrden)) {
+                    selectedOrden = ordenInspeccion;
+                } else {
                     pantallaOrden.comunicarFeedbackGestor("Ingresó una orden de inspeccion que no le pertenece o no se encuentra en estado finalizada");
                     pantallaOrden.comunicarFeedbackGestor("será redirigido al menu principal");
-                    pantallaOrden.mostrarOpciones();
                 }
+
+
             }
 
         }
