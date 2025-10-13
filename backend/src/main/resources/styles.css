@@ -1,0 +1,102 @@
+/* Estilo General para la ventana principal */
+.root {
+    -fx-background-color: #f4f7f9;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* Estilo para los títulos principales y de pasos */
+.label-titulo {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.label-subtitulo {
+    -fx-font-size: 18px;
+    -fx-text-fill: #596978;
+}
+
+/* Estilo para los paneles que contienen los pasos */
+.panel-paso {
+    -fx-background-color: white;
+    -fx-padding: 25px;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
+}
+
+/* Estilos para los botones */
+.button-principal {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+}
+
+.button-principal:hover {
+    -fx-background-color: #2980b9;
+}
+
+.button-agregar {
+    -fx-background-color: #2ecc71;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+}
+
+.button-agregar:hover {
+    -fx-background-color: #27ae60;
+}
+
+.button-confirmar {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+}
+
+.button-confirmar:hover {
+    -fx-background-color: #c0392b;
+}
+
+/* Estilos para ListView, ComboBox y TextArea */
+.list-view, .combo-box, .text-area {
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-focus-color: #3498db;
+    -fx-background-insets: 0; /* Asegura que el fondo no se recorte */
+}
+
+/* Estilo para el contenido INTERNO del TextArea */
+.text-area .content {
+    -fx-background-radius: 8px;
+    -fx-background-color: white;
+    -fx-padding: 5px; /* Añade espacio interno */
+}
+
+/* Estilo para las celdas del ListView */
+.list-view .list-cell {
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-padding: 5px; /* Añade espacio interno */
+}
+
+
+.list-view .list-cell:odd {
+    -fx-background-color: #f8f9fa;
+}
+
+.list-view .list-cell:selected {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}

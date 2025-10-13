@@ -1,111 +1,100 @@
-import boundary.PantallaOrden;
+import boundary.PantallaOrdenController;
 import control.GestorOrden;
 import control.MOCKDATAGenerator;
 import entity.*;
+import javafx.animation.PauseTransition;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.scene.web.WebView;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 
-import java.util.List;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
-public class Main {
-    public static void main(String[] args) {
-    //  MOCKDATAGenerator se encarga de la generación de datos de prueba
-    // como estamos programando solo un Caso de Uso necesitamos generar los datos que se generarian normalmente
-    // en otros CUs como "iniciar sesion" o "cargar órdenes de inspeccion"
-    MOCKDATAGenerator mockDataGenerator = new MOCKDATAGenerator();
-    Empleado empleadoRI = mockDataGenerator.generarEmpleado(1);
-    Usuario usuarioRI = mockDataGenerator.generarUsuario(1);
-    Empleado otroEmpleadoNoRI = mockDataGenerator.generarEmpleado(2);
-    List<Empleado> empleados = List.of(empleadoRI, otroEmpleadoNoRI);
-    // generamos una sesion con el empleado que tiene rol RI, este paso es muy importante
-    Sesion sesion = mockDataGenerator.generarSesion(usuarioRI);
-    EstacionSismologica estacionSismologica1 = mockDataGenerator.generarEstacionSismologica(1);
-    EstacionSismologica estacionSismologica2 = mockDataGenerator.generarEstacionSismologica(2);
-    List<Estado> estados = mockDataGenerator.generarEstados();
-    List<OrdenInspeccion> ordenesInspeccion = new ArrayList<>(mockDataGenerator.generarOrdenesInspeccion(empleadoRI, estacionSismologica1, estados));
-    ordenesInspeccion.addAll(mockDataGenerator.generarOrdenesInspeccion(empleadoRI, estacionSismologica2, estados));
-    List<TipoMotivo> listaMotivos = mockDataGenerator.generarTipoMotivo();
-    // fin de la generación de datos
+public class Main extends Application {
 
+    private Stage primaryStage;
+    private GestorOrden gestorOrden;
 
-    // inicializamos el GestorOrden y la pantallaOrden
-    GestorOrden gestorOrden = new GestorOrden(
-            ordenesInspeccion,
-            empleados,
-            listaMotivos,
-            estados,
-            sesion
-    );
-    PantallaOrden pantallaOrden = new PantallaOrden(
-            gestorOrden
-    );
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        this.primaryStage = primaryStage;
 
-    // proporcionamos al gestor la dependencia con la pantalla
-    gestorOrden.RecibirPantallaOrden(pantallaOrden);
+        // 1. Inicializa toda la lógica de negocio primero
+        inicializarLogicaDeNegocio();
 
-    // a partir de acá empieza el programa para el usuario
-
-    while (!gestorOrden.getSelectedOption().equals("2")) {
-        pantallaOrden.mostrarOpciones();
-        if (gestorOrden.getSelectedOption().equals("1")) {
-            // busca el empleado asociado a la sesion
-            gestorOrden.buscarEmpleado();
-            pantallaOrden.comunicarFeedbackGestorLeve("Listado de Ordenes Inspeccion para cerrar: ");
-            gestorOrden.buscarOrdenesInspeccion();
-            gestorOrden.pasarToPantallaOIs();
-            gestorOrden.tomarNumeroOI(
-                    pantallaOrden.tomarNumeroOI()
-            );
-
-            if (gestorOrden.getSelectedOrden() != null) {
-                gestorOrden.tomarDatosObservacion(
-                        pantallaOrden.solicitarObservacion()
-                );
-
-
-            gestorOrden.tomarSeleccionDecicionSismografo(
-                    pantallaOrden.confirmarActualizacionSituacionSismografo()
-            );
-
-            // selectedDecicion refiere a la decisión del usuario respecto a actualizar la situación del sismografo
-            if (gestorOrden.getSelectedDecicionSismografo().equals("1")) {
-                gestorOrden.manageSismografoFS();
-            }
-
-            gestorOrden.tomarConfirmacioncierreOI(
-                    pantallaOrden.solicitarConfirmacionCierreOI()
-            );
-
-            if (gestorOrden.getConfirmacionCierre() && gestorOrden.getObservaciones() != null){
-                gestorOrden.buscarEstadoFS();
-                gestorOrden.buscarEstadoCerradoOI();
-
-                Boolean result = gestorOrden.getSelectedOrden().cerrar(
-                        gestorOrden.getObservaciones(),
-                        gestorOrden.getMotivosFueraServicioSelection(),
-                        gestorOrden.getEstados().get(13),
-                        gestorOrden.getRI());
-
-                if (!gestorOrden.getMotivosFueraServicioSelection().isEmpty()){
-                    gestorOrden.getSelectedOrden()
-                            .enviarSismografoAReparar(
-                                    gestorOrden.getEstadoFS()
-                            );
-                }
-
-                pantallaOrden.mostrarResultadoCierre(result);
-
-                gestorOrden.enviarNotificacionMail(
-                        gestorOrden.confeccionarMensaje(
-                                gestorOrden.getSelectedOrden()
-                        )
-                );
-
-                gestorOrden.publicarMonitores();
-            }
-            }
-            pantallaOrden.imprimirOndasSismicas("usted está siendo redirigido al menú principal");
-        }
-
+        // 2. Muestra la animación de bienvenida
+        mostrarAnimacionBienvenida();
     }
-}
+
+    private void mostrarAnimacionBienvenida() {
+        WebView webView = new WebView();
+        // Le decimos que cargue el index.html de nuestra carpeta de recursos
+        URL url = getClass().getResource("/utnLogohtml/index.html");
+        webView.getEngine().load(url.toExternalForm());
+
+        StackPane root = new StackPane(webView);
+        Scene scene = new Scene(root, 800, 600);
+
+        primaryStage.setTitle("Cargando...");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+        // Crea una pausa para la animación
+        PauseTransition delay = new PauseTransition(Duration.seconds(4));
+        delay.setOnFinished(event -> {
+            try {
+                // 4. Cuando la pausa termina, carga la pantalla principal
+                mostrarPantallaPrincipal();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        delay.play();
+    }
+
+    private void mostrarPantallaPrincipal() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/PantallaOrden.fxml"));
+        Parent root = loader.load();
+
+        PantallaOrdenController controller = loader.getController();
+        controller.setGestorOrden(gestorOrden); // Le pasamos el gestor al controlador
+
+        Scene scene = new Scene(root, 800, 600);
+        primaryStage.setTitle("Sistema de Red Sísmica - CCRS");
+        primaryStage.setScene(scene);
+    }
+
+    private void inicializarLogicaDeNegocio() {
+        MOCKDATAGenerator mockDataGenerator = new MOCKDATAGenerator();
+        Empleado empleadoRI = mockDataGenerator.generarEmpleado(1);
+        Usuario usuarioRI = mockDataGenerator.generarUsuario(1);
+        Empleado otroEmpleadoNoRI = mockDataGenerator.generarEmpleado(2);
+        List<Empleado> empleados = List.of(empleadoRI, otroEmpleadoNoRI);
+        Sesion sesion = mockDataGenerator.generarSesion(usuarioRI);
+        EstacionSismologica estacionSismologica1 = mockDataGenerator.generarEstacionSismologica(1);
+        EstacionSismologica estacionSismologica2 = mockDataGenerator.generarEstacionSismologica(2);
+        List<Estado> estados = mockDataGenerator.generarEstados();
+        List<OrdenInspeccion> ordenesInspeccion = new ArrayList<>(mockDataGenerator.generarOrdenesInspeccion(empleadoRI, estacionSismologica1, estados));
+        ordenesInspeccion.addAll(mockDataGenerator.generarOrdenesInspeccion(empleadoRI, estacionSismologica2, estados));
+        List<TipoMotivo> listaMotivos = mockDataGenerator.generarTipoMotivo();
+
+        this.gestorOrden = new GestorOrden(
+                ordenesInspeccion,
+                empleados,
+                listaMotivos,
+                estados,
+                sesion
+        );
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
 }

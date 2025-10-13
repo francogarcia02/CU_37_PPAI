@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="TOP_CENTER" spacing="20.0" styleClass="root" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="boundary.PantallaOrdenController">
+    <stylesheets>
+        <URL value="@styles.css" />
+    </stylesheets>
+    <children>
+        <Label styleClass="label-titulo" text="Cerrar Orden de Inspección" />
+        <Label fx:id="lblPasoActual" styleClass="label-subtitulo" text="Paso 1: Seleccionar Orden de Inspección" />
+
+        <VBox fx:id="panelSeleccionOrden" alignment="CENTER" spacing="15.0" styleClass="panel-paso" VBox.vgrow="ALWAYS">
+            <children>
+                <Label text="Seleccione una de las órdenes finalizadas:" />
+                <ListView fx:id="listViewOrdenes" prefHeight="250.0" />
+                <Button onAction="#handleSeleccionarOrden" styleClass="button-principal" text="Siguiente: Ingresar Observación" />
+            </children>
+        </VBox>
+
+        <VBox fx:id="panelIngresoObservacion" alignment="CENTER" spacing="15.0" styleClass="panel-paso" visible="false" managed="false" VBox.vgrow="ALWAYS">
+            <children>
+                <Label text="Ingrese una observación sobre el cierre de la orden:" />
+                <TextArea fx:id="txtAreaObservacion" prefHeight="150.0" wrapText="true" />
+                <Button onAction="#handleGuardarObservacion" styleClass="button-principal" text="Siguiente: Gestionar Sismógrafo" />
+            </children>
+        </VBox>
+
+        <VBox fx:id="panelGestionSismografo" alignment="CENTER" spacing="15.0" styleClass="panel-paso" visible="false" managed="false" VBox.vgrow="ALWAYS">
+            <children>
+                <CheckBox fx:id="chkPonerFueraDeServicio" onAction="#handleCheckFueraDeServicio" text="¿Desea poner el sismógrafo 'Fuera de Servicio'?" />
+                <VBox alignment="CENTER" spacing="10.0">
+                    <children>
+                        <Label text="Seleccione un motivo y agregue un comentario:" />
+                        <ComboBox fx:id="cmbMotivos" prefWidth="300.0" promptText="Seleccionar tipo de motivo" />
+                        <TextField fx:id="txtComentarioMotivo" prefWidth="300.0" promptText="Comentario del motivo" />
+                        <Button onAction="#handleAgregarMotivo" styleClass="button-agregar" text="Agregar Motivo" />
+                        <Label text="Motivos agregados:" />
+                        <ListView fx:id="listViewMotivosAgregados" prefHeight="100.0" />
+                    </children>
+                </VBox>
+                <Button onAction="#handleConfirmarGestionSismografo" styleClass="button-principal" text="Siguiente: Confirmación Final" />
+            </children>
+        </VBox>
+
+        <VBox fx:id="panelConfirmacionFinal" alignment="CENTER" spacing="25.0" styleClass="panel-paso" visible="false" managed="false" VBox.vgrow="ALWAYS">
+            <children>
+                <Label text="Está a punto de cerrar la orden de inspección. Por favor, confirme la operación." wrapText="true" />
+                <Button fx:id="btnConfirmarCierre" onAction="#handleConfirmacionFinal" styleClass="button-confirmar" text="Confirmar Cierre Definitivo" />
+            </children>
+        </VBox>
+    </children>
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+</VBox>

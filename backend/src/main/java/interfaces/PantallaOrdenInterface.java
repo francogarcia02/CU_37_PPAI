@@ -8,8 +8,6 @@ public interface PantallaOrdenInterface {
     public String leerEntradaUsuario();
     public int numericInput(String mensaje, String mensajeError);
     public Long numericInputLong(String mensaje, String mensajeError);
-
-
     public void mostrarOI(String ordenInspeccionString);
     public Long tomarNumeroOI();
     public String solicitarObservacion();

@@ -2,15 +2,12 @@ package control;
 
 import boundary.InterfazCCRS;
 import boundary.InterfazMail;
-import boundary.PantallaOrden;
-import entity.CambioEstado;
 import entity.Empleado;
 import entity.OrdenInspeccion;
 import entity.Sesion;
 import entity.Usuario;
 import entity.TipoMotivo;
 import entity.Estado;
-import entity.Sismografo;
 import entity.MotivoFueraServicio;
 import interfaces.GestorOrdenInterface;
 import lombok.Data;
@@ -28,24 +25,17 @@ public class GestorOrden implements GestorOrdenInterface {
     private List<OrdenInspeccion> ordenesInspeccion;
     private OrdenInspeccion selectedOrden;
 
-    private String selectedOption;
     private String selectedDecicionSismografo;
     private String observaciones;
     private List<Empleado> empleados;
     private List<TipoMotivo> tiposMotivos;
     private List<MotivoFueraServicio> motivosFueraServicioSelection = new ArrayList<>();
-    public int selectedTempMFSIndex;
-    public String inputTempComentrarioFS;
     private List<Estado> estados;
     private Estado EstadoFS;
     private Estado EstadoCerrada;
     private Boolean confirmacionCierre;
     private List<OrdenInspeccion> ordenesInspeccionFiltradas = new ArrayList<>();
-    private List<String> mailsResponsablesReparaciones = new ArrayList<>();
-    private PantallaOrden pantallaOrden;
     private Sesion sesion;
-    private Empleado empleadoLogueado;
-    private List<TipoMotivo> motivosFueraServicio = new ArrayList<>();
 
     public GestorOrden(List<OrdenInspeccion> ordenesInspeccion, List<Empleado> empleados, List<TipoMotivo> tiposMotivos, List<Estado> estados, Sesion sesion) {
         this.ordenesInspeccion = ordenesInspeccion;
@@ -53,20 +43,6 @@ public class GestorOrden implements GestorOrdenInterface {
         this.tiposMotivos = tiposMotivos;
         this.estados = estados;
         this.sesion = sesion;
-        this.selectedOption = "";
-    }
-
-    // Todos estos metodos "Recibir" son para que el gestor conozca las clases necesarias
-
-    public void RecibirPantallaOrden(PantallaOrden pantallaOrden) {
-        this.pantallaOrden = pantallaOrden;
-        pantallaOrden.comunicarFeedbackGestor("He recibido la pantalla correctamente");
-    }
-
-
-    public void RecibirSelectedOption(String selectedOption) {
-        this.selectedOption = selectedOption;
-        pantallaOrden.comunicarFeedbackGestor("He recibido la opción seleccionada correctamente");
     }
 
     @Override
@@ -78,30 +54,19 @@ public class GestorOrden implements GestorOrdenInterface {
 
     @Override
     public List<OrdenInspeccion> buscarOrdenesInspeccion() {
-        // limpia la lista de ordenesInspeccionFiltradas, este paso es importante porque sino
-        // el sistema cree que hay ordenes cuando no las hay
         ordenesInspeccionFiltradas.clear();
 
-        // para cada ordenInspeccion en la lista de ordenesInspeccion, se verifica si es finalizada
-        // y si está asignada al RI, y si es asi, se agrega a la lista de
-        // ordenesInspeccionFiltradas y se muestra en la pantalla
         ordenesInspeccion.forEach(ordenInspeccion -> {
-            Boolean condition1 = ordenInspeccion.estaFinalizada();
-            Boolean condition2 = ordenInspeccion.esTuRI(RI);
+            boolean condition1 = ordenInspeccion.estaFinalizada();
+            boolean condition2 = ordenInspeccion.esTuRI(RI);
 
             if (condition1 && condition2) {
                 ordenesInspeccionFiltradas.add(ordenInspeccion);
             }
         });
 
-        if (ordenesInspeccionFiltradas.isEmpty()) {
-            pantallaOrden.comunicarFeedbackGestor("No hay Ordenes de Inspeccion para cerrar");
-            return ordenarOI(ordenesInspeccionFiltradas);
-        } else {
-            return ordenarOI(ordenesInspeccionFiltradas);
-        }
-
-    };
+        return ordenarOI(ordenesInspeccionFiltradas);
+    }
 
     @Override
     public List<OrdenInspeccion> ordenarOI(List<OrdenInspeccion> ordenesInspeccionToOrder) {
@@ -109,63 +74,25 @@ public class GestorOrden implements GestorOrdenInterface {
                 .sorted((o1, o2) -> {
                     LocalDateTime fecha1 = o1.obtenerFechaFinalizacion();
                     LocalDateTime fecha2 = o2.obtenerFechaFinalizacion();
-
-                    // Handle null cases
-                    if (fecha1 == null && fecha2 == null) {
-                        return 0;
-                    }
-                    if (fecha1 == null) {
-                        return 1; // Put nulls at the end
-                    }
-                    if (fecha2 == null) {
-                        return -1; // Put nulls at the end
-                    }
-                    return fecha1.compareTo(fecha2); // Ascending order
+                    if (fecha1 == null && fecha2 == null) return 0;
+                    if (fecha1 == null) return 1;
+                    if (fecha2 == null) return -1;
+                    return fecha1.compareTo(fecha2);
                 })
                 .collect(Collectors.toList());
     }
 
     @Override
-    public String stringificarOI(OrdenInspeccion ordenesInspeccionToStringify) {
-        return ordenesInspeccionToStringify.toStringForPantalla();
-    }
-
-    @Override
-    public void pasarToPantallaOIs() {
-        ordenesInspeccionFiltradas.forEach(ordenInspeccion -> {
-            pantallaOrden.mostrarOI(
-                    this.stringificarOI(ordenInspeccion)
-            );
-        });
-
+    public String stringificarOI(OrdenInspeccion ordenInspeccionToStringify) {
+        return ordenInspeccionToStringify.toStringForPantalla();
     }
 
     @Override
     public void tomarNumeroOI(Long selectedOrdenNumero) {
-        selectedOrden = null;
-
-        // ingresó orden ajena o no se encuentra en estado finalizada
-        Boolean error1 = false;
-
-        for (OrdenInspeccion ordenInspeccion : ordenesInspeccion) {
-            // se aplica patron experto para comparar el nro de la orden de inspeccion ingresado
-            Boolean comparedOI = ordenInspeccion.compareNroOrder(selectedOrdenNumero);
-            if (comparedOI) {
-                OrdenInspeccion tempSelectedOrden = ordenInspeccion;
-                if (ordenesInspeccionFiltradas.contains(tempSelectedOrden)) {
-                    selectedOrden = ordenInspeccion;
-                } else {
-                    pantallaOrden.comunicarFeedbackGestor("Ingresó una orden de inspeccion que no le pertenece o no se encuentra en estado finalizada");
-                    error1 = true;
-                    pantallaOrden.comunicarFeedbackGestor("será redirigido al menu principal");
-                }
-            }
-        }
-
-        if (selectedOrden == null && !error1) {
-            pantallaOrden.comunicarFeedbackGestor("No se encontró ninguna orden con el número ingresado.");
-        };
-
+        selectedOrden = ordenesInspeccionFiltradas.stream()
+                .filter(oi -> oi.getNumeroOrden().equals(selectedOrdenNumero))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
@@ -179,51 +106,11 @@ public class GestorOrden implements GestorOrdenInterface {
     }
 
     @Override
-    public void manageSismografoFS() {
-
-        while (!pantallaOrden.getSelectedMFS().equals("0")) {
-            pantallaOrden.comunicarFeedbackGestorLeve("Tipos de motivo: ");
-
-            pantallaOrden.mostrarMFS(
-                    this.stringificarMFS()
-            );
-
-            pantallaOrden.tomarMFS(
-                    pantallaOrden.SolicitarMFS()
-            );
-
-            if (pantallaOrden.getSelectedMFS().equals("0")) {
-                break;
-            }
-
-            // Ajustar el índice (restar 1 porque mostramos desde 1)
-            this.setSelectedTempMFSIndex(
-                    Integer.parseInt(pantallaOrden.getSelectedMFS()) - 1
-            );
-
-            if (validarMotivo()) {
-                TipoMotivo motivoSeleccionado = this.getTiposMotivos().get(selectedTempMFSIndex);
-                motivosFueraServicio.add(motivoSeleccionado);
-                pantallaOrden.comunicarFeedbackGestorLeve("Seleccionaste: " + motivoSeleccionado.getDescripcion());
-                pantallaOrden.tomarComentario(
-                        pantallaOrden.solicitarMotivoComentario()
-                );
-                this.tomarMFSyComentario(motivoSeleccionado,pantallaOrden.getInputComentrarioFS());
-            } else {
-                pantallaOrden.comunicarFeedbackGestor("Número fuera de rango.");
-            }
-        }
-    }
-
-
-    @Override
     public List<String> stringificarMFS() {
         List<String> stringifiedMFS = new ArrayList<>();
-
         for (int i = 0; i < this.getTiposMotivos().size(); i++) {
             TipoMotivo tipoMotivo = this.getTiposMotivos().get(i);
-            String descripcionConIndice = (i+1) + ": " + tipoMotivo.getDescripcion();
-            stringifiedMFS.add(descripcionConIndice);
+            stringifiedMFS.add((i + 1) + ": " + tipoMotivo.getDescripcion());
         }
         return stringifiedMFS;
     }
@@ -231,140 +118,147 @@ public class GestorOrden implements GestorOrdenInterface {
     @Override
     public void tomarMFSyComentario(TipoMotivo motivoSeleccionado, String comentario) {
         this.getMotivosFueraServicioSelection().add(new MotivoFueraServicio(comentario, motivoSeleccionado));
-
     }
 
     @Override
     public void tomarConfirmacioncierreOI(Boolean input) {
         if(selectedOrden != null){
             setConfirmacionCierre(input);
-        } else {
-            pantallaOrden.notificarIOSinSeleccionar();
         }
     }
-
 
     @Override
     public void buscarEstadoFS() {
-        estados.stream().forEach(estado -> {
-            if (estado.esAmbitoSismografo() && estado.esFueraDeServicio()) {
-                this.setEstadoFS(estado);
-            }
-        });
-
+        estados.stream()
+                .filter(estado -> estado.esAmbitoSismografo() && estado.esFueraDeServicio())
+                .findFirst()
+                .ifPresent(this::setEstadoFS);
     }
 
     @Override
-    public void  buscarEstadoCerradoOI() {
-        estados.stream().forEach(estado -> {
-            if (estado.esAmbitoOrdendeInspeccion() && estado.esCerrada()) {
-                this.setEstadoCerrada(estado);
-            }
-        });
-
+    public void buscarEstadoCerradoOI() {
+        estados.stream()
+                .filter(estado -> estado.esAmbitoOrdendeInspeccion() && estado.esCerrada())
+                .findFirst()
+                .ifPresent(this::setEstadoCerrada);
     }
 
-    @Override
-    public Boolean validarMotivo() {
-        if (selectedTempMFSIndex >= 0 && selectedTempMFSIndex < this.getTiposMotivos().size()) {
-            return true;
-        } else {
-            return false;
+    public boolean cerrarOrdenSeleccionada() {
+        if (getConfirmacionCierre() && getObservaciones() != null) {
+            buscarEstadoFS();
+            buscarEstadoCerradoOI();
+
+            boolean result = getSelectedOrden().cerrar(
+                    getObservaciones(),
+                    getMotivosFueraServicioSelection(),
+                    getEstados().get(13), // Asumiendo que el estado 13 es "cierreDefinitivo"
+                    getRI());
+
+            if (!getMotivosFueraServicioSelection().isEmpty()) {
+                getSelectedOrden().enviarSismografoAReparar(getEstadoFS());
+                enviarNotificacionMail(confeccionarMensaje(getSelectedOrden()));
+            }
+
+            publicarMonitores();
+            return result;
         }
+        return false;
     }
 
-
-
     @Override
-    public LocalDateTime getFechaHoraActual() {
-        return null;
-    }
-
-
-    @Override
-    public List<String> obtenerMailsResponsablesReparacion(){
-        List<Empleado> empleadosResponsablesReparaciones = new ArrayList<>();
-
-        // empleados.stream(): Crea un stream (flujo de datos) a partir de la lista de empleados.
-        // .filter(Empleado::esResponsableReparaciones): Filtra los empleados utilizando el predicado esResponsableReparaciones.
-        // .forEach(empleadosResponsablesReparaciones::add): Por cada empleado filtrado, lo agrega a la colección empleadosResponsablesReparaciones usando una referencia de método.
-        empleados.stream()
+    public List<String> obtenerMailsResponsablesReparacion() {
+        return empleados.stream()
                 .filter(Empleado::esResponsableReparaciones)
-                .forEach(empleadosResponsablesReparaciones::add);
-
-        List<String> mailsResponsablesReparaciones = new ArrayList<>();
-
-        // empleadosResponsablesReparacion.stream(): Crea un stream (flujo de datos)  a partir de la lista de empleadosResponsablesReparacion.
-        // .map(empleado -> empleado.getUsuario().getEmail()): Transforma cada objeto Empleado en su dirección de correo electrónico
-        // .forEach(mailsResponsablesReparacion::add): Por cada email obtenido, lo agrega a la colección mailsResponsablesReparaciones usando una referencia de método.
-        empleadosResponsablesReparaciones.stream()
-                .map(empleado -> empleado.obtenerMail())
-                .forEach(mailsResponsablesReparaciones::add);
-
-        // finalmente, se devuelve la colección mailsResponsablesReparaciones
-        return mailsResponsablesReparaciones;
+                .map(Empleado::obtenerMail)
+                .collect(Collectors.toList());
     }
 
     @Override
     public void enviarNotificacionMail(String mensaje) {
-        List<String> mailsResponsablesReparaciones = obtenerMailsResponsablesReparacion();
-
+        List<String> mails = obtenerMailsResponsablesReparacion();
         InterfazMail interfazMail = new InterfazMail();
-
-        mailsResponsablesReparaciones.stream().forEach(mail -> {
-            System.out.println(interfazMail.enviarMail(mail, mensaje));
+        mails.forEach(mail -> {
+            System.out.println(interfazMail.enviarMail(mail, mensaje)); // Placeholder para el envío real
         });
-
     }
 
     @Override
     public void publicarMonitores() {
         InterfazCCRS interfazCCRS = new InterfazCCRS();
         interfazCCRS.imprimirMonitores();
-        pantallaOrden.comunicarFeedbackGestor("publicación de monitores CCRS completada");
+        System.out.println("Publicación de monitores CCRS completada"); // Placeholder
     }
 
     @Override
-    public String confeccionarMensaje(OrdenInspeccion selectedOrden) {
-        String mensaje = "";
-        mensaje = "Estimado(a) responsable de reparaciones" + ",\n\n"
-                + "La Orden de Inspeccion " + selectedOrden.getNumeroOrden() + " ha sido cerrada. \n\n"
-                + "Detalles:\n"
-                + "Estación Sismológica: " + selectedOrden.getEstacionSismologica().getNombreEstacion() + "\n"
-                + "Responsable de la Orden: " + selectedOrden.getResponsableOrdenInspeccion().getNombreEmpleado() + "\n"
-                + "ID sismografo: " + selectedOrden.getEstacionSismologica().getSismografo().getIdSismografo() + "\n\n"
-                + "Estado actual del sismografo: " + selectedOrden.getEstacionSismologica().getSismografo().getEstadoActual().getNombre() + "\n"
-                + "fecha y hora nuevo estado: " + selectedOrden.obtenerCambioEstadoActual().getFechaHorainicio() + "\n"
-                + "Motivos:\n" + (
+    public String confeccionarMensaje(OrdenInspeccion orden) {
+        String motivosStr = orden.obtenerCambioEstadoActual().getMotivosCambioEstados() != null ?
+                orden.obtenerCambioEstadoActual().getMotivosCambioEstados().stream()
+                        .map(motivo -> String.format("  - Motivo: %s\n    Observaciones: %s\n",
+                                motivo.getTipoMotivo().getDescripcion(),
+                                motivo.getComentario() != null ? motivo.getComentario() : "Sin observaciones"))
+                        .collect(Collectors.joining("\n")) :
+                "  No hay motivos registrados\n";
 
-                (selectedOrden.obtenerCambioEstadoActual().getMotivosCambioEstados() != null) ?(
-                        selectedOrden.obtenerCambioEstadoActual().getMotivosCambioEstados().stream()
-                                .map(motivo ->
-                                        "  - Motivo: " + motivo.getTipoMotivo().getDescripcion() + "\n"
-                                                +
-                                                "    Observaciones: " + (motivo.getComentario() != null ? motivo.getComentario() : "Sin observaciones") + "\n"
-                                )
-                                .collect(Collectors.joining("\n")))
-                        : ("  No hay motivos registrados\n"
-                ));
-
-        return mensaje;
-    }
-
-    @Override
-    public void FinCU() {
-
+        return String.format(
+                "Estimado(a) responsable de reparaciones,\n\n" +
+                        "La Orden de Inspeccion %d ha sido cerrada.\n\n" +
+                        "Detalles:\n" +
+                        "Estación Sismológica: %s\n" +
+                        "Responsable de la Orden: %s\n" +
+                        "ID sismógrafo: %d\n\n" +
+                        "Estado actual del sismógrafo: %s\n" +
+                        "Fecha y hora nuevo estado: %s\n" +
+                        "Motivos:\n%s",
+                orden.getNumeroOrden(),
+                orden.getEstacionSismologica().getNombreEstacion(),
+                orden.getResponsableOrdenInspeccion().getNombreEmpleado(),
+                orden.getEstacionSismologica().getSismografo().getIdSismografo(),
+                orden.getEstacionSismologica().getSismografo().getEstadoActual().getNombre(),
+                orden.obtenerCambioEstadoActual().getFechaHorainicio(),
+                motivosStr
+        );
     }
 
     @Override
     public Usuario obtenerUsuarioLogueado() {
-        usuarioLogueado = sesion.getUsuario();
-        return usuarioLogueado;
+        return sesion.getUsuario();
+    }
+
+    // --- Métodos de la interfaz que ya no son necesarios o han sido adaptados ---
+
+    @Override
+    public void RecibirSelectedOption(String selectedOption) {
+        // La lógica de opciones se manejará en el controlador de la GUI
+    }
+
+    @Override
+    public void manageSismografoFS() {
+        // La lógica de selección de motivos se manejará en el controlador de la GUI
+    }
+
+    @Override
+    public Boolean validarMotivo() {
+        // La validación se puede hacer en el controlador antes de llamar a tomarMFSyComentario
+        return true;
+    }
+
+    @Override
+    public LocalDateTime getFechaHoraActual() {
+        return LocalDateTime.now();
+    }
+
+    @Override
+    public void FinCU() {
+        // La gestión del fin del caso de uso la hará la GUI (ej. cerrar ventana)
     }
 
     @Override
     public void RecibirTipoMotivos(List<TipoMotivo> listaMotivos) {
         setTiposMotivos(listaMotivos);
     }
-}
 
+    @Override
+    public void pasarToPantallaOIs() {
+        // No es necesario, el controlador obtendrá la lista y la mostrará.
+    }
+}
