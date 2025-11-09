@@ -1,6 +1,7 @@
 import boundary.PantallaOrdenController;
 import control.GestorOrden;
 import control.MOCKDATAGenerator;
+import control.notificacion.IObservadorCierreOrden;
 import entity.*;
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
@@ -16,6 +17,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import boundary.InterfazCCRS; // por patron observador.
+import boundary.InterfazMail;
+
 
 public class Main extends Application {
 
@@ -92,6 +96,21 @@ public class Main extends Application {
                 estados,
                 sesion
         );
+
+        // --- INICIO "ENSAMBLADO" OBSERVER
+
+        // 2  CONSULTA al Gestor por la data de configuración
+        List<String> mailsDeReparacion = this.gestorOrden.obtenerMailsResponsablesReparacion();
+
+        // 3. CREA LOS OBSERVADORES
+        IObservadorCierreOrden observadorMail = new InterfazMail(mailsDeReparacion); // solo Strings
+        IObservadorCierreOrden observadorCCRS = new InterfazCCRS();
+
+        // 4. SUSCRIBE LOS OBSERVADORES AL SUJETO
+        this.gestorOrden.agregarObservador(observadorMail);
+        this.gestorOrden.agregarObservador(observadorCCRS);
+        // --- FIN "ENSAMBLADO" OBSERVER ---
+
     }
 
     public static void main(String[] args) {
