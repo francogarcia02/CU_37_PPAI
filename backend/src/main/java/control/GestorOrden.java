@@ -191,7 +191,7 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
 
             // --- INICIO "DISPARADOR" OBSERVER ---
 
-            // 1. Creamos el DTO con toda la info. que los observadores puedan necesitar
+            // 1. Creamos el DTO con toda la info que los observadores puedan necesitar
             DatosNotificacionCierre datos = new DatosNotificacionCierre(
                     getSelectedOrden().getEstacionSismologica().getSismografo().getIdSismografo().toString(),
                     sismografoEstadoActual, // El estado final real

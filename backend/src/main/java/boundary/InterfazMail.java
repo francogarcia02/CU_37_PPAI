@@ -18,7 +18,7 @@ public class InterfazMail implements IObservadorCierreOrden {
     @Override
     public void actualizar(DatosNotificacionCierre datos) {
 
-        // 5. La lógica de decisión sigue aquí (perfecto)
+        // 5. Lógica de decisión
         if (datos.getMotivos() == null || datos.getMotivos().isEmpty()) {
             return; // No hago nada.
         }
@@ -64,7 +64,7 @@ public class InterfazMail implements IObservadorCierreOrden {
     }
 
     public String enviarMail(String mail, String mensaje) {
-        return "mail enviado a " + mail + " con el mensaje: " + mensaje;
+        return "mail enviado a " + mail + " con el mensaje: " + mensaje; //Placeholder
     }
 }
 

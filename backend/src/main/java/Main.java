@@ -99,14 +99,14 @@ public class Main extends Application {
 
         // --- INICIO "ENSAMBLADO" OBSERVER
 
-        // 2  CONSULTA al Gestor por la data de configuración
+        // 1  CONSULTA al Gestor por la data de configuración
         List<String> mailsDeReparacion = this.gestorOrden.obtenerMailsResponsablesReparacion();
 
-        // 3. CREA LOS OBSERVADORES
+        // 2. CREA LOS OBSERVADORES
         IObservadorCierreOrden observadorMail = new InterfazMail(mailsDeReparacion); // solo Strings
         IObservadorCierreOrden observadorCCRS = new InterfazCCRS();
 
-        // 4. SUSCRIBE LOS OBSERVADORES AL SUJETO
+        // 3. SUSCRIBE LOS OBSERVADORES AL SUJETO
         this.gestorOrden.agregarObservador(observadorMail);
         this.gestorOrden.agregarObservador(observadorCCRS);
         // --- FIN "ENSAMBLADO" OBSERVER ---

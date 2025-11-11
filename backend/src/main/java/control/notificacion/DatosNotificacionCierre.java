@@ -14,7 +14,6 @@ public class DatosNotificacionCierre {
     private final String nuevoEstado;
     private final LocalDateTime fechaHora;
     private final List<MotivoFueraServicio> motivos;
-
     private final Long numeroOrden;
     private final String nombreEstacion;
     private final String nombreResponsable;
