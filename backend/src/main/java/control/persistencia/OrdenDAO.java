@@ -1,7 +1,12 @@
 package control.persistencia;
 import entity.OrdenInspeccion;
+import entity.Estado;
+import entity.MotivoFueraServicio;
+import java.util.List;
 
 public interface OrdenDAO {
 
-    void actualizar(OrdenInspeccion ordenInspeccion);
+    boolean guardarCierre(OrdenInspeccion ordenInspeccion, Estado estado,
+                          List<MotivoFueraServicio> motivos);
+
 }

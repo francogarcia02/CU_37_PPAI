@@ -47,14 +47,14 @@ public class OrdenInspeccion implements OrdenInspeccionInterface {
 
 public Boolean estaFinalizada() {
     CambioEstado estadoActual = this.obtenerCambioEstadoActual();
-    return estadoActual != null && estadoActual.getEstadoNuevo().getNombre().equals("finalizada");
+    return estadoActual != null && estadoActual.getEstadoNuevo().getNombre().equals("Finalizado");
 }
 
     @Override
     public Boolean cerrar(String observacion, List<MotivoFueraServicio> motivosNuevos, Estado estadoCerrada, Empleado responsableEjecucion) {
         for (CambioEstado cambio : cambiosEstados) {
             if (cambio.getFechaHorafin() == null &&
-                    "finalizada".equalsIgnoreCase(cambio.getEstadoNuevo().getNombre())) {
+                    "Finalizado".equalsIgnoreCase(cambio.getEstadoNuevo().getNombre())) {
                 this.setObservaciones(observacion);
                 cambio.setFechaHorafin(LocalDateTime.now());
                 cambiosEstados.add(

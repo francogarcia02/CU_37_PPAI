@@ -5,6 +5,7 @@ import control.notificacion.IObservadorCierreOrden;
 import entity.*;
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -53,12 +54,13 @@ public class Main extends Application {
         // Crea una pausa para la animación
         PauseTransition delay = new PauseTransition(Duration.seconds(4));
         delay.setOnFinished(event -> {
-            try {
-                // 4. Cuando la pausa termina, carga la pantalla principal
-                mostrarPantallaPrincipal();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            Platform.runLater(() -> { // <-- Carga de la pantalla AL FINAL de la cola de eventos de JAVAFX.
+                try {
+                    mostrarPantallaPrincipal();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }); // <-- AÑADE ESTA LÍNEA
         });
         delay.play();
     }

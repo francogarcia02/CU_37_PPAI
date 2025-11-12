@@ -1,5 +1,6 @@
 package control;
 
+import control.persistencia.OrdenDAO;
 import entity.Empleado;
 import entity.OrdenInspeccion;
 import entity.Sesion;
@@ -36,6 +37,7 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
     private Boolean confirmacionCierre;
     private List<OrdenInspeccion> ordenesInspeccionFiltradas = new ArrayList<>();
     private Sesion sesion;
+    private OrdenDAO ordenDAO; // PERSISTENCIA
 
     // --- INICIA EL PATRÓN OBSERVER ---
     private List<IObservadorCierreOrden> observadores = new ArrayList<>();
@@ -64,6 +66,7 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
         this.tiposMotivos = tiposMotivos;
         this.estados = estados;
         this.sesion = sesion;
+        this.ordenDAO = new control.persistencia.OrdenDAOImpl(); //Inicializar para PERSISTENCIA
     }
 
     @Override
@@ -73,18 +76,69 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
         return RI;
     }
 
+// En GestorOrden.java
+
     @Override
     public List<OrdenInspeccion> buscarOrdenesInspeccion() {
         ordenesInspeccionFiltradas.clear();
 
+        // --- INICIO DEBUG ---
+        System.out.println("==========================================================");
+        System.out.println("--- DEBUG: Iniciando búsqueda de órdenes de inspección ---");
+
+        if (RI == null) {
+            System.out.println("--- DEBUG: ¡¡ERROR!! El Empleado (RI) es NULO. (¿Se llamó a buscarEmpleado() antes?)");
+        } else {
+            // CORREGIDO: Acceso directo al campo 'public'.
+            // Asumo que los campos se llaman 'nombre' y 'idEmpleado'.
+            System.out.println("--- DEBUG: Buscando órdenes para el RI: '" + RI.nombreEmpleado + "' (ID: " + RI.idEmpleado + ")");
+        }
+        System.out.println("--- DEBUG: Total de órdenes en memoria: " + ordenesInspeccion.size());
+        System.out.println("==========================================================");
+        // --- FIN DEBUG ---
+
         ordenesInspeccion.forEach(ordenInspeccion -> {
+
+            // --- DEBUG DETALLADO POR ORDEN ---
+            System.out.println("\n--- DEBUG: Revisando Orden N°: " + ordenInspeccion.getNumeroOrden() + " ---");
+
+            // Chequeo de Condición 1: estaFinalizada
+            String estadoActualNombre = "NULO";
+            // CORREGIDO: Asumo que CambioEstado y Estado también tienen campos 'public'
+            if (ordenInspeccion.obtenerCambioEstadoActual() != null && ordenInspeccion.obtenerCambioEstadoActual().getEstadoNuevo() != null) {
+                estadoActualNombre = ordenInspeccion.obtenerCambioEstadoActual().getEstadoNuevo().nombre;
+            }
+            System.out.println("    Estado Actual (String): '" + estadoActualNombre + "'");
+
             boolean condition1 = ordenInspeccion.estaFinalizada();
+            System.out.println("    Condición 1 (estaFinalizada): " + condition1 + " (Debe ser 'true' si el estado es 'Finalizado')");
+
+            // Chequeo de Condición 2: esTuRI
+            String riDeLaOrden = "NULO";
+            if (ordenInspeccion.getResponsableOrdenInspeccion() != null) {
+                // CORREGIDO: Acceso directo a los campos 'public'.
+                riDeLaOrden = ordenInspeccion.responsableOrdenInspeccion.nombreEmpleado + " (ID: " + ordenInspeccion.responsableOrdenInspeccion.idEmpleado + ")";
+            }
+            System.out.println("    RI asignado a la Orden: '" + riDeLaOrden + "'");
+
+            // CORREGIDO: Acceso directo a los campos 'public'.
+            System.out.println("    RI actualmente logueado: '" + RI.nombreEmpleado + " (ID: " + RI.idEmpleado + ")'");
+
             boolean condition2 = ordenInspeccion.esTuRI(RI);
+            System.out.println("    Condición 2 (esTuRI): " + condition2);
+            // --- FIN DEBUG DETALLADO ---
 
             if (condition1 && condition2) {
                 ordenesInspeccionFiltradas.add(ordenInspeccion);
+                System.out.println("    >>> ¡ÉXITO! Orden " + ordenInspeccion.getNumeroOrden() + " agregada a la lista.");
+            } else {
+                System.out.println("    >>> RECHAZADA: La orden no cumple ambas condiciones.");
             }
         });
+
+        System.out.println("\n==========================================================");
+        System.out.println("--- DEBUG: Búsqueda terminada. Total de órdenes filtradas: " + ordenesInspeccionFiltradas.size() + " ---");
+        System.out.println("==========================================================");
 
         return ordenarOI(ordenesInspeccionFiltradas);
     }
@@ -167,12 +221,17 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
     public boolean cerrarOrdenSeleccionada() {
         if (getConfirmacionCierre() && getObservaciones() != null) {
             buscarEstadoFS();
-            buscarEstadoCerradoOI();
+            buscarEstadoCerradoOI(); // Este metodo setea el atributo 'EstadoCerrada'
+
+            if (getEstadoCerrada() == null) {
+                System.err.println("ERROR: No se pudo encontrar el estado 'CierreDefinitivo' en la lista de estados.");
+                return false;
+            } //Importante asegurarnos de encontrar el estado.
 
             boolean result = getSelectedOrden().cerrar(
                     getObservaciones(),
                     getMotivosFueraServicioSelection(),
-                    getEstados().get(13), // Asumiendo que el estado 13 es "cierreDefinitivo"
+                    getEstadoCerrada(), // Asumiendo que el estado 13 es "cierreDefinitivo"
                     getRI());
 
             String sismografoEstadoActual;
@@ -188,6 +247,20 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
             // DEBUG
             //System.out.println("--- DEBUG: Motivos a notificar: " + getMotivosFueraServicioSelection().size() + " ---");
 
+            // --- INICIO PERSISTENCIA ---
+            // Le pasamos la orden (que ya tiene su estado "CierreDefinitivo")
+            // el estado del sismógrafo (si es que cambió) y la lista de motivos
+            boolean guardadoOK = ordenDAO.guardarCierre(
+                    getSelectedOrden(),
+                    getEstadoFS(), // Le pasamos el objeto Estado "Fuera de Servicio"
+                    getMotivosFueraServicioSelection()
+            );
+
+            if (!guardadoOK) {
+                // (Manejar error)
+                System.err.println("¡ERROR AL GUARDAR EN LA BASE DE DATOS!");
+            }
+            // --- FIN PERSISTENCIA ---
 
             // --- INICIO "DISPARADOR" OBSERVER ---
 

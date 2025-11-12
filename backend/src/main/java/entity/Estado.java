@@ -4,17 +4,19 @@ import lombok.Data;
 
 @Data
 public class Estado {
+    public int idEstado;
     public String ambito;
     public String nombre;
 
-    public Estado(String ambito, String nombre) {
+    public Estado(int idEstado, String ambito, String nombre) {
+        this.idEstado = idEstado;
         this.ambito = ambito;
         this.nombre = nombre;
     }
 
 
     public Boolean esFinalizado() {
-        if ( this.esAmbitoOrdendeInspeccion() && "finalizada".equals(this.getNombre()) ){
+        if ( this.esAmbitoOrdendeInspeccion() && "Finalizado".equals(this.getNombre()) ){
             return true;
         } else {
             return false;
@@ -32,7 +34,7 @@ public class Estado {
 
 
     public Boolean esFueraDeServicio() {
-        if ( this.esAmbitoSismografo() && "fueraServicio".equals(this.getNombre()) ){
+        if ( this.esAmbitoSismografo() && "Fuera de Servicio".equals(this.getNombre()) ){
             return true;
         } else {
             return false;
@@ -50,7 +52,7 @@ public class Estado {
 
 
     public Boolean esCerrada() {
-        if ( this.esAmbitoOrdendeInspeccion() && "cierreDefinitivo".equals(this.getNombre()) ){
+        if ( this.esAmbitoOrdendeInspeccion() && "CierreDefinitivo".equals(this.getNombre()) ){
             return true;
         } else {
             return false;
