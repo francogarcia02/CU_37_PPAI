@@ -8,9 +8,9 @@ public class TareaTecnicaRevision {
     public String nombre;
     public String descripcionTrabajo;
     public String duracionEstimada;
-    public String comentrario;
+    public String comentario;
     public Apreciacion apreciacion;
     public String resultadoInspeccion;
-    public boolean registroRealizacion;
+    public Boolean registroRealizacion;
 
 }

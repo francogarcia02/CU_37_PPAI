@@ -1,4 +1,5 @@
 package control.persistencia;
+import entity.Empleado;
 import entity.OrdenInspeccion;
 import entity.Estado;
 import entity.MotivoFueraServicio;
@@ -9,4 +10,9 @@ public interface OrdenDAO {
     boolean guardarCierre(OrdenInspeccion ordenInspeccion, Estado estado,
                           List<MotivoFueraServicio> motivos);
 
+    /**
+     * Busca en la BD todas las órdenes en estado "Finalizado"
+     * que pertenezcan al Responsable de Inspección (RI) dado.
+     */
+    List<OrdenInspeccion> buscarFinalizadasPorRI(Empleado ri);
 }

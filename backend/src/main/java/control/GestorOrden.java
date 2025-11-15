@@ -60,8 +60,8 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
     }
     // --- FIN PATRÓN OBSERVER ---
 
-    public GestorOrden(List<OrdenInspeccion> ordenesInspeccion, List<Empleado> empleados, List<TipoMotivo> tiposMotivos, List<Estado> estados, Sesion sesion) {
-        this.ordenesInspeccion = ordenesInspeccion;
+    public GestorOrden(List<Empleado> empleados, List<TipoMotivo> tiposMotivos, List<Estado> estados, Sesion sesion) {
+        // this.ordenesInspeccion = ordenesInspeccion; // No es necesaria, por implementacion de Lectura en BD
         this.empleados = empleados;
         this.tiposMotivos = tiposMotivos;
         this.estados = estados;
@@ -78,69 +78,44 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
 
 // En GestorOrden.java
 
+
+    /*
     @Override
     public List<OrdenInspeccion> buscarOrdenesInspeccion() {
         ordenesInspeccionFiltradas.clear();
 
-        // --- INICIO DEBUG ---
-        System.out.println("==========================================================");
-        System.out.println("--- DEBUG: Iniciando búsqueda de órdenes de inspección ---");
-
-        if (RI == null) {
-            System.out.println("--- DEBUG: ¡¡ERROR!! El Empleado (RI) es NULO. (¿Se llamó a buscarEmpleado() antes?)");
-        } else {
-            // CORREGIDO: Acceso directo al campo 'public'.
-            // Asumo que los campos se llaman 'nombre' y 'idEmpleado'.
-            System.out.println("--- DEBUG: Buscando órdenes para el RI: '" + RI.nombreEmpleado + "' (ID: " + RI.idEmpleado + ")");
-        }
-        System.out.println("--- DEBUG: Total de órdenes en memoria: " + ordenesInspeccion.size());
-        System.out.println("==========================================================");
-        // --- FIN DEBUG ---
-
+        // USABA LISTA DE ORDENES DEL MOCK
         ordenesInspeccion.forEach(ordenInspeccion -> {
-
-            // --- DEBUG DETALLADO POR ORDEN ---
-            System.out.println("\n--- DEBUG: Revisando Orden N°: " + ordenInspeccion.getNumeroOrden() + " ---");
-
-            // Chequeo de Condición 1: estaFinalizada
-            String estadoActualNombre = "NULO";
-            // CORREGIDO: Asumo que CambioEstado y Estado también tienen campos 'public'
-            if (ordenInspeccion.obtenerCambioEstadoActual() != null && ordenInspeccion.obtenerCambioEstadoActual().getEstadoNuevo() != null) {
-                estadoActualNombre = ordenInspeccion.obtenerCambioEstadoActual().getEstadoNuevo().nombre;
-            }
-            System.out.println("    Estado Actual (String): '" + estadoActualNombre + "'");
-
+            // Chequea que la orden esté en el estado correcto
             boolean condition1 = ordenInspeccion.estaFinalizada();
-            System.out.println("    Condición 1 (estaFinalizada): " + condition1 + " (Debe ser 'true' si el estado es 'Finalizado')");
-
-            // Chequeo de Condición 2: esTuRI
-            String riDeLaOrden = "NULO";
-            if (ordenInspeccion.getResponsableOrdenInspeccion() != null) {
-                // CORREGIDO: Acceso directo a los campos 'public'.
-                riDeLaOrden = ordenInspeccion.responsableOrdenInspeccion.nombreEmpleado + " (ID: " + ordenInspeccion.responsableOrdenInspeccion.idEmpleado + ")";
-            }
-            System.out.println("    RI asignado a la Orden: '" + riDeLaOrden + "'");
-
-            // CORREGIDO: Acceso directo a los campos 'public'.
-            System.out.println("    RI actualmente logueado: '" + RI.nombreEmpleado + " (ID: " + RI.idEmpleado + ")'");
-
+            // Chequea que la orden pertenezca al Responsable de Inspección logueado
             boolean condition2 = ordenInspeccion.esTuRI(RI);
-            System.out.println("    Condición 2 (esTuRI): " + condition2);
-            // --- FIN DEBUG DETALLADO ---
 
             if (condition1 && condition2) {
                 ordenesInspeccionFiltradas.add(ordenInspeccion);
-                System.out.println("    >>> ¡ÉXITO! Orden " + ordenInspeccion.getNumeroOrden() + " agregada a la lista.");
-            } else {
-                System.out.println("    >>> RECHAZADA: La orden no cumple ambas condiciones.");
             }
         });
 
-        System.out.println("\n==========================================================");
-        System.out.println("--- DEBUG: Búsqueda terminada. Total de órdenes filtradas: " + ordenesInspeccionFiltradas.size() + " ---");
-        System.out.println("==========================================================");
-
+        // Devuelve la lista filtrada y ordenada
         return ordenarOI(ordenesInspeccionFiltradas);
+    }
+    */ // Metodo buscarOrdenesInspeccion() SIN PERSISTENCIA
+
+    @Override
+    public List<OrdenInspeccion> buscarOrdenesInspeccion() {
+
+        // El 'RI' (Responsable de Inspección) debe estar seteado
+        // Asumimos que la pantalla llamó a "buscarEmpleado()" primero
+        if (RI == null) {
+            // Opcional: llamar a buscarEmpleado() aquí si no se ha hecho
+            buscarEmpleado();
+        }
+
+        // 1. Llamada al DAO para obtener las órdenes REALES de la BD
+        List<OrdenInspeccion> ordenesDesdeBD = ordenDAO.buscarFinalizadasPorRI(RI);
+
+        // 2. El metodo de ordenar ahora trabaja sobre la lista de la BD
+        return ordenarOI(ordenesDesdeBD);
     }
 
     @Override
@@ -264,15 +239,33 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
 
             // --- INICIO "DISPARADOR" OBSERVER ---
 
-            // 1. Creamos el DTO con toda la info que los observadores puedan necesitar
-            DatosNotificacionCierre datos = new DatosNotificacionCierre(
-                    getSelectedOrden().getEstacionSismologica().getSismografo().getIdSismografo().toString(),
-                    sismografoEstadoActual, // El estado final real
-                    getSelectedOrden().obtenerCambioEstadoActual().getFechaHorainicio(),
-                    getMotivosFueraServicioSelection(), // Pasamos la lista (puede estar vacía)
-                    getSelectedOrden().getNumeroOrden(),
-                    getSelectedOrden().getEstacionSismologica().getNombreEstacion(),
-                    getRI().getNombreEmpleado()
+            // Anterior implementacion:
+            /* 1. Creamos el DTO con toda la info que los observadores puedan necesitar
+//            DatosNotificacionCierre datos = new DatosNotificacionCierre(
+//                    getSelectedOrden().getEstacionSismologica().getSismografo().getIdSismografo().toString(),
+//                    sismografoEstadoActual, // El estado final real
+//                    getSelectedOrden().obtenerCambioEstadoActual().getFechaHorainicio(),
+//                    getMotivosFueraServicioSelection(), // Pasamos la lista (puede estar vacía)
+//                    getSelectedOrden().getNumeroOrden(),
+//                    getSelectedOrden().getEstacionSismologica().getNombreEstacion(),
+//                    getRI().getNombreEmpleado()
+//            );
+             */
+
+            // Nueva Implementacion:
+            // "Tell, Dont Ask": Le "decimos" a la orden que genere el DTO.
+            //  Le pasamos solo la información que el Gestor tiene y la Orden no.
+            /*
+            * Beneficios:
+            * - Bajo Acoplamiento: el GestorOrden no conoce
+            *  detalles concretos sobre la EstacionSismologica o Sismografo.
+            * - Alta Cohesion: Se mantiene la logica de "juntar datos de una orden" dentro de la propia orden.
+            * - Mantenibilidad: Si cambia la estructura, solo debo modificar OrdenInspeccion, y no el Gestor.
+            * */
+            DatosNotificacionCierre datos = getSelectedOrden().generarDatosNotificacion(
+                    sismografoEstadoActual,
+                    getMotivosFueraServicioSelection(),
+                    getRI() // Pasamos el empleado logueado
             );
 
             // 2. Notificamos (SIEMPRE, al final del cierre)

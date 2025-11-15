@@ -92,7 +92,7 @@ public class Main extends Application {
         List<TipoMotivo> listaMotivos = mockDataGenerator.generarTipoMotivo();
 
         this.gestorOrden = new GestorOrden(
-                ordenesInspeccion,
+                // ordenesInspeccion, // Eliminado por Implementacion de Lectura en BD.
                 empleados,
                 listaMotivos,
                 estados,
