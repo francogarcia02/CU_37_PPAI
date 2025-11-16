@@ -34,11 +34,6 @@
             
             <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
 
-            <!-- ===================================================================== -->
-            <!-- ¡LA SOLUCIÓN! Forzar la ejecución explícita del script de carga SQL. -->
-            <!-- ===================================================================== -->
-            <property name="javax.persistence.sql-load-script-source" value="import.sql"/>
-
         </properties>
 
     </persistence-unit>

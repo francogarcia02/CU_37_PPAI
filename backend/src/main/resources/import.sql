@@ -49,3 +49,6 @@ INSERT INTO T_TIPO_MOTIVO (id_tipo_motivo, descripcion) VALUES (2, 'Desgaste de 
 INSERT INTO T_TIPO_MOTIVO (id_tipo_motivo, descripcion) VALUES (3, 'Fallo en el sistema de registro');
 INSERT INTO T_TIPO_MOTIVO (id_tipo_motivo, descripcion) VALUES (4, 'Vandalismo');
 INSERT INTO T_TIPO_MOTIVO (id_tipo_motivo, descripcion) VALUES (5, 'Fallo en fuente de alimentación');
+
+-- Update the sequence to start after the highest ID used
+ALTER SEQUENCE IF EXISTS cambio_estado_seq RESTART WITH 7;

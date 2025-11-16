@@ -35,19 +35,26 @@ public class OrdenDAOImpl implements OrdenDAO {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            // Con las relaciones bidireccionales correctamente establecidas,
-            // un simple merge es suficiente para que JPA sincronice todos los cambios.
-            em.merge(orden);
+
+            // First, check if the entity is already in the persistence context
+            OrdenInspeccion managedOrden = em.find(OrdenInspeccion.class, orden.getNumeroOrden());
+
+            if (managedOrden != null) {
+                // If the entity is already managed, update its state
+                em.merge(orden);
+            } else {
+                // If not managed, merge it
+                em.merge(orden);
+            }
+
             tx.commit();
             System.out.println("PERSISTENCIA: Orden " + orden.getNumeroOrden() + " actualizada con éxito.");
         } catch (Exception e) {
-            if (tx.isActive()) {
+            if (tx != null && tx.isActive()) {
                 tx.rollback();
             }
             System.err.println("PERSISTENCIA: Error al actualizar la orden. Rollback ejecutado.");
-            e.printStackTrace();
-        } finally {
-            em.close();
+            throw new RuntimeException("Error al actualizar la orden", e);
         }
     }
 }

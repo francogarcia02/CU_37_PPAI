@@ -2,10 +2,7 @@ package entity;
 
 import control.notificacion.DatosNotificacionCierre;
 import interfaces.OrdenInspeccionInterface;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -13,8 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @Entity
 @Table(name = "T_ORDEN_INSPECCION")
@@ -40,6 +36,7 @@ public class OrdenInspeccion implements OrdenInspeccionInterface {
     @Column(name = "observaciones_cierre")
     private String observaciones;
 
+
     @OneToMany(mappedBy = "ordenInspeccion", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<CambioEstado> cambiosEstados = new ArrayList<>();
 
@@ -51,6 +48,16 @@ public class OrdenInspeccion implements OrdenInspeccionInterface {
         this.responsableOrdenInspeccion = responsableOrdenInspeccion;
         this.observaciones = observaciones;
         this.cambiosEstados = new ArrayList<>(cambiosEstados);
+    }
+
+    // Getter para cambiosEstados
+    public List<CambioEstado> getCambiosEstado() {
+        return cambiosEstados;
+    }
+
+    // Getter para observaciones
+    public String getObservacionesCierre() {
+        return observaciones;
     }
 
     @Override

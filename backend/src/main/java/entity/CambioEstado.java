@@ -20,7 +20,12 @@ public class CambioEstado {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cambio_estado_seq")
-    @SequenceGenerator(name = "cambio_estado_seq", sequenceName = "T_CAMBIO_ESTADO_SEQ", allocationSize = 1)
+    @SequenceGenerator(
+            name = "cambio_estado_seq",
+            sequenceName = "cambio_estado_seq",
+            allocationSize = 1,
+            initialValue = 6 // Un número mayor que el ID más alto en tus datos iniciales
+    )
     @Column(name = "id_cambio_estado")
     private Long idCambioEstado;
 
