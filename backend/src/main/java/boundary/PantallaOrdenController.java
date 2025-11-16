@@ -66,7 +66,18 @@ public class PantallaOrdenController {
             mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Por favor, seleccione una orden de la lista.");
             return;
         }
-        this.ordenSeleccionada = gestorOrden.getOrdenesInspeccionFiltradas().get(indiceSeleccionado);
+
+        // Get the filtered orders
+        List<OrdenInspeccion> ordenesFiltradas = gestorOrden.getOrdenesInspeccionFiltradas();
+
+        // Verify the index is within bounds
+        if (indiceSeleccionado >= ordenesFiltradas.size()) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "La orden seleccionada ya no está disponible.");
+            cargarOrdenesInspeccion(); // Refresh the list
+            return;
+        }
+
+        this.ordenSeleccionada = ordenesFiltradas.get(indiceSeleccionado);
         gestorOrden.tomarNumeroOI(ordenSeleccionada.getNumeroOrden());
 
         lblPasoActual.setText("Paso 2: Ingresar Observación de Cierre");
@@ -164,6 +175,7 @@ public class PantallaOrdenController {
         cmbMotivos.getSelectionModel().clearSelection();
         txtComentarioMotivo.clear();
         listViewMotivosAgregados.getItems().clear();
+        listViewOrdenes.getItems().clear();
 
         // 3. Volver a cargar la lista de órdenes actualizada
         cargarOrdenesInspeccion();
@@ -179,6 +191,31 @@ public class PantallaOrdenController {
         panelIngresoObservacion.setVisible(p2); panelIngresoObservacion.setManaged(p2);
         panelGestionSismografo.setVisible(p3); panelGestionSismografo.setManaged(p3);
         panelConfirmacionFinal.setVisible(p4); panelConfirmacionFinal.setManaged(p4);
+    }
+
+    // Agrega estos métodos en PantallaOrdenController.java
+
+    @FXML
+    private void handleVolverASeleccion() {
+        // Vuelve del Paso 2 (Observación) al Paso 1 (Selección)
+        lblPasoActual.setText("Paso 1: Seleccionar Orden de Inspección");
+        cambiarVisibilidadPaneles(true, false, false, false);
+        // Opcional: Si quieres limpiar la selección anterior, descomenta la siguiente línea:
+         this.ordenSeleccionada = null;
+    }
+
+    @FXML
+    private void handleVolverAObservacion() {
+        // Vuelve del Paso 3 (Gestión Sismógrafo) al Paso 2 (Observación)
+        lblPasoActual.setText("Paso 2: Ingresar Observación de Cierre");
+        cambiarVisibilidadPaneles(false, true, false, false);
+    }
+
+    @FXML
+    private void handleVolverAGestion() {
+        // Vuelve del Paso 4 (Confirmación) al Paso 3 (Gestión Sismógrafo)
+        lblPasoActual.setText("Paso 3: Actualizar Situación del Sismógrafo (Opcional)");
+        cambiarVisibilidadPaneles(false, false, true, false);
     }
 
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {

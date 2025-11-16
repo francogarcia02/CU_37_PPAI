@@ -14,5 +14,12 @@ public interface OrdenDAO {
      * Busca en la BD todas las órdenes en estado "Finalizado"
      * que pertenezcan al Responsable de Inspección (RI) dado.
      */
-    List<OrdenInspeccion> buscarFinalizadasPorRI(Empleado ri);
+    List<OrdenInspeccion> getAllOrdenes();
+
+    /**
+     * Actualiza una orden de inspección existente en la base de datos.
+     * @param orden La orden de inspección con los datos actualizados.
+     */
+    void update(OrdenInspeccion orden);
+
 }

@@ -1,7 +1,6 @@
 import boundary.PantallaOrdenController;
 import control.GestorOrden;
-import control.MOCKDATAGenerator;
-import control.notificacion.IObservadorCierreOrden;
+import control.persistencia.*;
 import entity.*;
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
@@ -16,11 +15,10 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
-import boundary.InterfazCCRS; // por patron observador.
+import boundary.InterfazCCRS;
 import boundary.InterfazMail;
-
+import control.notificacion.IObservadorCierreOrden;
 
 public class Main extends Application {
 
@@ -31,7 +29,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
 
-        // 1. Inicializa toda la lógica de negocio primero
+        // 1. Inicializa la lógica de negocio con datos reales de la BD
         inicializarLogicaDeNegocio();
 
         // 2. Muestra la animación de bienvenida
@@ -40,7 +38,6 @@ public class Main extends Application {
 
     private void mostrarAnimacionBienvenida() {
         WebView webView = new WebView();
-        // Le decimos que cargue el index.html de nuestra carpeta de recursos
         URL url = getClass().getResource("/utnLogohtml/index.html");
         webView.getEngine().load(url.toExternalForm());
 
@@ -51,16 +48,15 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        // Crea una pausa para la animación
         PauseTransition delay = new PauseTransition(Duration.seconds(4));
         delay.setOnFinished(event -> {
-            Platform.runLater(() -> { // <-- Carga de la pantalla AL FINAL de la cola de eventos de JAVAFX.
+            Platform.runLater(() -> {
                 try {
                     mostrarPantallaPrincipal();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }); // <-- AÑADE ESTA LÍNEA
+            });
         });
         delay.play();
     }
@@ -70,7 +66,7 @@ public class Main extends Application {
         Parent root = loader.load();
 
         PantallaOrdenController controller = loader.getController();
-        controller.setGestorOrden(gestorOrden); // Le pasamos el gestor al controlador
+        controller.setGestorOrden(gestorOrden);
 
         Scene scene = new Scene(root, 800, 600);
         primaryStage.setTitle("Sistema de Red Sísmica - CCRS");
@@ -78,44 +74,42 @@ public class Main extends Application {
     }
 
     private void inicializarLogicaDeNegocio() {
-        MOCKDATAGenerator mockDataGenerator = new MOCKDATAGenerator();
-        Empleado empleadoRI = mockDataGenerator.generarEmpleado(1);
-        Usuario usuarioRI = mockDataGenerator.generarUsuario(1);
-        Empleado otroEmpleadoNoRI = mockDataGenerator.generarEmpleado(2);
-        List<Empleado> empleados = List.of(empleadoRI, otroEmpleadoNoRI);
-        Sesion sesion = mockDataGenerator.generarSesion(usuarioRI);
-        EstacionSismologica estacionSismologica1 = mockDataGenerator.generarEstacionSismologica(1);
-        EstacionSismologica estacionSismologica2 = mockDataGenerator.generarEstacionSismologica(2);
-        List<Estado> estados = mockDataGenerator.generarEstados();
-        List<OrdenInspeccion> ordenesInspeccion = new ArrayList<>(mockDataGenerator.generarOrdenesInspeccion(empleadoRI, estacionSismologica1, estados));
-        ordenesInspeccion.addAll(mockDataGenerator.generarOrdenesInspeccion(empleadoRI, estacionSismologica2, estados));
-        List<TipoMotivo> listaMotivos = mockDataGenerator.generarTipoMotivo();
+        // --- Carga de datos desde la Base de Datos usando DAOs ---
+        EmpleadoDAO empleadoDAO = new EmpleadoDAOImpl();
+        EstadoDAO estadoDAO = new EstadoDAOImpl();
+        TipoMotivoDAO tipoMotivoDAO = new TipoMotivoDAOImpl();
 
+        // Simulamos el inicio de sesión del Responsable de Inspecciones (ID 1)
+        Empleado empleadoLogueado = empleadoDAO.getById(1L);
+        Usuario usuarioLogueado = new Usuario("AgusBieberQW", "123456", empleadoLogueado);
+        Sesion sesion = new Sesion(usuarioLogueado);
+
+        // Obtenemos todos los datos necesarios para el gestor
+        List<Empleado> todosLosEmpleados = empleadoDAO.getAll();
+        List<Estado> todosLosEstados = estadoDAO.getAll();
+        System.out.println("Todos los estados: " + todosLosEstados);
+        List<TipoMotivo> todosLosTiposMotivo = tipoMotivoDAO.getAll();
+
+        // Creamos el gestor con los datos reales
         this.gestorOrden = new GestorOrden(
-                // ordenesInspeccion, // Eliminado por Implementacion de Lectura en BD.
-                empleados,
-                listaMotivos,
-                estados,
+                todosLosEmpleados,
+                todosLosTiposMotivo,
+                todosLosEstados,
                 sesion
         );
 
-        // --- INICIO "ENSAMBLADO" OBSERVER
-
-        // 1  CONSULTA al Gestor por la data de configuración
+        // --- Configuración del Patrón Observer ---
         List<String> mailsDeReparacion = this.gestorOrden.obtenerMailsResponsablesReparacion();
-
-        // 2. CREA LOS OBSERVADORES
-        IObservadorCierreOrden observadorMail = new InterfazMail(mailsDeReparacion); // solo Strings
+        IObservadorCierreOrden observadorMail = new InterfazMail(mailsDeReparacion);
         IObservadorCierreOrden observadorCCRS = new InterfazCCRS();
 
-        // 3. SUSCRIBE LOS OBSERVADORES AL SUJETO
         this.gestorOrden.agregarObservador(observadorMail);
         this.gestorOrden.agregarObservador(observadorCCRS);
-        // --- FIN "ENSAMBLADO" OBSERVER ---
-
     }
 
     public static void main(String[] args) {
         launch(args);
+        // Es una buena práctica cerrar la fábrica de EntityManager cuando la aplicación termina.
+        JPAUtil.shutdown();
     }
 }

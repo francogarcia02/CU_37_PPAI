@@ -23,7 +23,6 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
 
     private Usuario usuarioLogueado;
     private Empleado RI;
-    private List<OrdenInspeccion> ordenesInspeccion;
     private OrdenInspeccion selectedOrden;
 
     private String selectedDecicionSismografo;
@@ -103,6 +102,7 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
 
     @Override
     public List<OrdenInspeccion> buscarOrdenesInspeccion() {
+        ordenesInspeccionFiltradas.clear();
 
         // El 'RI' (Responsable de Inspección) debe estar seteado
         // Asumimos que la pantalla llamó a "buscarEmpleado()" primero
@@ -112,10 +112,27 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
         }
 
         // 1. Llamada al DAO para obtener las órdenes REALES de la BD
-        List<OrdenInspeccion> ordenesDesdeBD = ordenDAO.buscarFinalizadasPorRI(RI);
+        List<OrdenInspeccion> ordenesDesdeBD = ordenDAO.getAllOrdenes();
+        System.out.println("ordenesDesdeBD = " + ordenesDesdeBD);
+        ordenesDesdeBD.forEach(ordenInspeccion -> {
+            // Chequea que la orden esté en el estado correcto
+            boolean condition1 = ordenInspeccion.estaFinalizada();
+            System.out.println("estaFinalizada = " + condition1);
+
+            // Chequea que la orden pertenezca al Responsable de Inspección logueado
+            boolean condition2 = ordenInspeccion.esTuRI(RI);
+            System.out.println("esTuRI = " + condition2);
+
+
+            if (condition1 && condition2) {
+                ordenesInspeccionFiltradas.add(ordenInspeccion);
+            }
+        });
+        System.out.println("ordenesFiltradas = " + ordenesInspeccionFiltradas);
+
 
         // 2. El metodo de ordenar ahora trabaja sobre la lista de la BD
-        return ordenarOI(ordenesDesdeBD);
+        return ordenarOI(ordenesInspeccionFiltradas);
     }
 
     @Override
@@ -199,81 +216,45 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
             buscarEstadoCerradoOI(); // Este metodo setea el atributo 'EstadoCerrada'
 
             if (getEstadoCerrada() == null) {
-                System.err.println("ERROR: No se pudo encontrar el estado 'CierreDefinitivo' en la lista de estados.");
+                System.err.println("ERROR: No se pudo encontrar el estado 'Cerrada' en la lista de estados.");
                 return false;
             } //Importante asegurarnos de encontrar el estado.
 
-            boolean result = getSelectedOrden().cerrar(
+            boolean cierreExitoso = getSelectedOrden().cerrar(
                     getObservaciones(),
                     getMotivosFueraServicioSelection(),
-                    getEstadoCerrada(), // Asumiendo que el estado 13 es "cierreDefinitivo"
+                    getEstadoCerrada(),
                     getRI());
 
-            String sismografoEstadoActual;
-            // Logica para determinar el estado final.
-            if (!getMotivosFueraServicioSelection().isEmpty()) {
-                getSelectedOrden().enviarSismografoAReparar(getEstadoFS());
-                sismografoEstadoActual = getEstadoFS().getNombre(); // "Fuera de Servicio"
-            } else {
-                // Si no hay motivos, quedará online (o el estado que .cerrar() le haya puesto)
-                sismografoEstadoActual = getSelectedOrden().getEstacionSismologica().getSismografo().getEstadoActual().getNombre();
+            if (cierreExitoso) {
+                System.out.println("cierre exitoso");
+                String sismografoEstadoActual;
+                // Logica para determinar el estado final del sismógrafo
+                if (!getMotivosFueraServicioSelection().isEmpty()) {
+                    getSelectedOrden().enviarSismografoAReparar(getEstadoFS());
+                    sismografoEstadoActual = getEstadoFS().getNombre(); // "Fuera de Servicio"
+                } else {
+                    sismografoEstadoActual = getSelectedOrden().getEstacionSismologica().getSismografo().getEstadoActual().getNombre();
+                }
+
+                // --- INICIO PERSISTENCIA ---
+                // Actualizamos la entidad OrdenInspeccion. Gracias a la configuración de cascada,
+                // JPA se encargará de insertar el nuevo CambioEstado y de actualizar el anterior.
+                ordenDAO.update(getSelectedOrden());
+                // --- FIN PERSISTENCIA ---
+
+                // --- INICIO "DISPARADOR" OBSERVER ---
+                DatosNotificacionCierre datos = getSelectedOrden().generarDatosNotificacion(
+                        sismografoEstadoActual,
+                        getMotivosFueraServicioSelection(),
+                        getRI()
+                );
+
+                this.notificar(datos);
+                // --- FIN DISPARADOR OBSERVER ---
+
+                return true;
             }
-
-            // DEBUG
-            //System.out.println("--- DEBUG: Motivos a notificar: " + getMotivosFueraServicioSelection().size() + " ---");
-
-            // --- INICIO PERSISTENCIA ---
-            // Le pasamos la orden (que ya tiene su estado "CierreDefinitivo")
-            // el estado del sismógrafo (si es que cambió) y la lista de motivos
-            boolean guardadoOK = ordenDAO.guardarCierre(
-                    getSelectedOrden(),
-                    getEstadoFS(), // Le pasamos el objeto Estado "Fuera de Servicio"
-                    getMotivosFueraServicioSelection()
-            );
-
-            if (!guardadoOK) {
-                // (Manejar error)
-                System.err.println("¡ERROR AL GUARDAR EN LA BASE DE DATOS!");
-            }
-            // --- FIN PERSISTENCIA ---
-
-            // --- INICIO "DISPARADOR" OBSERVER ---
-
-            // Anterior implementacion:
-            /* 1. Creamos el DTO con toda la info que los observadores puedan necesitar
-//            DatosNotificacionCierre datos = new DatosNotificacionCierre(
-//                    getSelectedOrden().getEstacionSismologica().getSismografo().getIdSismografo().toString(),
-//                    sismografoEstadoActual, // El estado final real
-//                    getSelectedOrden().obtenerCambioEstadoActual().getFechaHorainicio(),
-//                    getMotivosFueraServicioSelection(), // Pasamos la lista (puede estar vacía)
-//                    getSelectedOrden().getNumeroOrden(),
-//                    getSelectedOrden().getEstacionSismologica().getNombreEstacion(),
-//                    getRI().getNombreEmpleado()
-//            );
-             */
-
-            // Nueva Implementacion:
-            // "Tell, Dont Ask": Le "decimos" a la orden que genere el DTO.
-            //  Le pasamos solo la información que el Gestor tiene y la Orden no.
-            /*
-            * Beneficios:
-            * - Bajo Acoplamiento: el GestorOrden no conoce
-            *  detalles concretos sobre la EstacionSismologica o Sismografo.
-            * - Alta Cohesion: Se mantiene la logica de "juntar datos de una orden" dentro de la propia orden.
-            * - Mantenibilidad: Si cambia la estructura, solo debo modificar OrdenInspeccion, y no el Gestor.
-            * */
-            DatosNotificacionCierre datos = getSelectedOrden().generarDatosNotificacion(
-                    sismografoEstadoActual,
-                    getMotivosFueraServicioSelection(),
-                    getRI() // Pasamos el empleado logueado
-            );
-
-            // 2. Notificamos (SIEMPRE, al final del cierre)
-            this.notificar(datos);
-            // --- FIN DISPARADOR OBSERVER ---
-
-            // publicarMonitores(); METODO QUE YA NO USAMOS, DES-ACOPLO EL GESTOR.
-            return result;
         }
         return false;
     }

@@ -1,12 +1,26 @@
 package entity;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
 
 @Data
+@NoArgsConstructor
+@Entity
+@Table(name = "T_ESTADO")
 public class Estado {
-    public int idEstado;
-    public String ambito;
-    public String nombre;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_estado")
+    private int idEstado;
+
+    @Column(name = "ambito", nullable = false)
+    private String ambito;
+
+    @Column(name = "nombre", nullable = false)
+    private String nombre;
 
     public Estado(int idEstado, String ambito, String nombre) {
         this.idEstado = idEstado;
@@ -14,48 +28,28 @@ public class Estado {
         this.nombre = nombre;
     }
 
-
+    @Transient
     public Boolean esFinalizado() {
-        if ( this.esAmbitoOrdendeInspeccion() && "Finalizado".equals(this.getNombre()) ){
-            return true;
-        } else {
-            return false;
-        }
+        return esAmbitoOrdendeInspeccion() && "Finalizado".equals(getNombre());
     }
 
-
+    @Transient
     public Boolean esAmbitoSismografo() {
-        if (  this.getAmbito().equals("SISMOGRAFO") ) {
-            return true;
-        } else {
-            return false;
-        }
+        return "SISMOGRAFO".equals(getAmbito());
     }
 
-
+    @Transient
     public Boolean esFueraDeServicio() {
-        if ( this.esAmbitoSismografo() && "Fuera de Servicio".equals(this.getNombre()) ){
-            return true;
-        } else {
-            return false;
-        }
+        return esAmbitoSismografo() && "Fuera de Servicio".equals(getNombre());
     }
 
-
+    @Transient
     public Boolean esAmbitoOrdendeInspeccion() {
-        if (  this.getAmbito().equals("ORDEN_INSPECCION") ) {
-            return true;
-        } else {
-            return false;
-        }
+        return "ORDEN_INSPECCION".equals(getAmbito());
     }
 
-
+    @Transient
     public Boolean esCerrada() {
-        if ( this.esAmbitoOrdendeInspeccion() && "CierreDefinitivo".equals(this.getNombre()) ){
-            return true;
-        } else {
-            return false;
-        }
+        return esAmbitoOrdendeInspeccion() && "CierreDefinitivo".equals(getNombre());
     }
 }

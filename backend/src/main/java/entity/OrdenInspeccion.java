@@ -2,36 +2,49 @@ package entity;
 
 import control.notificacion.DatosNotificacionCierre;
 import interfaces.OrdenInspeccionInterface;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@Entity
+@Table(name = "T_ORDEN_INSPECCION")
 public class OrdenInspeccion implements OrdenInspeccionInterface {
-    public Long numeroOrden;
-    public EstacionSismologica estacionSismologica;
-    public Empleado responsableOrdenInspeccion;
-    public List<TareaTecnicaRevision> tareasTecnicasRevisiones;
-    public String observaciones;
-    public List<CambioEstado> cambiosEstados;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_orden")
+    private Long numeroOrden;
+
+    @ManyToOne
+    @JoinColumn(name = "id_estacion", nullable = false)
+    private EstacionSismologica estacionSismologica;
+
+    @ManyToOne
+    @JoinColumn(name = "id_responsable", nullable = false)
+    private Empleado responsableOrdenInspeccion;
+
+    @OneToMany(mappedBy = "ordenInspeccion", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<TareaTecnicaRevision> tareasTecnicasRevisiones = new ArrayList<>();
+
+    @Column(name = "observaciones_cierre")
+    private String observaciones;
+
+    @OneToMany(mappedBy = "ordenInspeccion", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<CambioEstado> cambiosEstados = new ArrayList<>();
 
 
     public OrdenInspeccion(Long numeroOrden, EstacionSismologica estacionSismologica, List<TareaTecnicaRevision> tareasTecnicasRevisiones, Empleado responsableOrdenInspeccion, String observaciones, List<CambioEstado> cambiosEstados) {
-        if (numeroOrden == null) {
-            throw new IllegalArgumentException("Número de orden no puede ser nulo");
-        }
-        if (estacionSismologica == null) {
-            throw new IllegalArgumentException("Estación sismológica no puede ser nula");
-        }
-        if (tareasTecnicasRevisiones == null) {
-            throw new IllegalArgumentException("Lista de tareas técnicas no puede ser nula");
-        }
-        if (responsableOrdenInspeccion == null) {
-            throw new IllegalArgumentException("Responsable de la orden no puede ser nulo");
-        }
-        
         this.numeroOrden = numeroOrden;
         this.estacionSismologica = estacionSismologica;
         this.tareasTecnicasRevisiones = new ArrayList<>(tareasTecnicasRevisiones);
@@ -40,58 +53,52 @@ public class OrdenInspeccion implements OrdenInspeccionInterface {
         this.cambiosEstados = new ArrayList<>(cambiosEstados);
     }
 
-
-
     @Override
     public Boolean esTuRI(Empleado empleado) {
-            return responsableOrdenInspeccion.equals(empleado);
+        if (empleado == null || this.responsableOrdenInspeccion == null) {
+            return false;
         }
+        return Objects.equals(this.responsableOrdenInspeccion.getIdEmpleado(), empleado.getIdEmpleado());
+    }
 
     public Boolean estaFinalizada() {
         CambioEstado estadoActual = this.obtenerCambioEstadoActual();
-        return estadoActual != null && estadoActual.getEstadoNuevo().getNombre().equals("Finalizado");
-}
+        return estadoActual != null && "Finalizado".equalsIgnoreCase(estadoActual.getEstadoNuevo().getNombre());
+    }
 
     @Override
     public Boolean cerrar(String observacion, List<MotivoFueraServicio> motivosNuevos, Estado estadoCerrada, Empleado responsableEjecucion) {
-        for (CambioEstado cambio : cambiosEstados) {
-            if (cambio.getFechaHorafin() == null &&
-                    "Finalizado".equalsIgnoreCase(cambio.getEstadoNuevo().getNombre())) {
-                this.setObservaciones(observacion);
-                cambio.setFechaHorafin(LocalDateTime.now());
-                cambiosEstados.add(
-                        new CambioEstado(
-                                cambio.getIdCambioEstado() + 1L,
-                                cambio.getEstadoNuevo(),
-                                estadoCerrada,
-                                LocalDateTime.now(),
-                                null,
-                                responsableEjecucion,
-                                motivosNuevos
-                        ));
-                return true;
+        CambioEstado cambioActual = this.obtenerCambioEstadoActual();
+        if (cambioActual != null && "Finalizado".equalsIgnoreCase(cambioActual.getEstadoNuevo().getNombre())) {
+            this.setObservaciones(observacion);
+            cambioActual.setFechaHorafin(LocalDateTime.now());
+
+            CambioEstado nuevoCambioCerrado = new CambioEstado();
+            nuevoCambioCerrado.setEstadoAnterior(cambioActual.getEstadoNuevo());
+            nuevoCambioCerrado.setEstadoNuevo(estadoCerrada);
+            nuevoCambioCerrado.setFechaHorainicio(LocalDateTime.now());
+            nuevoCambioCerrado.setResponsableCambioEstado(responsableEjecucion);
+            nuevoCambioCerrado.setOrdenInspeccion(this);
+
+            if (motivosNuevos != null && !motivosNuevos.isEmpty()) {
+                nuevoCambioCerrado.setMotivosCambioEstados(motivosNuevos);
             }
+
+            this.cambiosEstados.add(nuevoCambioCerrado);
+            return true;
         }
         return false;
     }
 
 
     @Override
-    public void realizar() {
-
-    }
+    public void realizar() {}
 
     @Override
-    public void confirmarPte() {
-
-    }
+    public void confirmarPte() {}
 
     @Override
-    public void finalizar() {
-
-    }
-
-
+    public void finalizar() {}
 
     public void enviarSismografoAReparar(Estado estadoFs) {
         EstacionSismologica estacionSelected = this.getEstacionSismologica();
@@ -99,41 +106,28 @@ public class OrdenInspeccion implements OrdenInspeccionInterface {
     }
 
     public LocalDateTime obtenerFechaFinalizacion() {
-        LocalDateTime fechaFinalizacion = null;
+        return cambiosEstados.stream()
+                .filter(CambioEstado::esFinalizado)
+                .map(CambioEstado::getFechaHorafin)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+    }
 
-        for (CambioEstado cambio : cambiosEstados) {
-            if (cambio.esFinalizado()) {
-                fechaFinalizacion = cambio.getFechaHorafin();
-                break;
-            }
-        }
-        return fechaFinalizacion;
-    };
-
+    @Transient
     public CambioEstado obtenerCambioEstadoActual() {
         return cambiosEstados.stream()
             .filter(cambio -> cambio.getFechaHorafin() == null)
-            .findFirst()  // Get the first (debería ser el unico)
+            .findFirst()
             .orElse(null);
     }
 
     public Boolean compareNroOrder(Long number){
-        if(this.getNumeroOrden().equals(number)){
-            return true;
-        }
-        else {
-            return false;
-        }
+        return this.getNumeroOrden().equals(number);
     }
 
     public String toStringForPantalla() {
-        // Obtener el cambio de estado actual (donde fechaHorafin es null)
-        CambioEstado estadoActual = cambiosEstados.stream()
-                .filter(cambio -> cambio.getFechaHorafin() == null)
-                .findFirst()
-                .orElse(null);
-
-        // Format the date if available
+        CambioEstado estadoActual = obtenerCambioEstadoActual();
         String fechaFin = (estadoActual != null && estadoActual.getFechaHorainicio() != null)
                 ? estadoActual.getFechaHorainicio().toString()
                 : "No disponible";
@@ -141,48 +135,48 @@ public class OrdenInspeccion implements OrdenInspeccionInterface {
         return String.format(
                 "\033[95m____________________________________________________________________________%n\033[0m" +
                 "\033[92mNúmero de Orden:\033[0m %d%n" +
-                        "\033[92mEstado:\033[0m %s%n" +
-                        "\033[92mFecha de Finalización:\033[0m %s%n" +
-                        "\033[92mEstación Sismológica:\033[0m %s%n" +
-                        "\033[92mSismógrafo:\033[0m %s%n" +
-                "\033[95m____________________________________________________________________________%n\033[0m"
-                ,
+                "\033[92mEstado:\033[0m %s%n" +
+                "\033[92mFecha de Finalización:\033[0m %s%n" +
+                "\033[92mEstación Sismológica:\033[0m %s%n" +
+                "\033[92mSismógrafo:\033[0m %s%n" +
+                "\033[95m____________________________________________________________________________%n\033[0m",
                 numeroOrden,
-                this.obtenerCambioEstadoActual().estadoNuevo.getNombre(),
+                (estadoActual != null) ? estadoActual.getEstadoNuevo().getNombre() : "N/A",
                 fechaFin,
                 estacionSismologica.getNombreEstacion(),
                 estacionSismologica.getSismografo().getIdSismografo()
-
         );
     }
 
-    // Dentro de la clase entity/OrdenInspeccion.java
-
-    /**
-     * Aplicación de Patron GRASP Experto y "Tell, Don't Ask".
-     * Esta orden es la experta en su propia información.
-     * Genera el DTO para la notificación, recibiendo los datos
-     * que solo el Gestor conoce (el nuevo estado y los motivos de la GUI).
-     */
+    @Transient
     public DatosNotificacionCierre generarDatosNotificacion(String sismografoEstadoActual, List<MotivoFueraServicio> motivos, Empleado responsable) {
-
-        // Ahora SÍ, la Orden es la experta en sus propios datos
         String sismografoId = this.estacionSismologica.getSismografo().getIdSismografo().toString();
         LocalDateTime fechaHora = this.obtenerCambioEstadoActual().getFechaHorainicio();
         Long numeroOrden = this.getNumeroOrden();
         String nombreEstacion = this.estacionSismologica.getNombreEstacion();
-        String nombreResponsable = responsable.getNombreEmpleado(); // O .nombreEmpleado
+        String nombreResponsable = responsable.getNombreEmpleado();
 
         return new DatosNotificacionCierre(
                 sismografoId,
-                sismografoEstadoActual, // <-- Dato que pasó el Gestor
+                sismografoEstadoActual,
                 fechaHora,
-                motivos,                // <-- Dato que pasó el Gestor
+                motivos,
                 numeroOrden,
                 nombreEstacion,
                 nombreResponsable
         );
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OrdenInspeccion that = (OrdenInspeccion) o;
+        return Objects.equals(numeroOrden, that.numeroOrden);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(numeroOrden);
+    }
 }
