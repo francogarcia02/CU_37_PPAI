@@ -12,7 +12,7 @@ public class OrdenDAOImpl implements OrdenDAO {
 
     @Override
     public boolean guardarCierre(OrdenInspeccion orden, Estado estadoSismografo, List<MotivoFueraServicio> motivos) {
-        // Este método queda obsoleto, la lógica principal está en update.
+        // Este metodo queda obsoleto, la lógica principal está en update.
         // Se podría eliminar en una futura refactorización.
         update(orden);
         return true;

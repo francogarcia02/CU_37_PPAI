@@ -78,6 +78,8 @@ public class Main extends Application {
         EmpleadoDAO empleadoDAO = new EmpleadoDAOImpl();
         EstadoDAO estadoDAO = new EstadoDAOImpl();
         TipoMotivoDAO tipoMotivoDAO = new TipoMotivoDAOImpl();
+        OrdenDAO ordenDAO = new OrdenDAOImpl();
+
 
         // Simulamos el inicio de sesión del Responsable de Inspecciones (ID 1)
         Empleado empleadoLogueado = empleadoDAO.getById(1L);
@@ -95,7 +97,8 @@ public class Main extends Application {
                 todosLosEmpleados,
                 todosLosTiposMotivo,
                 todosLosEstados,
-                sesion
+                sesion,
+                ordenDAO
         );
 
         // --- Configuración del Patrón Observer ---

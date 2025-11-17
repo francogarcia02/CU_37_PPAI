@@ -162,7 +162,7 @@ public class PantallaOrdenController {
     }
 
     /**
-     * Nuevo método para reiniciar la interfaz a su estado inicial.
+     * Nuevo metodo para reiniciar la interfaz a su estado inicial.
      */
     private void resetearPantalla() {
         // 1. Limpiar variables de estado

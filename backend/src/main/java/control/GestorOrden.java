@@ -59,13 +59,14 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
     }
     // --- FIN PATRÓN OBSERVER ---
 
-    public GestorOrden(List<Empleado> empleados, List<TipoMotivo> tiposMotivos, List<Estado> estados, Sesion sesion) {
+    public GestorOrden(List<Empleado> empleados, List<TipoMotivo> tiposMotivos, List<Estado> estados, Sesion sesion, OrdenDAO ordenDAO) {
         // this.ordenesInspeccion = ordenesInspeccion; // No es necesaria, por implementacion de Lectura en BD
         this.empleados = empleados;
         this.tiposMotivos = tiposMotivos;
         this.estados = estados;
         this.sesion = sesion;
-        this.ordenDAO = new control.persistencia.OrdenDAOImpl(); //Inicializar para PERSISTENCIA
+        this.ordenDAO = ordenDAO;
+//      this.ordenDAO = new control.persistencia.OrdenDAOImpl(); // Eliminado, por principio Single Responsability (SRP)
     }
 
     @Override
