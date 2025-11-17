@@ -242,7 +242,7 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
                     getRI());
 
             if (cierreExitoso) {
-                System.out.println("cierre exitoso");
+                System.out.println("Cierre Exitoso");
                 String sismografoEstadoActual;
                 // Logica para determinar el estado final del sismógrafo
                 if (!getMotivosFueraServicioSelection().isEmpty()) {
@@ -250,7 +250,21 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
                     sismografoEstadoActual = getEstadoFS().getNombre(); // "Fuera de Servicio"
                 } else {
                     sismografoEstadoActual = getSelectedOrden().getEstacionSismologica().getSismografo().getEstadoActual().getNombre();
-                }
+                    /*
+                    NOTA TÉCNICA (DEUDA DE DISEÑO):
+                    La anterior línea genera un "tren de mensajes" y acopla al Gestor (Controlador)
+                    con la estructura interna profunda de las Clases Entidad.
+                    Esto no respeta el principio Ley de Demeter (Don't talk to Strangers)
+
+                    Principio de Solución (Refactorización):
+                    La solución ideal (Patrón Experto en Información) sería añadir un metodo
+                    en 'OrdenInspeccion' (ej. getNombreEstadoSismografoActual()) que
+                    encapsule esta navegación.
+
+                    Se mantiene la implementación actual para respetar
+                    la consistencia con el Diagrama de Clases entregado.
+                    */
+                    }
 
                 // --- INICIO PERSISTENCIA ---
                 // Actualizamos la entidad OrdenInspeccion. Gracias a la configuración de cascada,

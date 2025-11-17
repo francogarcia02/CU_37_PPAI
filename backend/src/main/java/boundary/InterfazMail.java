@@ -38,7 +38,7 @@ public class InterfazMail implements IObservadorCierreOrden {
         String mensaje = confeccionarMensaje(datos);
 
         // Usa la lista de mails que ya tiene configurada
-        // 3. --- ESTE MÉTODO NO SE CAMBIA ---
+        // 3. --- ESTE METODO NO SE CAMBIA ---
         // Sigue imprimiendo el String que devuelve enviarMail.
         // Ahora, ese String será limpio.
         mailsDestinatarios.forEach(mail ->

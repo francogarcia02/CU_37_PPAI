@@ -19,8 +19,9 @@ INSERT INTO T_ESTADO (id_estado, ambito, nombre) VALUES (12, 'SISMOGRAFO', 'Desc
 INSERT INTO T_ESTADO (id_estado, ambito, nombre) VALUES (13, 'SISMOGRAFO', 'enReparacion');
 
 -- Empleados
-INSERT INTO T_EMPLEADO (id_empleado, nombre_empleado, apellido_empleado, rol_empleado, mail, telefono) VALUES (1, 'Agustin', 'Bieber', 'RESPONSABLE_INSPECCIONES', 'agustinbieber@gmail.com', '3512345671');
+INSERT INTO T_EMPLEADO (id_empleado, nombre_empleado, apellido_empleado, rol_empleado, mail, telefono) VALUES (1, 'Agustin', 'Bieber', 'RESPONSABLE_REPARACIONES', 'agustinbieber@gmail.com', '3512345671');
 INSERT INTO T_EMPLEADO (id_empleado, nombre_empleado, apellido_empleado, rol_empleado, mail, telefono) VALUES (2, 'Jane', 'Doe', 'RESPONSABLE_REPARACIONES', 'janeDoe@gmail.com', '3517654321');
+INSERT INTO T_EMPLEADO (id_empleado, nombre_empleado, apellido_empleado, rol_empleado, mail, telefono) VALUES (3, 'Lucas', 'Sanchez', 'RESPONSABLE_INSPECCIONES', 'lucassanchezqw@gmail.com', '3514667890');
 
 -- Sismógrafos
 INSERT INTO T_SISMOGRAFO (id_sismografo, fecha_adquisicion, numero_serie, fabricante, modelo, id_estado) VALUES (1, '2024-12-12', 12, 'ZETLAB', 'Modelo 1', 1);
