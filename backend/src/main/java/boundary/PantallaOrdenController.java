@@ -111,6 +111,16 @@ public class PantallaOrdenController {
                     setText(empty || item == null ? null : item.getDescripcion());
                 }
             });
+
+            // Esto define el VALOR SELECCIONADO (la parte que faltaba)
+            cmbMotivos.setButtonCell(new ListCell<>() {
+                @Override
+                protected void updateItem(TipoMotivo item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? null : item.getDescripcion());
+                }
+            });
+            // --- FIN DE LA SOLUCIÓN ---
         }
     }
 
