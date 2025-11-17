@@ -2,8 +2,8 @@ package boundary;
 
 import control.notificacion.DatosNotificacionCierre;
 import control.notificacion.IObservadorCierreOrden;
-import java.util.List; // Importar
-import java.util.stream.Collectors; // Importar
+import java.util.List;
+import java.util.stream.Collectors;
 
 // Implementa la interfaz del patron.
 public class InterfazMail implements IObservadorCierreOrden {
@@ -18,20 +18,33 @@ public class InterfazMail implements IObservadorCierreOrden {
     @Override
     public void actualizar(DatosNotificacionCierre datos) {
 
-        // 5. Lógica de decisión
+        // 1. Loguear si se recibe el evento pero no se actúa
         if (datos.getMotivos() == null || datos.getMotivos().isEmpty()) {
-            return; // No hago nada.
+            System.out.println(String.format(
+                    "INFO [InterfazMail] -> Evento recibido. Orden [%d] sin motivos, no se requiere notificación.",
+                    datos.getNumeroOrden()
+            ));
+            return;
         }
 
-        // 6. La lógica de envío ahora es simple
+        // 2. Loguear la decisión de actuar
+        System.out.println(String.format(
+                "INFO [InterfazMail] -> Evento recibido. Sismógrafo '%s'. Se requiere notificación para Orden [%d].",
+                datos.getNuevoEstado(),
+                datos.getNumeroOrden()
+        ));
+
+        // La lógica de envío ahora es simple
         String mensaje = confeccionarMensaje(datos);
 
         // Usa la lista de mails que ya tiene configurada
+        // 3. --- ESTE MÉTODO NO SE CAMBIA ---
+        // Sigue imprimiendo el String que devuelve enviarMail.
+        // Ahora, ese String será limpio.
         mailsDestinatarios.forEach(mail ->
                 System.out.println(this.enviarMail(mail, mensaje)));
-    }
+        };
 
-    // 8. El metodo `confeccionarMensaje`
     private String confeccionarMensaje(DatosNotificacionCierre datos) {
         String motivosStr = datos.getMotivos() != null ?
                 datos.getMotivos().stream()
@@ -64,7 +77,16 @@ public class InterfazMail implements IObservadorCierreOrden {
     }
 
     public String enviarMail(String mail, String mensaje) {
-        return "mail enviado a " + mail + " con el mensaje: " + mensaje; //Placeholder
+        // Aquí iría la lógica real de la API de email (que no cambia)
+
+        // En lugar de devolver el mensaje, devuelve SOLO la confirmación.
+        return String.format(
+                "INFO [InterfazMail] -> Email enviado exitosamente a: %s",
+                mail
+        );
+
+        // Este metodo no deberia devolver el mensaje, solo una confirmacion.
+        // return "mail enviado a " + mail + " con el mensaje: " + mensaje; // LÍNEA ANTERIOR (ELIMINADA)
     }
 }
 

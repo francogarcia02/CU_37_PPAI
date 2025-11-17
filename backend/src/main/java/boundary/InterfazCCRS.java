@@ -7,14 +7,13 @@ public class InterfazCCRS implements IObservadorCierreOrden {
     @Override
     public void actualizar(DatosNotificacionCierre datos) {
 
-        // Hacemos la notificación más informativa
-        System.out.println("--- PUBLICANDO EN MONITORES CCRS ---");
-        System.out.println("Orden " + datos.getNumeroOrden() + " cerrada.");
-        System.out.println("Sismografo " + datos.getSismografoId() + " paso a estado: " + datos.getNuevoEstado());
+        System.out.println(String.format(
+                "INFO [InterfazCCRS] -> Evento recibido. Publicando estado de Orden [%d] (Sismógrafo: %s) en monitores...",
+                datos.getNumeroOrden(),
+                datos.getNuevoEstado()
+        ));
 
         this.imprimirMonitores(); // Llama al metodo original
-
-        System.out.println("------------------------------------");
     }
 
 

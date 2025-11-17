@@ -67,10 +67,10 @@ public class PantallaOrdenController {
             return;
         }
 
-        // Get the filtered orders
+        // Obtener ordenes filtradas.
         List<OrdenInspeccion> ordenesFiltradas = gestorOrden.getOrdenesInspeccionFiltradas();
 
-        // Verify the index is within bounds
+
         if (indiceSeleccionado >= ordenesFiltradas.size()) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error", "La orden seleccionada ya no está disponible.");
             cargarOrdenesInspeccion(); // Refresh the list
@@ -134,6 +134,7 @@ public class PantallaOrdenController {
             return;
         }
 
+        // Responsabilidad de la vista
         gestorOrden.tomarMFSyComentario(motivoSeleccionado, comentario);
         listViewMotivosAgregados.getItems().add(motivoSeleccionado.getDescripcion() + ": " + comentario);
 

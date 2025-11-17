@@ -1,11 +1,15 @@
 package entity;
 
-import lombok.Data;
+//import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
-@Data
+// 1. SE QUITÓ @Data
+@Getter // 2. SE AÑADIÓ @Getter
+@Setter // 3. SE AÑADIÓ @Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "T_ESTACION_SISMOLOGICA")
@@ -53,4 +57,11 @@ public class EstacionSismologica {
         Sismografo sismografoSelected = this.getSismografo();
         sismografoSelected.enviarSismografoAReparar(estadoFs);
     }
+
+    // Modificacion del metodo toString() que agrega por defecto Lombok dentro del @Data
+    @Override
+    public String toString() {
+        return "EstacionSismologica[id=" + codigoEstacion + "]";
+    }
+
 }

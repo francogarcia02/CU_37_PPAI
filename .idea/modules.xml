@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/CU_37_PPAI.iml" filepath="$PROJECT_DIR$/.idea/CU_37_PPAI.iml" />
+      <module fileurl="file://$PROJECT_DIR$/backend/redsismica.iml" filepath="$PROJECT_DIR$/backend/redsismica.iml" />
     </modules>
   </component>
 </project>

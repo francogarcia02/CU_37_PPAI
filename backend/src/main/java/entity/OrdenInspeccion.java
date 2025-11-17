@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Data
+@Data // Borrado
+@Getter // Agregado
+@Setter // Agregado
 @NoArgsConstructor
 @Entity
 @Table(name = "T_ORDEN_INSPECCION")
@@ -133,6 +135,20 @@ public class OrdenInspeccion implements OrdenInspeccionInterface {
         return this.getNumeroOrden().equals(number);
     }
 
+    // Modificacion del metodo toString() que agrega por defecto Lombok dentro del @Data
+    @Override
+    public String toString() {
+        return "OrdenInspeccion[id=" + numeroOrden + "]";
+    }
+
+
+    /**
+     * @deprecated Este metodo viola el principio de Separación de Intereses (SoC) y SRP
+     * La lógica de formateo de la Vista (códigos de color ANSI) no debe
+     * estar en la clase Entidad.
+     * La nueva Vista implementada (JavaFX) implementa su propia lógica de presentación.
+     */
+    @Deprecated
     public String toStringForPantalla() {
         CambioEstado estadoActual = obtenerCambioEstadoActual();
         String fechaFin = (estadoActual != null && estadoActual.getFechaHorainicio() != null)

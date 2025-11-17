@@ -150,6 +150,15 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
                 .collect(Collectors.toList());
     }
 
+
+
+    /**
+     * @deprecated Este metodo viola el principio de Separación de Intereses (SoC).
+     * La capa de Controlador (Gestor) no debe ser responsable de solicitar
+     * lógica de formato de la Vista. El metodo se mantiene por consistencia
+     * con la UI de consola anterior, pero la nueva Vista (JavaFX) no debe usarlo.
+     */
+    @Deprecated
     @Override
     public String stringificarOI(OrdenInspeccion ordenInspeccionToStringify) {
         return ordenInspeccionToStringify.toStringForPantalla();
@@ -213,6 +222,11 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
 
     public boolean cerrarOrdenSeleccionada() {
         if (getConfirmacionCierre() && getObservaciones() != null) {
+            // --- LOG INICIO OPERACIÓN ---
+            System.out.printf(
+                    "INFO [GestorOrden] Inicia cierre de Orden [%d]%n",
+                    getSelectedOrden().getNumeroOrden()
+            );
             buscarEstadoFS();
             buscarEstadoCerradoOI(); // Este metodo setea el atributo 'EstadoCerrada'
 
@@ -245,6 +259,12 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
                 // --- FIN PERSISTENCIA ---
 
                 // --- INICIO "DISPARADOR" OBSERVER ---
+                // --- LOG INICIO OBSERVER ---
+                System.out.println(String.format(
+                        "INFO [GestorOrden] Disparando notificaciones (Observer) para Orden [%d]...",
+                        getSelectedOrden().getNumeroOrden()
+                ));
+
                 DatosNotificacionCierre datos = getSelectedOrden().generarDatosNotificacion(
                         sismografoEstadoActual,
                         getMotivosFueraServicioSelection(),
@@ -252,7 +272,11 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
                 );
 
                 this.notificar(datos);
-                // --- FIN DISPARADOR OBSERVER ---
+                // --- FIN DISPARADOR OBSERVER ---- LOG FIN OPERACIÓN ---
+                System.out.println(String.format(
+                        "INFO [GestorOrden] Cierre de Orden [%d] finalizado exitosamente.",
+                        getSelectedOrden().getNumeroOrden()
+                ));
 
                 return true;
             }
@@ -269,7 +293,7 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
                 .collect(Collectors.toList());
     }
 
-// Responsabilidad que el gestor no conserva. Por aplicacion del Patron Observer.
+// --- Responsabilidad que el gestor no conserva. Por aplicacion del Patron Observer. ---
     //@Override
 //    public void enviarNotificacionMail(String mensaje) {
 //        List<String> mails = obtenerMailsResponsablesReparacion();
@@ -279,14 +303,14 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
 //        });
 //    }
 
-// Responsabilidad que el gestor no conserva. Por aplicacion del Patron Observer.
+// --- Responsabilidad que el gestor no conserva. Por aplicacion del Patron Observer. ---
 //    public void publicarMonitores() {
 //        InterfazCCRS interfazCCRS = new InterfazCCRS();
 //        interfazCCRS.imprimirMonitores();
 //        System.out.println("Publicación de monitores CCRS completada"); // Placeholder
 //    }
 
-// Responsabilidad que el gestor no conserva. Por aplicacion del Patron Observer.
+// --- Responsabilidad que el gestor no conserva. Por aplicacion del Patron Observer. ---
 //    public String confeccionarMensaje(OrdenInspeccion orden) {
 //        String motivosStr = orden.obtenerCambioEstadoActual().getMotivosCambioEstados() != null ?
 //                orden.obtenerCambioEstadoActual().getMotivosCambioEstados().stream()
