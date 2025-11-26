@@ -1,6 +1,6 @@
 package entity;
 
-import control.notificacion.DatosNotificacionCierre;
+//import control.notificacion.DatosNotificacionCierre; Eliminado.
 import interfaces.OrdenInspeccionInterface;
 import lombok.*;
 
@@ -170,25 +170,24 @@ public class OrdenInspeccion implements OrdenInspeccionInterface {
                 estacionSismologica.getSismografo().getIdSismografo()
         );
     }
-
-    @Transient
-    public DatosNotificacionCierre generarDatosNotificacion(String sismografoEstadoActual, List<MotivoFueraServicio> motivos, Empleado responsable) {
-        String sismografoId = this.estacionSismologica.getSismografo().getIdSismografo().toString();
-        LocalDateTime fechaHora = this.obtenerCambioEstadoActual().getFechaHorainicio();
-        Long numeroOrden = this.getNumeroOrden();
-        String nombreEstacion = this.estacionSismologica.getNombreEstacion();
-        String nombreResponsable = responsable.getNombreEmpleado();
-
-        return new DatosNotificacionCierre(
-                sismografoId,
-                sismografoEstadoActual,
-                fechaHora,
-                motivos,
-                numeroOrden,
-                nombreEstacion,
-                nombreResponsable
-        );
-    }
+//    @Transient
+//    public DatosNotificacionCierre generarDatosNotificacion(String sismografoEstadoActual, List<MotivoFueraServicio> motivos, Empleado responsable) {
+//        String sismografoId = this.estacionSismologica.getSismografo().getIdSismografo().toString();
+//        LocalDateTime fechaHora = this.obtenerCambioEstadoActual().getFechaHorainicio();
+//        Long numeroOrden = this.getNumeroOrden();
+//        String nombreEstacion = this.estacionSismologica.getNombreEstacion();
+//        String nombreResponsable = responsable.getNombreEmpleado();
+//
+//        return new DatosNotificacionCierre(
+//                sismografoId,
+//                sismografoEstadoActual,
+//                fechaHora,
+//                motivos,
+//                numeroOrden,
+//                nombreEstacion,
+//                nombreResponsable
+//        );
+//    } //ELIMINADO.
 
     @Override
     public boolean equals(Object o) {
@@ -202,4 +201,26 @@ public class OrdenInspeccion implements OrdenInspeccionInterface {
     public int hashCode() {
         return Objects.hash(numeroOrden);
     }
+
+    /**
+     * Métodos delegados para cumplir con la Ley de Demeter.
+     * El Gestor no debe navegar por la estructura interna (orden.getEstacion().getSismografo()...).
+     */
+
+    public String getNombreEstacion() {
+        // Delega en Estación
+        return this.estacionSismologica != null ? this.estacionSismologica.getNombreEstacion() : "Sin Estación";
+    }
+
+    public String getIdSismografo() {
+        // Delega en Estación, que a su vez delegará en Sismógrafo
+        return this.estacionSismologica != null ? this.estacionSismologica.getIdSismografo() : "N/A";
+    }
+
+    public String getNombreEstadoSismografo() {
+        // Delega en Estación para obtener el estado del sismógrafo
+        return this.estacionSismologica != null ? this.estacionSismologica.getNombreEstadoSismografo() : "Desconocido";
+    }
+
+
 }

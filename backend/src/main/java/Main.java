@@ -102,8 +102,8 @@ public class Main extends Application {
         );
 
         // --- Configuración del Patrón Observer ---
-        List<String> mailsDeReparacion = this.gestorOrden.obtenerMailsResponsablesReparacion();
-        IObservadorCierreOrden observadorMail = new InterfazMail(mailsDeReparacion);
+        //List<String> mailsDeReparacion = this.gestorOrden.obtenerMailsResponsablesReparacion();
+        IObservadorCierreOrden observadorMail = new InterfazMail();
         IObservadorCierreOrden observadorCCRS = new InterfazCCRS();
 
         this.gestorOrden.agregarObservador(observadorMail);

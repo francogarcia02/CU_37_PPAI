@@ -8,73 +8,74 @@ import java.util.stream.Collectors;
 // Implementa la interfaz del patron.
 public class InterfazMail implements IObservadorCierreOrden {
 
-    // Recibe solo una lista de Strings (emails)
-    private final List<String> mailsDestinatarios;
+    //    // Recibe solo una lista de Strings (emails)
+    //    private final List<String> mailsDestinatarios;
 
-    public InterfazMail(List<String> mailsDestinatarios) {
-        this.mailsDestinatarios = mailsDestinatarios;
-    }
+    //    public InterfazMail(List<String> mailsDestinatarios) {
+    //        this.mailsDestinatarios = mailsDestinatarios;
+    //    }
 
     @Override
-    public void actualizar(DatosNotificacionCierre datos) {
+    public void actualizar(Object objetoDatos, String evento) {
 
-        // 1. Loguear si se recibe el evento pero no se actúa
-        if (datos.getMotivos() == null || datos.getMotivos().isEmpty()) {
-            System.out.println(String.format(
-                    "INFO [InterfazMail] -> Evento recibido. Orden [%d] sin motivos, no se requiere notificación.",
-                    datos.getNumeroOrden()
-            ));
+        if (!"CIERRE_ORDEN".equals(evento)) {
             return;
         }
 
-        // 2. Loguear la decisión de actuar
-        System.out.println(String.format(
-                "INFO [InterfazMail] -> Evento recibido. Sismógrafo '%s'. Se requiere notificación para Orden [%d].",
-                datos.getNuevoEstado(),
-                datos.getNumeroOrden()
-        ));
+        // 2. Casteo seguro (Técnica)
+        if (objetoDatos instanceof DatosNotificacionCierre) {
+            DatosNotificacionCierre datos = (DatosNotificacionCierre) objetoDatos;
 
-        // La lógica de envío ahora es simple
-        String mensaje = confeccionarMensaje(datos);
+            // 3. Usar los datos del DTO
+            if (datos.getMotivos() == null || datos.getMotivos().isEmpty()) {
+                // Logica de no enviar
+                return;
+            }
 
-        // Usa la lista de mails que ya tiene configurada
-        // 3. --- ESTE METODO NO SE CAMBIA ---
-        // Sigue imprimiendo el String que devuelve enviarMail.
-        // Ahora, ese String será limpio.
-        mailsDestinatarios.forEach(mail ->
-                System.out.println(this.enviarMail(mail, mensaje)));
-        };
+            String mensaje = confeccionarMensaje(datos);
+
+            // 4. Obtener destinatarios DEL DTO (No del Main)
+            List<String> destinatarios = datos.getEmailsDestinatarios();
+
+            destinatarios.forEach(mail ->
+                    System.out.println(this.enviarMail(mail, mensaje))
+            );
+
+            // 2. Loguear la decisión de actuar
+            System.out.println(String.format(
+                    "INFO [InterfazMail] -> Evento recibido. Sismografo '%s'. Se requiere notificacion para Orden [%d].",
+                    datos.getNuevoEstado(),
+                    datos.getNumeroOrden()
+            ));
+        }
+    }
 
     private String confeccionarMensaje(DatosNotificacionCierre datos) {
-        String motivosStr = datos.getMotivos() != null ?
-                datos.getMotivos().stream()
-                        .map(motivo -> String.format("  - Motivo: %s\n    Observaciones: %s\n",
-                                motivo.getTipoMotivo().getDescripcion(),
-                                motivo.getComentario() != null ? motivo.getComentario() : "Sin observaciones"))
-                        .collect(Collectors.joining("\n")) :
-                "  No hay motivos registrados\n";
+        // Ahora 'datos.getMotivos()' ya es una List<String>, no hay que mapear nada complejo.
+        String motivosStr = (datos.getMotivos() != null && !datos.getMotivos().isEmpty())
+                ? String.join("\n", datos.getMotivos()) // Une los strings con saltos de linea
+                : "  No hay motivos registrados";
 
         return String.format(
                 "Estimado(a) responsable de reparaciones,\n\n" +
-                        "La Orden de Inspeccion %d ha sido cerrada.\n\n" +      // 1. numeroOrden
+                        "La Orden de Inspeccion %d ha sido cerrada.\n\n" +
                         "Detalles:\n" +
-                        "Estacion Sismologica: %s\n" +                           // 2. nombreEstacion
-                        "Responsable de la Orden: %s\n" +                       // 3. nombreResponsable
-                        "ID sismografo: %s\n\n" +                               // 4. sismografoId
-                        "Estado actual del sismógrafo: %s\n" +                  // 5. nuevoEstado
-                        "Fecha y hora nuevo estado: %s\n" +                     // 6. fechaHora
-                        "Motivos:\n%s",                                        // 7. motivosStr
-
-                // --- 7 ARGUMENTOS ---
+                        "Estacion Sismologica: %s\n" +
+                        "Responsable de la Orden: %s\n" +
+                        "ID sismografo: %s\n\n" +
+                        "Estado actual del sismógrafo: %s\n" +
+                        "Fecha y hora nuevo estado: %s\n" +
+                        "Motivos:\n%s",
                 datos.getNumeroOrden(),
                 datos.getNombreEstacion(),
                 datos.getNombreResponsable(),
                 datos.getSismografoId(),
                 datos.getNuevoEstado(),
                 datos.getFechaHora().toString(),
-                motivosStr
+                motivosStr // Inserta el String ya procesado
         );
     }
+
 
     public String enviarMail(String mail, String mensaje) {
         // Aquí iría la lógica real de la API de email (que no cambia)
@@ -89,6 +90,4 @@ public class InterfazMail implements IObservadorCierreOrden {
         // return "mail enviado a " + mail + " con el mensaje: " + mensaje; // LÍNEA ANTERIOR (ELIMINADA)
     }
 }
-
-
 

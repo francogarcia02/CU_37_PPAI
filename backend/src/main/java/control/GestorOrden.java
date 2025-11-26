@@ -1,72 +1,198 @@
 package control;
 
+import boundary.InterfazCCRS;
+import boundary.InterfazMail;
+import control.notificacion.DatosNotificacionCierre;
+import control.notificacion.IObservadorCierreOrden;
+import control.notificacion.ISujetoCierreOrden;
 import control.persistencia.OrdenDAO;
-import entity.Empleado;
-import entity.OrdenInspeccion;
-import entity.Sesion;
-import entity.Usuario;
-import entity.TipoMotivo;
-import entity.Estado;
-import entity.MotivoFueraServicio;
+import entity.*;
 import interfaces.GestorOrdenInterface;
 import lombok.Data;
-import control.notificacion.DatosNotificacionCierre; // aplicacion patron observer
-import control.notificacion.IObservadorCierreOrden; // aplicacion patron observer
-import control.notificacion.ISujetoCierreOrden; // aplicacion patron observer
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
+public class GestorOrden implements GestorOrdenInterface, ISujetoCierreOrden {
 
+    // --- Atributos de Negocio y Estado ---
     private Usuario usuarioLogueado;
     private Empleado RI;
     private OrdenInspeccion selectedOrden;
-
     private String selectedDecicionSismografo;
     private String observaciones;
+
+    // Listas de referencia
     private List<Empleado> empleados;
     private List<TipoMotivo> tiposMotivos;
     private List<MotivoFueraServicio> motivosFueraServicioSelection = new ArrayList<>();
     private List<Estado> estados;
+
+    // Estados específicos buscados
     private Estado EstadoFS;
     private Estado EstadoCerrada;
+
+    // Variables de control
     private Boolean confirmacionCierre;
     private List<OrdenInspeccion> ordenesInspeccionFiltradas = new ArrayList<>();
     private Sesion sesion;
-    private OrdenDAO ordenDAO; // PERSISTENCIA
+    private OrdenDAO ordenDAO; // Persistencia
 
-    // --- INICIA EL PATRÓN OBSERVER ---
+    // --- PATRÓN OBSERVER: Estructura ---
     private List<IObservadorCierreOrden> observadores = new ArrayList<>();
 
-    @Override
-    public void agregarObservador(IObservadorCierreOrden observador) {
-        observadores.add(observador);
-    }
-
-    @Override
-    public void quitarObservador(IObservadorCierreOrden observador) {
-        observadores.remove(observador);
-    }
-
-    @Override
-    public void notificar(DatosNotificacionCierre datos) {
-        for (IObservadorCierreOrden obs : observadores) {
-            obs.actualizar(datos);
-        }
-    }
-    // --- FIN PATRÓN OBSERVER ---
-
+    // --- CONSTRUCTOR ---
     public GestorOrden(List<Empleado> empleados, List<TipoMotivo> tiposMotivos, List<Estado> estados, Sesion sesion, OrdenDAO ordenDAO) {
-        // this.ordenesInspeccion = ordenesInspeccion; // No es necesaria, por implementacion de Lectura en BD
         this.empleados = empleados;
         this.tiposMotivos = tiposMotivos;
         this.estados = estados;
         this.sesion = sesion;
         this.ordenDAO = ordenDAO;
-//      this.ordenDAO = new control.persistencia.OrdenDAOImpl(); // Eliminado, por principio Single Responsability (SRP)
+        // NOTA: Ya no instanciamos los observadores aquí.
+        // Se instancian bajo demanda en notificarObservadores() según el flujo de la cátedra.
+    }
+
+    // --- MÉTODOS DEL PATRÓN OBSERVER (Implementación ISujeto) ---
+
+    @Override
+    public void agregarObservador(IObservadorCierreOrden observador) {
+        this.observadores.add(observador);
+    }
+
+    @Override
+    public void quitarObservador(IObservadorCierreOrden observador) {
+        this.observadores.remove(observador);
+    }
+
+    @Override
+    public void notificar(Object datos, String evento) {
+        // El Loop del Patrón: Recorre y avisa
+        for (IObservadorCierreOrden obs : observadores) {
+            obs.actualizar(datos, evento);
+        }
+    }
+
+    // ==========================================================================
+    // === LÓGICA DE NEGOCIO PRINCIPAL (CU: Cerrar Orden de Inspección) ===
+    // ==========================================================================
+
+    public boolean cerrarOrdenSeleccionada() {
+        // 1. Validaciones iniciales
+        if (getConfirmacionCierre() && getObservaciones() != null) {
+
+            System.out.printf("INFO [GestorOrden] Inicia proceso de cierre para Orden [%d]%n", getSelectedOrden().getNumeroOrden());
+
+            // 2. Buscar estados necesarios
+            buscarEstadoFS();
+            buscarEstadoCerradoOI();
+
+            if (getEstadoCerrada() == null) {
+                System.err.println("ERROR: No se pudo encontrar el estado 'Cerrada'.");
+                return false;
+            }
+
+            // 3. Delegar el cambio de estado a la Entidad (Experto)
+            boolean cierreExitoso = getSelectedOrden().cerrar(
+                    getObservaciones(),
+                    getMotivosFueraServicioSelection(),
+                    getEstadoCerrada(),
+                    getRI());
+
+            if (cierreExitoso) {
+                // 4. Lógica del Sismógrafo
+                if (!getMotivosFueraServicioSelection().isEmpty()) {
+                    // Si hay motivos, se pone fuera de servicio
+                    getSelectedOrden().enviarSismografoAReparar(getEstadoFS());
+                }
+                // Nota: El estado actual del sismógrafo lo consultaremos luego para el DTO.
+
+                // 5. Persistencia (Actualizar en BD)
+                ordenDAO.update(getSelectedOrden());
+
+                // --- COMIENZO LÓGICA DE NOTIFICACIÓN (SoC) ---
+
+                // PASO A: Generar los datos necesarios (DTO)
+                DatosNotificacionCierre dto = this.generarDatosNotificacion();
+
+                // PASO B: Configurar y disparar el patrón Observer
+                this.notificarObservadores(dto);
+
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Metodo encargado EXCLUSIVAMENTE de recolectar la información y crear el DTO.
+     * Aplica Alta Cohesión.
+     */
+    private DatosNotificacionCierre generarDatosNotificacion() {
+        // 1. Obtener datos de la Orden (Respetando Ley de Demeter con métodos delegados)
+        String idSismografo = getSelectedOrden().getIdSismografo();
+        String nombreEstacion = getSelectedOrden().getNombreEstacion();
+        String nombreResponsable = getRI().getNombreEmpleado();
+
+        // Obtenemos el estado final del sismógrafo post-cierre
+        String estadoSismoActual = getSelectedOrden().getNombreEstadoSismografo();
+
+        // 2. Buscar emails de destinatarios (Lógica de negocio del Gestor)
+        List<String> listaMails = obtenerMailsResponsablesReparacion();
+
+        // 3. Convertir motivos (Objetos) a Strings primitivos para el DTO
+        List<String> listaMotivosTexto = getMotivosFueraServicioSelection().stream()
+                .map(m -> String.format("%s (%s)", m.getTipoMotivo().getDescripcion(),
+                        (m.getComentario() != null ? m.getComentario() : "-")))
+                .collect(Collectors.toList());
+
+        // 4. Crear y retornar el DTO
+        return new DatosNotificacionCierre(
+                listaMails,                 // Emails
+                idSismografo,               // ID Sismógrafo
+                estadoSismoActual,          // Estado Nuevo
+                LocalDateTime.now(),        // Fecha Hora
+                listaMotivosTexto,          // Lista de Strings (Motivos)
+                getSelectedOrden().getNumeroOrden(), // Nro Orden
+                nombreEstacion,             // Estación
+                nombreResponsable           // Responsable
+        );
+    }
+
+    /**
+     * Metodo encargado EXCLUSIVAMENTE de configurar los observadores y disparar la notificación.
+     */
+    private void notificarObservadores(DatosNotificacionCierre dto) {
+        System.out.println("INFO [GestorOrden] Configurando observadores...");
+
+        // 1. Limpiar observadores previos (si los hubiera)
+        this.observadores.clear();
+
+        // 2. Crear las instancias de los observadores concretos (Creator)
+        IObservadorCierreOrden observadorMail = new InterfazMail();
+        IObservadorCierreOrden observadorCCRS = new InterfazCCRS();
+
+        // 3. Suscribirlos (Auto-suscripción)
+        this.agregarObservador(observadorMail);
+        this.agregarObservador(observadorCCRS);
+
+        // 4. Disparar la notificación a todos los suscritos
+        System.out.println("INFO [GestorOrden] Disparando evento 'CIERRE_ORDEN'...");
+        this.notificar(dto, "CIERRE_ORDEN");
+    }
+
+    // ==========================================================================
+    //                      === OTROS MÉTODOS DE APOYO ===
+    // ==========================================================================
+
+    @Override
+    public List<String> obtenerMailsResponsablesReparacion() {
+        return empleados.stream()
+                .filter(Empleado::esResponsableReparaciones)
+                .map(Empleado::obtenerMail)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -76,63 +202,18 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
         return RI;
     }
 
-// En GestorOrden.java
-
-
-    /*
     @Override
     public List<OrdenInspeccion> buscarOrdenesInspeccion() {
         ordenesInspeccionFiltradas.clear();
+        if (RI == null) buscarEmpleado();
 
-        // USABA LISTA DE ORDENES DEL MOCK
-        ordenesInspeccion.forEach(ordenInspeccion -> {
-            // Chequea que la orden esté en el estado correcto
-            boolean condition1 = ordenInspeccion.estaFinalizada();
-            // Chequea que la orden pertenezca al Responsable de Inspección logueado
-            boolean condition2 = ordenInspeccion.esTuRI(RI);
-
-            if (condition1 && condition2) {
-                ordenesInspeccionFiltradas.add(ordenInspeccion);
-            }
-        });
-
-        // Devuelve la lista filtrada y ordenada
-        return ordenarOI(ordenesInspeccionFiltradas);
-    }
-    */ // Metodo buscarOrdenesInspeccion() SIN PERSISTENCIA
-
-    @Override
-    public List<OrdenInspeccion> buscarOrdenesInspeccion() {
-        ordenesInspeccionFiltradas.clear();
-
-        // El 'RI' (Responsable de Inspección) debe estar seteado
-        // Asumimos que la pantalla llamó a "buscarEmpleado()" primero
-        if (RI == null) {
-            // Opcional: llamar a buscarEmpleado() aquí si no se ha hecho
-            buscarEmpleado();
-        }
-
-        // 1. Llamada al DAO para obtener las órdenes REALES de la BD
         List<OrdenInspeccion> ordenesDesdeBD = ordenDAO.getAllOrdenes();
-        System.out.println("ordenesDesdeBD = " + ordenesDesdeBD);
+
         ordenesDesdeBD.forEach(ordenInspeccion -> {
-            // Chequea que la orden esté en el estado correcto
-            boolean condition1 = ordenInspeccion.estaFinalizada();
-            System.out.println("estaFinalizada = " + condition1);
-
-            // Chequea que la orden pertenezca al Responsable de Inspección logueado
-            boolean condition2 = ordenInspeccion.esTuRI(RI);
-            System.out.println("esTuRI = " + condition2);
-
-
-            if (condition1 && condition2) {
+            if (ordenInspeccion.estaFinalizada() && ordenInspeccion.esTuRI(RI)) {
                 ordenesInspeccionFiltradas.add(ordenInspeccion);
             }
         });
-        System.out.println("ordenesFiltradas = " + ordenesInspeccionFiltradas);
-
-
-        // 2. El metodo de ordenar ahora trabaja sobre la lista de la BD
         return ordenarOI(ordenesInspeccionFiltradas);
     }
 
@@ -150,20 +231,12 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
                 .collect(Collectors.toList());
     }
 
-
-
-    /**
-     * @deprecated Este metodo viola el principio de Separación de Intereses (SoC).
-     * La capa de Controlador (Gestor) no debe ser responsable de solicitar
-     * lógica de formato de la Vista. El metodo se mantiene por consistencia
-     * con la UI de consola anterior, pero la nueva Vista (JavaFX) no debe usarlo.
-     */
-    @Deprecated
     @Override
-    public String stringificarOI(OrdenInspeccion ordenInspeccionToStringify) {
-        return ordenInspeccionToStringify.toStringForPantalla();
+    public Usuario obtenerUsuarioLogueado() {
+        return sesion.getUsuario();
     }
 
+    // --- Métodos de interacción con UI ---
     @Override
     public void tomarNumeroOI(Long selectedOrdenNumero) {
         selectedOrden = ordenesInspeccionFiltradas.stream()
@@ -183,16 +256,6 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
     }
 
     @Override
-    public List<String> stringificarMFS() {
-        List<String> stringifiedMFS = new ArrayList<>();
-        for (int i = 0; i < this.getTiposMotivos().size(); i++) {
-            TipoMotivo tipoMotivo = this.getTiposMotivos().get(i);
-            stringifiedMFS.add((i + 1) + ": " + tipoMotivo.getDescripcion());
-        }
-        return stringifiedMFS;
-    }
-
-    @Override
     public void tomarMFSyComentario(TipoMotivo motivoSeleccionado, String comentario) {
         this.getMotivosFueraServicioSelection().add(new MotivoFueraServicio(comentario, motivoSeleccionado));
     }
@@ -204,10 +267,11 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
         }
     }
 
+    // --- Búsquedas internas ---
     @Override
     public void buscarEstadoFS() {
         estados.stream()
-                .filter(estado -> estado.esAmbitoSismografo() && estado.esFueraDeServicio())
+                .filter(e -> e.esAmbitoSismografo() && e.esFueraDeServicio())
                 .findFirst()
                 .ifPresent(this::setEstadoFS);
     }
@@ -215,185 +279,19 @@ public class GestorOrden implements GestorOrdenInterface , ISujetoCierreOrden {
     @Override
     public void buscarEstadoCerradoOI() {
         estados.stream()
-                .filter(estado -> estado.esAmbitoOrdendeInspeccion() && estado.esCerrada())
+                .filter(e -> e.esAmbitoOrdendeInspeccion() && e.esCerrada())
                 .findFirst()
                 .ifPresent(this::setEstadoCerrada);
     }
 
-    public boolean cerrarOrdenSeleccionada() {
-        if (getConfirmacionCierre() && getObservaciones() != null) {
-            // --- LOG INICIO OPERACIÓN ---
-            System.out.printf(
-                    "INFO [GestorOrden] Inicia cierre de Orden [%d]%n",
-                    getSelectedOrden().getNumeroOrden()
-            );
-            buscarEstadoFS();
-            buscarEstadoCerradoOI(); // Este metodo setea el atributo 'EstadoCerrada'
-
-            if (getEstadoCerrada() == null) {
-                System.err.println("ERROR: No se pudo encontrar el estado 'Cerrada' en la lista de estados.");
-                return false;
-            } //Importante asegurarnos de encontrar el estado.
-
-            boolean cierreExitoso = getSelectedOrden().cerrar(
-                    getObservaciones(),
-                    getMotivosFueraServicioSelection(),
-                    getEstadoCerrada(),
-                    getRI());
-
-            if (cierreExitoso) {
-                System.out.println("Cierre Exitoso");
-                String sismografoEstadoActual;
-                // Logica para determinar el estado final del sismógrafo
-                if (!getMotivosFueraServicioSelection().isEmpty()) {
-                    getSelectedOrden().enviarSismografoAReparar(getEstadoFS());
-                    sismografoEstadoActual = getEstadoFS().getNombre(); // "Fuera de Servicio"
-                } else {
-                    sismografoEstadoActual = getSelectedOrden().getEstacionSismologica().getSismografo().getEstadoActual().getNombre();
-                    /*
-                    NOTA TÉCNICA (DEUDA DE DISEÑO):
-                    La anterior línea genera un "tren de mensajes" y acopla al Gestor (Controlador)
-                    con la estructura interna profunda de las Clases Entidad.
-                    Esto no respeta el principio Ley de Demeter (Don't talk to Strangers)
-
-                    Principio de Solución (Refactorización):
-                    La solución ideal (Patrón Experto en Información) sería añadir un metodo
-                    en 'OrdenInspeccion' (ej. getNombreEstadoSismografoActual()) que
-                    encapsule esta navegación.
-
-                    Se mantiene la implementación actual para respetar
-                    la consistencia con el Diagrama de Clases entregado.
-                    */
-                    }
-
-                // --- INICIO PERSISTENCIA ---
-                // Actualizamos la entidad OrdenInspeccion. Gracias a la configuración de cascada,
-                // JPA se encargará de insertar el nuevo CambioEstado y de actualizar el anterior.
-                ordenDAO.update(getSelectedOrden());
-                // --- FIN PERSISTENCIA ---
-
-                // --- INICIO "DISPARADOR" OBSERVER ---
-                // --- LOG INICIO OBSERVER ---
-                System.out.println(String.format(
-                        "INFO [GestorOrden] Disparando notificaciones (Observer) para Orden [%d]...",
-                        getSelectedOrden().getNumeroOrden()
-                ));
-
-                DatosNotificacionCierre datos = getSelectedOrden().generarDatosNotificacion(
-                        sismografoEstadoActual,
-                        getMotivosFueraServicioSelection(),
-                        getRI()
-                );
-
-                this.notificar(datos);
-                // --- FIN DISPARADOR OBSERVER ---- LOG FIN OPERACIÓN ---
-                System.out.println(String.format(
-                        "INFO [GestorOrden] Cierre de Orden [%d] finalizado exitosamente.",
-                        getSelectedOrden().getNumeroOrden()
-                ));
-
-                return true;
-            }
-        }
-        return false;
-    }
-
-    //Responsabilidad que el gestor MANTIENE
-    @Override
-    public List<String> obtenerMailsResponsablesReparacion() {
-        return empleados.stream()
-                .filter(Empleado::esResponsableReparaciones)
-                .map(Empleado::obtenerMail)
-                .collect(Collectors.toList());
-    }
-
-// --- Responsabilidad que el gestor no conserva. Por aplicacion del Patron Observer. ---
-    //@Override
-//    public void enviarNotificacionMail(String mensaje) {
-//        List<String> mails = obtenerMailsResponsablesReparacion();
-//        InterfazMail interfazMail = new InterfazMail();
-//        mails.forEach(mail -> {
-//            System.out.println(interfazMail.enviarMail(mail, mensaje)); // Placeholder para el envío real
-//        });
-//    }
-
-// --- Responsabilidad que el gestor no conserva. Por aplicacion del Patron Observer. ---
-//    public void publicarMonitores() {
-//        InterfazCCRS interfazCCRS = new InterfazCCRS();
-//        interfazCCRS.imprimirMonitores();
-//        System.out.println("Publicación de monitores CCRS completada"); // Placeholder
-//    }
-
-// --- Responsabilidad que el gestor no conserva. Por aplicacion del Patron Observer. ---
-//    public String confeccionarMensaje(OrdenInspeccion orden) {
-//        String motivosStr = orden.obtenerCambioEstadoActual().getMotivosCambioEstados() != null ?
-//                orden.obtenerCambioEstadoActual().getMotivosCambioEstados().stream()
-//                        .map(motivo -> String.format("  - Motivo: %s\n    Observaciones: %s\n",
-//                                motivo.getTipoMotivo().getDescripcion(),
-//                                motivo.getComentario() != null ? motivo.getComentario() : "Sin observaciones"))
-//                        .collect(Collectors.joining("\n")) :
-//                "  No hay motivos registrados\n";
-//
-//        return String.format(
-//                "Estimado(a) responsable de reparaciones,\n\n" +
-//                        "La Orden de Inspeccion %d ha sido cerrada.\n\n" +
-//                        "Detalles:\n" +
-//                        "Estación Sismológica: %s\n" +
-//                        "Responsable de la Orden: %s\n" +
-//                        "ID sismógrafo: %d\n\n" +
-//                        "Estado actual del sismógrafo: %s\n" +
-//                        "Fecha y hora nuevo estado: %s\n" +
-//                        "Motivos:\n%s",
-//                orden.getNumeroOrden(),
-//                orden.getEstacionSismologica().getNombreEstacion(),
-//                orden.getResponsableOrdenInspeccion().getNombreEmpleado(),
-//                orden.getEstacionSismologica().getSismografo().getIdSismografo(),
-//                orden.getEstacionSismologica().getSismografo().getEstadoActual().getNombre(),
-//                orden.obtenerCambioEstadoActual().getFechaHorainicio(),
-//                motivosStr
-//        );
-//    }
-
-    @Override
-    public Usuario obtenerUsuarioLogueado() {
-        return sesion.getUsuario();
-    }
-
-    // --- Métodos de la interfaz que ya no son necesarios o han sido adaptados ---
-
-    @Override
-    public void RecibirSelectedOption(String selectedOption) {
-        // La lógica de opciones se manejará en el controlador de la GUI
-    }
-
-    @Override
-    public void manageSismografoFS() {
-        // La lógica de selección de motivos se manejará en el controlador de la GUI
-    }
-
-    @Override
-    public Boolean validarMotivo() {
-        // La validación se puede hacer en el controlador antes de llamar a tomarMFSyComentario
-        return true;
-    }
-
-    @Override
-    public LocalDateTime getFechaHoraActual() {
-        return LocalDateTime.now();
-    }
-
-    @Override
-    public void FinCU() {
-        // La gestión del fin del caso de uso la hará la GUI (ej. cerrar ventana)
-    }
-
-    @Override
-    public void RecibirTipoMotivos(List<TipoMotivo> listaMotivos) {
-        setTiposMotivos(listaMotivos);
-    }
-
-    @Override
-    public void pasarToPantallaOIs() {
-        // No es necesario, el controlador obtendrá la lista y la mostrará.
-    }
+    // --- Métodos Legacy mantenidos por la interfaz ---
+    @Override public List<String> stringificarMFS() { return new ArrayList<>(); }
+    @Override public String stringificarOI(OrdenInspeccion o) { return ""; }
+    @Override public void RecibirSelectedOption(String s) {}
+    @Override public void manageSismografoFS() {}
+    @Override public Boolean validarMotivo() { return true; }
+    @Override public LocalDateTime getFechaHoraActual() { return LocalDateTime.now(); }
+    @Override public void FinCU() {}
+    @Override public void RecibirTipoMotivos(List<TipoMotivo> l) { setTiposMotivos(l); }
+    @Override public void pasarToPantallaOIs() {}
 }

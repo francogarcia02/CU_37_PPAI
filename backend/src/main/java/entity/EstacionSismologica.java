@@ -64,4 +64,20 @@ public class EstacionSismologica {
         return "EstacionSismologica[id=" + codigoEstacion + "]";
     }
 
+    public String getIdSismografo() {
+        // Delega en Sismógrafo
+        return this.sismografo != null ? this.sismografo.getIdSismografo().toString() : "N/A";
+    }
+
+    public String getNombreEstadoSismografo() {
+        // Navega un nivel permitido (Conoce a su componente Sismógrafo)
+        // Asumiendo que Sismógrafo tiene getEstadoActual() que devuelve un objeto Estado
+        if (this.sismografo != null && this.sismografo.getEstadoActual() != null) {
+            return this.sismografo.getEstadoActual().getNombre();
+        }
+        return "Desconocido";
+    }
+
+
+
 }

@@ -10,14 +10,16 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor // Genera automáticamente un constructor con TODOS los campos
 public class DatosNotificacionCierre {
 
+    private final List<String> emailsDestinatarios; // AGREGADO
     private final String sismografoId;
     private final String nuevoEstado;
     private final LocalDateTime fechaHora;
-    private final List<MotivoFueraServicio> motivos;
+//    private final List<MotivoFueraServicio> motivos;
+    private final List<String> motivos; // CORRECCIÓN: Ahora es una lista de Strings, no de Entidades
     private final Long numeroOrden;
     private final String nombreEstacion;
     private final String nombreResponsable;
 
-    // Lombok generará los 7 getters y el constructor con los 7 argumentos
+    // Lombok generará los getters y el constructor
     // en tiempo de compilación.
 }

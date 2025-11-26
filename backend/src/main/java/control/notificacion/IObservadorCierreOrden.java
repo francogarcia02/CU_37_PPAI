@@ -1,5 +1,5 @@
 package control.notificacion;
 
 public interface IObservadorCierreOrden {
-    void actualizar(DatosNotificacionCierre datos);
+    void actualizar(Object datos, String Evento);
 }
