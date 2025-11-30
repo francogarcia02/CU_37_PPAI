@@ -2,43 +2,46 @@ package boundary;
 
 import control.notificacion.DatosNotificacionCierre;
 import control.notificacion.IObservadorCierreOrden;
+import java.time.format.DateTimeFormatter;
 
 public class InterfazCCRS implements IObservadorCierreOrden {
 
     @Override
     public void actualizar(Object objetoDatos, String evento) {
-
-        // 1. Validar Evento (Semántica)
-        // Si el evento no es el esperado, ignoramos la notificación.
+        // 1. Validar Evento
         if (!"CIERRE_ORDEN".equals(evento)) {
             return;
         }
 
-        // 2. Casteo Seguro (Técnica)
-        // Verificamos que el objeto sea del tipo esperado antes de usarlo.
+        // 2. Validar Tipo de Datos
         if (objetoDatos instanceof DatosNotificacionCierre) {
             DatosNotificacionCierre datos = (DatosNotificacionCierre) objetoDatos;
 
-            // 3. Lógica de Presentación
-            System.out.println(String.format(
-                    "INFO [InterfazCCRS] -> Evento recibido: %s. Procesando actualización para Orden [%d]...",
-                    evento,
-                    datos.getNumeroOrden()
-            ));
-
-            // Pasamos los datos necesarios al metodo interno
-            this.imprimirMonitores(datos.getNuevoEstado(), datos.getSismografoId());
+            // 3. Delegar la comunicación al metodo especialista
+            // El metodo actualizar NO sabe cómo se conecta con el CCRS, solo sabe que debe hacerlo.
+            this.imprimirMonitores(datos);
         }
     }
 
-    // Metodo interno que simula la actualización de una pantalla física o dashboard
-    private void imprimirMonitores(String nuevoEstado, String idSismografo) {
-        System.out.println("**************************************************");
-        System.out.println("* SISTEMA DE MONITOREO CCRS - ALERTA        *");
-        System.out.println("**************************************************");
-        System.out.printf ("* SISMOGRAFO ID: %-31s *%n", idSismografo);
-        System.out.printf ("* NUEVO ESTADO : %-31s *%n", nuevoEstado);
-        System.out.println("**************************************************");
-        System.out.println(">> Publicacion en monitores completada exitosamente.\n");
+    // Este metodo es el "Driver" o "Adaptador" que sabe hablar con el sistema externo.
+    // En producción, aquí iría un "httpClient.post(...)".
+    // En nuestra demo, aquí va la conexión al Simulador.
+    private void imprimirMonitores(DatosNotificacionCierre datos) {
+
+        // A. Preparar el mensaje en el formato que el sistema externo espera
+        String hora = datos.getFechaHora().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+        String mensajeLog = String.format(
+                "[%s] ALERTA SÍSMICA: Orden #%d finalizada. Estación: %s. Estado Sismógrafo: %s",
+                hora,
+                datos.getNumeroOrden(),
+                datos.getNombreEstacion(),
+                datos.getNuevoEstado()
+        );
+
+        // B. "Enviar" la señal (Simulación de conexión)
+        System.out.println("INFO [InterfazCCRS] -> Enviando paquete a servidor central: " + mensajeLog);
+
+        // Aquí se concreta la "conexión"
+        SimuladorCCRS.agregarNotificacion(mensajeLog);
     }
 }

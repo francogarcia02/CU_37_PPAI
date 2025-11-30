@@ -24,12 +24,12 @@ INSERT INTO T_EMPLEADO (id_empleado, nombre_empleado, apellido_empleado, rol_emp
 INSERT INTO T_EMPLEADO (id_empleado, nombre_empleado, apellido_empleado, rol_empleado, mail, telefono) VALUES (3, 'Lucas', 'Sanchez', 'RESPONSABLE_INSPECCIONES', 'lucassanchezqw@gmail.com', '3514667890');
 
 -- Sismógrafos
-INSERT INTO T_SISMOGRAFO (id_sismografo, fecha_adquisicion, numero_serie, fabricante, modelo, id_estado) VALUES (1, '2024-12-12', 12, 'ZETLAB', 'Modelo 1', 1);
-INSERT INTO T_SISMOGRAFO (id_sismografo, fecha_adquisicion, numero_serie, fabricante, modelo, id_estado) VALUES (2, '2024-12-12', 11, 'ZETLAB', 'Modelo 1', 1);
+INSERT INTO T_SISMOGRAFO (id_sismografo, fecha_adquisicion, numero_serie, fabricante, modelo, id_estado) VALUES (1, '2024-12-12', 12, 'ZETLAB', 'Modelo F3', 1);
+INSERT INTO T_SISMOGRAFO (id_sismografo, fecha_adquisicion, numero_serie, fabricante, modelo, id_estado) VALUES (2, '2024-12-12', 11, 'ZETLAB', 'Modelo F3-A', 1);
 
 -- Estaciones Sismológicas
-INSERT INTO T_ESTACION_SISMOLOGICA (id_estacion, nombre_estacion, latitud, longitud, nro_certificacion_adquisicion, fecha_solicitud_certificacion, documento_certificacion_adq, id_sismografo) VALUES (1, 'Estación Sierra de la Invernada', 10, 20, 5, '2024-12-20', 'Documentacion', 1);
-INSERT INTO T_ESTACION_SISMOLOGICA (id_estacion, nombre_estacion, latitud, longitud, nro_certificacion_adquisicion, fecha_solicitud_certificacion, documento_certificacion_adq, id_sismografo) VALUES (2, 'Estación San Luis', 11, 23, 20, '2023-03-13', 'Documentacion', 2);
+INSERT INTO T_ESTACION_SISMOLOGICA (id_estacion, nombre_estacion, latitud, longitud, nro_certificacion_adquisicion, fecha_solicitud_certificacion, documento_certificacion_adq, id_sismografo) VALUES (1, 'Estación Bosque Alegre', -31.60581, -64.56881, 5, '2024-12-20', 'Documentacion', 1);
+INSERT INTO T_ESTACION_SISMOLOGICA (id_estacion, nombre_estacion, latitud, longitud, nro_certificacion_adquisicion, fecha_solicitud_certificacion, documento_certificacion_adq, id_sismografo) VALUES (2, 'Estación Pilar', -31.66861, -63.88290, 20, '2023-03-13', 'Documentacion', 2);
 
 -- Órdenes de Inspección
 INSERT INTO T_ORDEN_INSPECCION (id_orden, id_estacion, id_responsable, observaciones_cierre) VALUES (1, 1, 1, 'No hay Observaciones todavía');
@@ -53,3 +53,40 @@ INSERT INTO T_TIPO_MOTIVO (id_tipo_motivo, descripcion) VALUES (5, 'Fallo en fue
 
 -- Update the sequence to start after the highest ID used
 ALTER SEQUENCE IF EXISTS cambio_estado_seq RESTART WITH 7;
+
+--- =================================================================
+-- LIMPIEZA Y DATOS PARA LA DEMO (Reemplaza el bloque final con esto)
+-- =================================================================
+
+-- Borramos órdenes de prueba generadas anteriormente para empezar limpio
+DELETE FROM T_CAMBIO_ESTADO WHERE id_orden > 200 OR id_orden = 2;
+DELETE FROM T_ORDEN_INSPECCION WHERE id_orden > 200 OR id_orden = 2;
+
+-- 1. ASEGURAR SISMÓGRAFOS Y ESTACIONES EXTRAS
+INSERT INTO T_SISMOGRAFO (id_sismografo, fecha_adquisicion, numero_serie, fabricante, modelo, id_estado) VALUES (101, '2023-05-20', 9901, 'Sony', 'Modelo K5-A', 1);
+INSERT INTO T_SISMOGRAFO (id_sismografo, fecha_adquisicion, numero_serie, fabricante, modelo, id_estado) VALUES (103, '2023-08-10', 9903, 'LG', 'Modelo K5', 1);
+
+-- Estación 101 (Volcán) y 103 (Antártida)
+INSERT INTO T_ESTACION_SISMOLOGICA (id_estacion, nombre_estacion, latitud, longitud, id_sismografo) VALUES (101, 'Estación Volcán Lanín', -39.6, -71.5, 101);
+INSERT INTO T_ESTACION_SISMOLOGICA (id_estacion, nombre_estacion, latitud, longitud, id_sismografo) VALUES (103, 'Estación Base Marambio', -64.2, -56.6, 103);
+
+-- 2. CREAR LAS 4 ÓRDENES (Todas FINALIZADAS para que se vean)
+
+-- A. Orden 1 (Sierra de la Invernada - Ya existía, aseguramos estado)
+-- (Asumimos que ya está insertada arriba, solo aseguramos el cambio de estado)
+UPDATE T_CAMBIO_ESTADO SET fecha_hora_fin = CURRENT_TIMESTAMP() WHERE id_orden = 1;
+INSERT INTO T_CAMBIO_ESTADO (id_cambio_estado, id_orden, id_estado_anterior, id_estado_nuevo, fecha_hora_inicio, fecha_hora_fin, id_responsable_cambio) VALUES (500, 1, 5, 6, CURRENT_TIMESTAMP(), NULL, 1);
+
+-- B. Orden 204 (ESTACIÓN PILAR - La que faltaba)
+INSERT INTO T_ORDEN_INSPECCION (id_orden, id_estacion, id_responsable, observaciones_cierre) VALUES (204, 2, 1, null);
+INSERT INTO T_CAMBIO_ESTADO (id_cambio_estado, id_orden, id_estado_anterior, id_estado_nuevo, fecha_hora_inicio, fecha_hora_fin, id_responsable_cambio) VALUES (504, 204, 5, 6, CURRENT_TIMESTAMP(), NULL, 1);
+
+-- C. Orden 201 (Volcán Lanín)
+INSERT INTO T_ORDEN_INSPECCION (id_orden, id_estacion, id_responsable, observaciones_cierre) VALUES (201, 101, 1, null);
+INSERT INTO T_CAMBIO_ESTADO (id_cambio_estado, id_orden, id_estado_anterior, id_estado_nuevo, fecha_hora_inicio, fecha_hora_fin, id_responsable_cambio) VALUES (501, 201, 5, 6, CURRENT_TIMESTAMP(), NULL, 1);
+
+-- D. Orden 203 (Base Marambio)
+INSERT INTO T_ORDEN_INSPECCION (id_orden, id_estacion, id_responsable, observaciones_cierre) VALUES (203, 103, 1, null);
+INSERT INTO T_CAMBIO_ESTADO (id_cambio_estado, id_orden, id_estado_anterior, id_estado_nuevo, fecha_hora_inicio, fecha_hora_fin, id_responsable_cambio) VALUES (503, 203, 5, 6, CURRENT_TIMESTAMP(), NULL, 1);
+
+ALTER SEQUENCE IF EXISTS cambio_estado_seq RESTART WITH 600;

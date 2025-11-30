@@ -86,8 +86,6 @@ public class InterfazMail implements IObservadorCierreOrden {
                 mail
         );
 
-        // Este metodo no deberia devolver el mensaje, solo una confirmacion.
-        // return "mail enviado a " + mail + " con el mensaje: " + mensaje; // LÍNEA ANTERIOR (ELIMINADA)
     }
 }
 

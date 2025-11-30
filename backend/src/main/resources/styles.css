@@ -1,118 +1,541 @@
-/* Estilo General para la ventana principal */
+/* --- GENERAL --- */
 .root {
-    -fx-background-color: #f4f7f9;
-    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-family: "Segoe UI", "Roboto", Helvetica, Arial, sans-serif;
+    -fx-background-color: #ecf0f1; /* Fondo Gris Suave */
 }
 
-/* Estilo para los títulos principales y de pasos */
-.label-titulo {
+/* --- SIDEBAR (Menú Lateral) --- */
+.sidebar {
+    -fx-background-color: #2c3e50; /* Azul Oscuro */
+    -fx-padding: 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 0);
+}
+
+.sidebar-title {
+    -fx-text-fill: #ecf0f1;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 20 0;
+    -fx-border-color: transparent transparent #34495e transparent;
+    -fx-border-width: 2;
+}
+
+.menu-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #bdc3c7; /* Texto gris claro */
+    -fx-font-size: 14px;
+    -fx-alignment: BASELINE_LEFT;
+    -fx-cursor: hand;
+    -fx-padding: 10 15;
+    -fx-background-radius: 5;
+    -fx-graphic-text-gap: 15px; /* Espacio entre ícono y texto */
+}
+
+.menu-button:hover {
+    -fx-background-color: #34495e;
+    -fx-text-fill: white;
+}
+
+.menu-button-active {
+    -fx-background-color: rgba(23, 68, 104, 0.61); /* Azul brillante para el activo */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2);
+    -fx-padding: 10 15;
+    -fx-alignment: BASELINE_LEFT;
+    -fx-graphic-text-gap: 15px;
+}
+
+/* --- CONTENIDO Y PANELES --- */
+.content-pane {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);
+    -fx-padding: 30;
+    -fx-max-width: 900;
+}
+
+.header-label {
     -fx-font-size: 24px;
     -fx-font-weight: bold;
     -fx-text-fill: #2c3e50;
 }
 
-.label-subtitulo {
-    -fx-font-size: 18px;
-    -fx-text-fill: #596978;
+.subtitle-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7f8c8d;
+    -fx-font-style: italic;
 }
 
-/* Estilo para los paneles que contienen los pasos */
-.panel-paso {
+/* --- BOTONES DE ACCIÓN --- */
+.action-button {
+    -fx-background-color: #27ae60; /* Verde Éxito */
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 3, 0, 0, 2);
+}
+
+.action-button:hover {
+    -fx-background-color: #2ecc71; /* Verde más claro al pasar mouse */
+}
+
+.secondary-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #7f8c8d;
+    -fx-font-size: 13px;
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+/* --- INPUTS (TextAreas, Combos) --- */
+.text-area, .text-field, .combo-box {
+    -fx-background-color: #fdfdfd;
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.text-area:focused, .text-field:focused {
+    -fx-border-color: #3498db;
     -fx-background-color: white;
-    -fx-padding: 25px;
-    -fx-background-radius: 12px;
-    -fx-border-radius: 12px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
 }
 
-/* Estilos para los botones */
-.button-principal {
-    -fx-background-color: #3498db;
-    -fx-text-fill: white;
-    -fx-font-size: 14px;
+/* --- ESTILO PARA ALERTAS (MODALES) --- */
+.dialog-pane {
+    -fx-background-color: white;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1;
+}
+
+.dialog-pane > .header-panel {
+    -fx-background-color: #ecf0f1;
+    -fx-padding: 10;
+}
+
+.dialog-pane > .header-panel > .label {
+    -fx-font-size: 16px;
     -fx-font-weight: bold;
-    -fx-background-radius: 8px;
-    -fx-padding: 10px 20px;
+    -fx-text-fill: #2c3e50;
+}
+
+.dialog-pane > .content {
+    -fx-padding: 20;
+    -fx-font-size: 14px;
+    -fx-text-fill: #2c3e50;
+}
+
+/* --- ESTADOS DE VALIDACIÓN --- */
+.error-border {
+    -fx-border-color: #e74c3c; /* Rojo alerta */
+    -fx-border-width: 2px;
+    -fx-border-radius: 5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(231, 76, 60, 0.4), 5, 0, 0, 0);
+}
+
+/* --- LISTAS --- */
+/* --- LISTAS --- */
+.list-view {
+    /* Esto define el color de fondo del área de scroll */
+    -fx-control-inner-background: white;
+
+    /* Esto asegura que el fondo sea blanco sólido */
+    -fx-background-color: white;
+
+    /* Quitamos el borde gris predeterminado si quieres que se vea más limpia */
+    -fx-background-insets: 0;
+    -fx-padding: 5;
+}
+
+/* Aseguramos que las celdas vacías (el espacio sobrante abajo) también sean blancas */
+.list-cell:empty {
+    -fx-background-color: white;
+}
+
+/* Las celdas con contenido (tus tarjetas) flotan sobre el blanco */
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 5 10 5 10;
+}
+
+.list-cell:filled:selected {
+    -fx-background-color: #eaf2f8; /* Azul muy suave al seleccionar */
+    -fx-text-fill: black;
+}
+
+.list-cell:filled:hover {
+    -fx-background-color: #f4f6f6; /* Gris muy suave al pasar el mouse */
+}
+
+/* --- TARJETAS DE LISTA (TABLET STYLE) --- */
+.orden-card {
+    -fx-background-color: white;
+    -fx-border-color: #ecf0f1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);
     -fx-cursor: hand;
 }
 
-.button-principal:hover {
-    -fx-background-color: #2980b9;
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 5 10 5 10; /* Espacio entre tarjetas */
 }
 
-.button-agregar {
-    -fx-background-color: #2ecc71;
-    -fx-text-fill: white;
+.list-cell:empty {
+    -fx-background-color: transparent;
+}
+
+/* Efecto Hover (cuando pasas el dedo/mouse) */
+.list-cell:filled:hover .orden-card {
+    -fx-background-color: #fdfdfd;
+    -fx-border-color: rgba(23, 68, 104, 0.61);
+    -fx-effect: dropshadow(three-pass-box, rgba(52, 152, 219, 0.2), 8, 0, 0, 3);
+    -fx-translate-y: -2; /* Levanta la tarjeta un poquito */
+}
+
+/* Efecto Selección */
+.list-cell:filled:selected .orden-card {
+    -fx-background-color: #eaf2f8; /* Azul muy clarito */
+    -fx-border-color: rgba(23, 68, 104, 0.61);
+    -fx-border-width: 2;
+}
+
+/* Tipografía dentro de la tarjeta */
+.card-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.card-subtitle {
     -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-background-radius: 8px;
-    -fx-padding: 10px 20px;
+    -fx-text-fill: #7f8c8d;
+}
+
+.card-detail {
+    -fx-font-size: 13px;
+    -fx-text-fill: #7f8c8d;
+}
+
+.card-detail-small {
+    -fx-font-size: 11px;
+    -fx-text-fill: #95a5a6;
+    -fx-font-family: "Consolas", monospace; /* Para que las coordenadas se vean técnicas */
+}
+
+/* --- EMOJIS NATIVOS --- */
+.emoji-icon {
+    /* Esta pila de fuentes cubre Windows, Mac y Linux */
+    -fx-font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Symbol";
+    -fx-font-size: 34px; /* Tamaño grande para que se luzca */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 2, 0, 0, 1); /* Sombrita suave */
+    -fx-padding: -5 0 0 0; /* Pequeño ajuste vertical */
+}
+
+/* --- BOTONES DE ESTADO TIPO TARJETA --- */
+.status-toggle {
+    -fx-background-color: white;
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-text-fill: #7f8c8d;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+
+    /* ESTO ES CLAVE PARA CENTRAR IMAGEN Y TEXTO */
+    -fx-content-display: TOP;
+    -fx-alignment: CENTER;
+    -fx-graphic-text-gap: 10; /* Espacio entre imagen y texto */
+
+    -fx-padding: 15;
+    -fx-min-width: 160; /* Un poco más anchos */
+    -fx-min-height: 110;
     -fx-cursor: hand;
 }
 
-.button-agregar:hover {
+.status-toggle:hover {
+    -fx-background-color: #f4f6f7;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);
+}
+
+/* Estado Seleccionado: ONLINE (Verde) */
+.status-toggle-online:selected {
+    -fx-background-color: #e8f6f3;
+    -fx-border-color: #27ae60;
+    -fx-text-fill: #27ae60;
+    -fx-border-width: 2;
+}
+
+/* Estado Seleccionado: FUERA DE SERVICIO (Naranja/Rojo) */
+.status-toggle-offline:selected {
+    -fx-background-color: #fdf2e9;
+    -fx-border-color: #e67e22;
+    -fx-text-fill: #d35400;
+    -fx-border-width: 2;
+}
+
+/* --- CHIPS DE TEXTO RÁPIDO (Estilo Cápsula Grande) --- */
+.quick-chip {
+    /* Solución al Error: Usamos background-color para el gradiente, no image */
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #f4f6f7);
+
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+
+    /* Color de Texto: Azul Oscuro (Legible) */
+    -fx-text-fill: #34495e;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 2, 0, 0, 1);
+}
+
+.quick-chip:hover {
+    -fx-background-color: #eaf2f8; /* Azul muy clarito al pasar el mouse */
+    -fx-border-color: #3498db;
+    -fx-text-fill: #2980b9;
+    -fx-translate-y: -1;
+}
+
+.quick-chip:pressed {
+    -fx-background-color: #d6eaf8;
+    -fx-translate-y: 1;
+}
+
+/* Botón de "+ Nuevo" (Amarillo suave pero legible) */
+.quick-chip-add {
+    -fx-background-color: #fef9e7;
+    -fx-border-color: #f1c40f;
+    -fx-text-fill: #d35400; /* Naranja oscuro para que se lea bien */
+}
+
+/* --- BOTÓN VOLVER (Alto Contraste) --- */
+.button-back-big {
+    /* Estado Normal: Claro con letras oscuras */
+    -fx-background-color: #fdfdfd;
+    -fx-border-color: #95a5a6;
+    -fx-border-width: 2;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+
+    /* Texto Gris Oscuro (Se lee perfecto sobre blanco) */
+    -fx-text-fill: #7f8c8d;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+
+    -fx-min-width: 110;
+    -fx-min-height: 40;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER;
+}
+
+.button-back-big:hover {
+    /* Estado Hover: Se vuelve gris sólido con letras blancas */
+    -fx-background-color: #95a5a6;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);
+}
+
+/* Corrección para el ícono de la flecha dentro del botón */
+.button-back-big .label {
+    -fx-text-fill: inherit; /* Hereda el color del botón (Gris -> Blanco) */
+}
+
+/* --- TOAST NOTIFICATION COMPACTA --- */
+.toast-content {
+    -fx-background-color: #34495e;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+
+    /* CAMBIO: Menos relleno vertical (de 12 a 8) y horizontal (de 20 a 15) */
+    -fx-padding: 8 15;
+
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 10, 0, 0, 2);
+
+    /* Opcional: Si quieres que sea menos ancho también, baja esto */
+    -fx-min-width: 250;
+}
+
+/* Variación para Advertencia (Naranja) */
+.toast-warning .toast-content {
+    -fx-background-color: #e67e22;
+}
+
+/* Variación para Éxito (Verde) */
+.toast-success .toast-content {
     -fx-background-color: #27ae60;
 }
-
-.button-confirmar {
-    -fx-background-color: #e74c3c;
-    -fx-text-fill: white;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-background-radius: 8px;
-    -fx-padding: 10px 20px;
-    -fx-cursor: hand;
+/* Variación para Información (Azul) */
+.toast-info .toast-content {
+    -fx-background-color: #3498db; /* Mismo azul que tus botones principales */
 }
 
-.button-confirmar:hover {
-    -fx-background-color: #c0392b;
+/* Variación para Error (Rojo) */
+.toast-error .toast-content {
+    -fx-background-color: #e74c3c; /* Rojo suave pero visible */
 }
 
-/* Estilos para ListView, ComboBox y TextArea */
-.list-view, .combo-box, .text-area {
-    -fx-border-color: #bdc3c7;
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-    -fx-focus-color: #3498db;
-    -fx-background-insets: 0; /* Asegura que el fondo no se recorte */
-}
-
-/* Estilo para el contenido INTERNO del TextArea */
-.text-area .content {
-    -fx-background-radius: 8px;
+/* --- BOTÓN MAPA (Estilo Dedicado) --- */
+.btn-mapa {
     -fx-background-color: white;
-    -fx-padding: 5px; /* Añade espacio interno */
-}
+    -fx-border-color: #3498db;
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
 
-/* Estilo para las celdas del ListView */
-.list-view .list-cell {
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
-    -fx-padding: 5px; /* Añade espacio interno */
-}
-
-
-.list-view .list-cell:odd {
-    -fx-background-color: #f8f9fa;
-}
-
-.list-view .list-cell:selected {
-    -fx-background-color: #3498db;
-    -fx-text-fill: white;
-}
-
-/* Agrega esto al final de styles.css */
-
-.button-volver {
-    -fx-background-color: #95a5a6; /* Un color gris para indicar acción secundaria */
-    -fx-text-fill: white;
-    -fx-font-size: 14px;
+    /* Color de fuente más oscuro (Azul corporativo oscuro) */
+    -fx-text-fill: #2c3e50;
     -fx-font-weight: bold;
-    -fx-background-radius: 8px;
-    -fx-padding: 10px 20px;
+    -fx-font-size: 12px;
     -fx-cursor: hand;
 }
 
-.button-volver:hover {
-    -fx-background-color: #7f8c8d;
+/* Estilo Hover Estable (Sin sombra pesada) */
+.btn-mapa:hover {
+    -fx-background-color: #ebf5fb; /* Solo cambiamos color de fondo */
+    -fx-border-color: #2980b9;
+    -fx-cursor: hand;
+    /* Quitamos el -fx-effect dropshadow que causaba el bug visual */
+}
+
+/* --- BOTONES DE PAGINACIÓN TÁCTILES --- */
+.pagination-button {
+    -fx-background-color: white;
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-text-fill: #7f8c8d;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px; /* Letra más grande */
+    -fx-padding: 10 30;  /* Mucho relleno horizontal para dedos */
+    -fx-cursor: hand;
+    -fx-min-width: 120px;
+}
+
+.pagination-button:hover {
+    -fx-background-color: #ecf0f1;
+    -fx-border-color: #95a5a6;
+    -fx-text-fill: #2c3e50;
+}
+
+.pagination-button:pressed {
+    -fx-background-color: #bdc3c7;
+}
+
+.pagination-button:disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: default;
+}
+
+/* --- ARREGLO LISTA DASHBOARD (Log estilo consola) --- */
+.dashboard-list {
+    -fx-background-color: #2c3e50;
+    -fx-control-inner-background: #2c3e50;
+    -fx-padding: 10;
+}
+
+/* La celda normal */
+.log-cell {
+    -fx-text-fill: #2ecc71; /* Verde matrix */
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 13px;
+    -fx-padding: 5;
+    -fx-background-color: transparent;
+}
+
+/* La celda seleccionada (EL FIX): Mantenemos el fondo oscuro */
+.dashboard-list .list-cell:filled:selected {
+    -fx-background-color: #34495e; /* Un gris apenas más claro para indicar selección */
+    -fx-text-fill: #2ecc71; /* Mantenemos el texto verde */
+}
+
+/* Al pasar el mouse */
+.dashboard-list .list-cell:filled:hover {
+    -fx-background-color: #34495e;
+}
+
+/* --- SCROLLBARS TÁCTILES (Modern & Wide) --- */
+
+/* 1. El contenedor de la barra */
+.scroll-bar:vertical {
+    -fx-pref-width: 25; /* Ancho amigable para el dedo */
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar:horizontal {
+    -fx-pref-height: 25;
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* 2. El carril (Track) - Fondo */
+.scroll-bar .track {
+    -fx-background-color: #ecf0f1; /* Gris muy suave */
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+/* 3. El pulgar (Thumb) - Lo que se arrastra */
+.scroll-bar .thumb {
+    -fx-background-color: #bdc3c7; /* Gris medio */
+    -fx-background-radius: 10;
+    -fx-background-insets: 3; /* Margen interno para que "flote" dentro del carril */
+}
+
+/* Feedback al tocar */
+.scroll-bar .thumb:hover,
+.scroll-bar .thumb:pressed {
+    -fx-background-color: #7f8c8d; /* Se oscurece al interactuar */
+}
+
+/* 4. OCULTAR FLECHAS (Innecesarias en táctil) */
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-padding: 0;
+    -fx-pref-height: 0;
+    -fx-pref-width: 0;
+    -fx-opacity: 0;
+    -fx-shape: " "; /* Quita la forma vectorial */
+}
+
+/* Eliminar la caja de esquina en scrolls dobles */
+.scroll-pane .corner {
+    -fx-background-color: transparent;
+}
+
+/* --- COMBO BOX TÁCTIL --- */
+
+
+/* El botón del combo (lo que se ve antes de abrir) */
+.combo-box-base {
+    -fx-font-size: 14px;
+    -fx-padding: 8 15; /* Más área de toque */
+}
+
+/* La lista desplegable (Popup) */
+.combo-box-popup .list-view {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 5);
+}
+
+/* Cada ítem dentro de la lista desplegable */
+.combo-box-popup .list-cell {
+    -fx-padding: 15 10; /* 15px de alto arriba y abajo -> Mucho más fácil de acertar */
+    -fx-font-size: 14px;
+    -fx-text-fill: #2c3e50;
+}
+
+.combo-box-popup .list-cell:filled:hover {
+    -fx-background-color: #eaf2f8;
+    -fx-text-fill: #3498db;
 }
