@@ -1,7 +1,7 @@
 package control;
 
-import boundary.InterfazCCRS;
-import boundary.InterfazMail;
+import boundary.notificacion.InterfazCCRS;
+import boundary.notificacion.InterfazMail;
 import control.notificacion.DatosNotificacionCierre;
 import control.notificacion.IObservadorCierreOrden;
 import control.notificacion.ISujetoCierreOrden;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-public class GestorOrden implements ISujetoCierreOrden { // <--- ¡SOLO IMPLEMENTA SUJETO!
+public class GestorOrden implements ISujetoCierreOrden {
 
     // --- Atributos de Negocio y Estado ---
     private Usuario usuarioLogueado;
@@ -85,7 +85,8 @@ public class GestorOrden implements ISujetoCierreOrden { // <--- ¡SOLO IMPLEMEN
                     observaciones,
                     motivosFueraServicioSelection,
                     getEstadoCerrada(),
-                    getRI());
+                    getRI()
+            );
 
             if (cierreExitoso) {
                 // 3. Manejo de Sismógrafo
@@ -96,8 +97,12 @@ public class GestorOrden implements ISujetoCierreOrden { // <--- ¡SOLO IMPLEMEN
                 // 4. Persistencia
                 ordenDAO.update(getSelectedOrden());
 
-                // 5. Notificación (Observer)
+                // 5. Logica de Notificación (Observer)
+
+                // A. Generar el DTO con todos los datos adquiridos.
                 DatosNotificacionCierre dto = this.generarDatosNotificacion();
+
+                // B. Metodo de Control que dispara el Patron Observador.
                 this.notificarObservadores(dto);
 
                 return true;
@@ -112,8 +117,10 @@ public class GestorOrden implements ISujetoCierreOrden { // <--- ¡SOLO IMPLEMEN
         String nombreResponsable = getRI().getNombreEmpleado();
         String estadoSismoActual = getSelectedOrden().getNombreEstadoSismografo();
 
+        // Obtener Mails en lista de Strings.
         List<String> listaMails = obtenerMailsResponsablesReparacion();
 
+        // Conversion a tipo primitivo String
         List<String> listaMotivosTexto = motivosFueraServicioSelection.stream()
                 .map(m -> String.format("%s (%s)", m.getTipoMotivo().getDescripcion(),
                         (m.getComentario() != null ? m.getComentario() : "-")))
@@ -127,11 +134,12 @@ public class GestorOrden implements ISujetoCierreOrden { // <--- ¡SOLO IMPLEMEN
     }
 
     private void notificarObservadores(DatosNotificacionCierre dto) {
-        // Creator Pattern: El Gestor crea sus observadores
+        // Creator: El Gestor crea sus observadores
         this.observadores.clear();
         IObservadorCierreOrden observadorMail = new InterfazMail();
         IObservadorCierreOrden observadorCCRS = new InterfazCCRS();
 
+        //  Subscripcion de Observadores
         this.agregarObservador(observadorMail);
         this.agregarObservador(observadorCCRS);
 

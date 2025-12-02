@@ -1,4 +1,4 @@
-import boundary.PantallaOrdenController;
+import boundary.vistas.PantallaOrdenController;
 import control.GestorOrden;
 import control.persistencia.*;
 import entity.*;
@@ -15,8 +15,8 @@ import javafx.stage.StageStyle;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import boundary.InterfazCCRS;
-import boundary.InterfazMail;
+import boundary.notificacion.InterfazCCRS;
+import boundary.notificacion.InterfazMail;
 import control.notificacion.IObservadorCierreOrden;
 
 public class Main extends Application {

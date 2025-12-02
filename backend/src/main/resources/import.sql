@@ -67,8 +67,8 @@ INSERT INTO T_SISMOGRAFO (id_sismografo, fecha_adquisicion, numero_serie, fabric
 INSERT INTO T_SISMOGRAFO (id_sismografo, fecha_adquisicion, numero_serie, fabricante, modelo, id_estado) VALUES (103, '2023-08-10', 9903, 'LG', 'Modelo K5', 1);
 
 -- Estación 101 (Volcán) y 103 (Antártida)
-INSERT INTO T_ESTACION_SISMOLOGICA (id_estacion, nombre_estacion, latitud, longitud, id_sismografo) VALUES (101, 'Estación Volcán Lanín', -39.6, -71.5, 101);
-INSERT INTO T_ESTACION_SISMOLOGICA (id_estacion, nombre_estacion, latitud, longitud, id_sismografo) VALUES (103, 'Estación Base Marambio', -64.2, -56.6, 103);
+INSERT INTO T_ESTACION_SISMOLOGICA (id_estacion, nombre_estacion, latitud, longitud, id_sismografo) VALUES (101, 'Estación Volcán Lanín', -39.58268, -71.46873, 101);
+INSERT INTO T_ESTACION_SISMOLOGICA (id_estacion, nombre_estacion, latitud, longitud, id_sismografo) VALUES (103, 'Estación Base Marambio', -64.24070, -56.62307, 103);
 
 -- 2. CREAR LAS 4 ÓRDENES (Todas FINALIZADAS para que se vean)
 
